@@ -4,5 +4,10 @@
   ],
   "critics": [
     "lint": {"engine": "eslint"}
-  ]
+  ],
+  "dependencies": {
+    "mute": [
+      "eslint"
+    ]
+  }
 }
