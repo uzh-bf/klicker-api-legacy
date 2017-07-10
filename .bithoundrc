@@ -1,6 +1,7 @@
 {
   "test": [
-    "src/**/*.test.js"
+    "src/**/*.test.js",
+    "test/**/*.js"
   ],
   "critics": {
     "lint": {"engine": "eslint"}
