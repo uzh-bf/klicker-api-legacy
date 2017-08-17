@@ -2,32 +2,37 @@
 
 const graphql = require('graphql')
 
-const { GraphQLList, GraphQLObjectType, GraphQLString, GraphQLSchema } = graphql
+const { GraphQLBoolean, GraphQLDate, GraphQLList, GraphQLObjectType, GraphQLString, GraphQLSchema } = graphql
 
-const QuestionModel = require('../database/question')
+const UserModel = require('../database/user')
 
-const QuestionType = new GraphQLObjectType({
-  name: 'Question',
+const UserType = new GraphQLObjectType({
+  name: 'User',
   fields: () => ({
     id: { type: GraphQLString },
-    title: { type: GraphQLString },
+    email: { type: GraphQLString },
+    shortname: { type: GraphQLString },
+    isActive: { type: GraphQLBoolean },
+    isAAI: { type: GraphQLBoolean },
+    createdAt: { type: GraphQLDate },
+    updatedAt: { type: GraphQLDate },
   }),
 })
 
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
-    allQuestions: {
-      type: new GraphQLList(QuestionType),
+    allUsers: {
+      type: new GraphQLList(UserType),
       resolve() {
-        return QuestionModel.find({})
+        return UserModel.find({})
       },
     },
-    question: {
-      type: QuestionType,
+    user: {
+      type: UserType,
       args: { id: { type: GraphQLString } },
       resolve(parentValue, args) {
-        return QuestionModel.findOne(args.id)
+        return UserModel.findOne(args.id)
       },
     },
   },
