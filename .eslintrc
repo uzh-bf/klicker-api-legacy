@@ -4,8 +4,7 @@
   "plugins": ["import", "flowtype"],
   "rules": {
     "semi": 0,
-    "no-console": 0,
-    "sort-keys": 1
+    "no-console": 0
   },
   "env": {
     "node": true,
