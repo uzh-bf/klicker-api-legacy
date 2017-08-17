@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema({
   shortname: String,
   isActive: Boolean,
   isAAI: Boolean,
-  tags: [{ name: String }],
+  tags: [{ type: String }],
   createdAt: Date,
   updatedAt: Date,
 })
