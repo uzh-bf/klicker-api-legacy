@@ -1,12 +1,5 @@
 // @flow
 
-/*
-  id: ID!
-  content: String!
-  votes: Number (0)
-  createdAt: Date
-*/
-
 const mongoose = require('mongoose')
 
 const Feedback = new mongoose.Schema({
@@ -17,4 +10,3 @@ const Feedback = new mongoose.Schema({
 })
 
 module.exports = Feedback
-// module.exports = mongoose.model('Feedback', Feedback)

@@ -1,19 +1,5 @@
 // @flow
 
-/*
-  id: ID!
-  email: String!
-  password: String!
-  shortname: String!
-  isActive: boolean (false)
-  isAAI: boolean (false)
-  tags: [Tag]
-  questions: [QuestionDefinition]
-  sessions: [Session]
-  createdAt: Date
-  updatedAt: Date
-*/
-
 const mongoose = require('mongoose')
 
 const ObjectId = mongoose.Schema.Types.ObjectId

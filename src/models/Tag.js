@@ -1,13 +1,5 @@
 // @flow
 
-/*
-  id: ID!
-  name: String!
-  questions: [QuestionDefinition]
-  createdAt: Date
-  updatedAt: Date
-*/
-
 const mongoose = require('mongoose')
 
 const ObjectId = mongoose.Schema.Types.ObjectId

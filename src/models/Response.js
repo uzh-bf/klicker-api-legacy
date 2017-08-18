@@ -1,11 +1,5 @@
 // @flow
 
-/*
-  id: ID!
-  value: Object!
-  createdAt: Date
-*/
-
 const mongoose = require('mongoose')
 
 const Response = new mongoose.Schema({
@@ -15,4 +9,3 @@ const Response = new mongoose.Schema({
 })
 
 module.exports = Response
-// module.exports = mongoose.model('Response', Response)

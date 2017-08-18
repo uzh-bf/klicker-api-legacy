@@ -1,20 +1,5 @@
 // @flow
 
-/*
-  id: ID!
-  name: String!
-  blocks: [QuestionBlock]!
-  feedbacks: [Feedback]
-  confusionTS: [ConfusionTimeStep]
-  status: Enum!
-  settings: Json!
-  isFeedbackChannelActive: Boolean (false)
-  isFeedbackChannelPublic: Boolean (false)
-  isConfusionBarometerActive: Boolean (false)
-  createdAt: Date
-  updatedAt: Date
-*/
-
 const mongoose = require('mongoose')
 
 const ConfusionTimeStep = require('./ConfusionTimeStep')

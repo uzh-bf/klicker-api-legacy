@@ -1,15 +1,5 @@
 // @flow
 
-/*
-  id: ID!
-  questions: [QuestionInstance]!
-  status: Enum!
-  timeLimit: Number
-  showSolutions: Boolean (false)
-  createdAt: Date
-  updatedAt: Date
-*/
-
 const mongoose = require('mongoose')
 
 const ObjectId = mongoose.Schema.Types.ObjectId
@@ -27,4 +17,3 @@ const QuestionBlock = new mongoose.Schema({
 })
 
 module.exports = QuestionBlock
-// module.exports = mongoose.model('QuestionBlock', QuestionBlock)

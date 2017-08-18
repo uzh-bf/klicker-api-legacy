@@ -1,15 +1,5 @@
 // @flow
 
-/*
-  id: ID!
-  description: String!
-  options: Json!
-  solution: Json
-  instances: [QuestionInstance]
-  createdAt: Date
-  updatedAt: Date
-*/
-
 const mongoose = require('mongoose')
 
 const ObjectId = mongoose.Schema.Types.ObjectId
@@ -26,4 +16,3 @@ const QuestionVersion = new mongoose.Schema({
 })
 
 module.exports = QuestionVersion
-// module.exports = mongoose.model('QuestionVersion', QuestionVersion)

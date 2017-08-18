@@ -1,16 +1,5 @@
 // @flow
 
-/*
-  id: ID!
-  title: String!
-  type: Enum!
-  versions: [QuestionVersion]
-  instances: [QuestionInstances]
-  tags: [Tag]
-  createdAt: Date
-  updatedAt: Date
-*/
-
 const mongoose = require('mongoose')
 
 const ObjectId = mongoose.Schema.Types.ObjectId

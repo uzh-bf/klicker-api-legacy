@@ -1,12 +1,5 @@
 // @flow
 
-/*
-  id: ID!
-  difficulty: Number!
-  comprehensibility: Number!
-  createdAt: Date
-*/
-
 const mongoose = require('mongoose')
 
 const ConfusionTimeStep = new mongoose.Schema({
@@ -17,4 +10,3 @@ const ConfusionTimeStep = new mongoose.Schema({
 })
 
 module.exports = ConfusionTimeStep
-// module.exports = mongoose.model('ConfusionTimeStep', ConfusionTimeStep)
