@@ -31,7 +31,7 @@
   },
   "scripts": {
     "debug": "cross-env NODE_ENV=production node --inspect src/server.js",
-    "dev": "nodemon -w src/server.js src/server.js",
+    "dev": "nodemon -w src/* src/server.js",
     "flow": "flow",
     "format": "prettier-eslint --single-quote --no-semi --write \"src/**/*.js\"",
     "format:ci": "prettier-eslint --single-quote --no-semi --list-different \"src/**/*.js\"",
