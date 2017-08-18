@@ -2,7 +2,7 @@ const graphql = require('graphql')
 
 const { GraphQLID, GraphQLObjectType, GraphQLString } = graphql
 
-const TagType = new GraphQLObjectType({
+const Tag = new GraphQLObjectType({
   name: 'Tag',
   fields: () => ({
     id: { type: GraphQLID },
@@ -10,4 +10,4 @@ const TagType = new GraphQLObjectType({
   }),
 })
 
-module.exports = TagType
+module.exports = Tag

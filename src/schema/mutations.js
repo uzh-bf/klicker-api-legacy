@@ -1,7 +1,7 @@
 const graphql = require('graphql')
 
 const { GraphQLObjectType, GraphQLString } = graphql
-const UserType = require('./types/userType')
+const UserType = require('./types/User')
 
 const mutation = new GraphQLObjectType({
   name: 'Mutation',
@@ -13,6 +13,10 @@ const mutation = new GraphQLObjectType({
         password: { type: GraphQLString },
       },
       resolve(parentValue, { email, password }, req) {
+        // TODO: check whether the email is already occupied
+        // TODO: create a new user with passport
+        // TODO: return details of the new user
+
         return {
           id: 123,
           email,
