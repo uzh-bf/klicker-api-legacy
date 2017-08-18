@@ -5,7 +5,7 @@ const graphql = require('graphql')
 const { GraphQLID, GraphQLList, GraphQLObjectType, GraphQLString, GraphQLSchema } = graphql
 
 const mutation = require('./mutations')
-const UserModel = require('../models/userModel')
+const UserModel = require('../models/User')
 const UserType = require('./types/userType')
 
 const RootQuery = new GraphQLObjectType({

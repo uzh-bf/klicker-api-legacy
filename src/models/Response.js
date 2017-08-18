@@ -1,14 +1,17 @@
-const mongoose = require('mongoose')
+// @flow
 
 /*
   id: ID!
-  value: Json!
+  value: Object!
   createdAt: Date
-  updatedAt: Date
 */
 
-const Response = new mongoose.Schema({
+const mongoose = require('mongoose')
 
+const Response = new mongoose.Schema({
+  value: { type: Object, required: true },
+
+  createdAt: { type: Date, default: Date.now() },
 })
 
 module.exports = Response
