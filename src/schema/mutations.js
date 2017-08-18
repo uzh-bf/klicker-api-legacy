@@ -17,9 +17,12 @@ const mutation = new GraphQLObjectType({
         // TODO: create a new user with passport
         // TODO: return details of the new user
 
+        console.dir(req)
+
         return {
           id: 123,
           email,
+          password,
           shortname: 'abcd',
           isActive: true,
           isAAI: false,

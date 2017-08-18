@@ -23,7 +23,8 @@ const QuestionBlock = require('./QuestionBlock')
 
 const Session = new mongoose.Schema({
   name: { type: String, default: Date.now(), index: true },
-  status: { type: Number, default: 0, min: 0, max: 2, index: true }, // 0: CREATED, 1: RUNNING, 2: COMPLETED
+  // session status (enum) => 0: CREATED, 1: RUNNING, 2: COMPLETED
+  status: { type: Number, default: 0, min: 0, max: 2, index: true },
   settings: {
     isConfusionBarometerActive: { type: Boolean, default: false },
     isFeedbackChannelActive: { type: Boolean, default: false },
