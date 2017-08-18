@@ -8,20 +8,25 @@
   "timezone": "Europe/Zurich",
   "packageRules": [
     {
-      "packagePatterns": ["^babel-eslint","^eslint", "^prettier", "^pre-commit"],
-      "groupName": ["code style"]
+      "packagePatterns": [
+        "^babel-eslint",
+        "^eslint",
+        "^prettier",
+        "^pre-commit"
+      ],
+      "groupName": "code style"
     },
     {
       "packageNames": ["flow-bin"],
-      "groupName": ["flow"]
+      "groupName": "flow"
     },
     {
       "packageNames": ["jest"],
-      "groupName": ["test"]
+      "groupName": "test"
     },
     {
       "packageNames": ["mongodb", "mongoose"],
-      "groupName": ["database"]
+      "groupName": "database"
     }
   ]
 }
