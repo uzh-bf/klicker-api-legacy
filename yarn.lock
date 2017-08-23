@@ -1542,12 +1542,6 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.2:
   version "4.1.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
 
-graphql-server-express@^1.0.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/graphql-server-express/-/graphql-server-express-1.1.0.tgz#28f3ccb51fcac552e47df5f010f05853269f03cb"
-  dependencies:
-    apollo-server-express "^1.1.0"
-
 graphql-tools@^1.1.0, graphql-tools@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/graphql-tools/-/graphql-tools-1.2.1.tgz#8d462abaa7b0f3bb2aa633df1e7a848720197671"
