@@ -43,7 +43,8 @@ const resolvers = {
       const user = await UserModel.findById(userId).populate(['tags'])
       return user.tags
     },
-    user: async (root, { id }) => UserModel.findById(id).populate(['questions', 'sessions', 'tags']),
+    user: async (root, { id }) =>
+      UserModel.findById(id).populate(['questions', 'sessions', 'tags']),
   },
   Mutation: {
     createTag: async (root, { name, userId }, context, info) => {
