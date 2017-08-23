@@ -5,6 +5,14 @@ const { makeExecutableSchema } = require('graphql-tools')
 const { QuestionModel, SessionModel, TagModel, UserModel } = require('./models')
 const { allTypes } = require('./types')
 
+// check if auth property is available
+// throw if not properly authenticated
+const isAuthenticated = (context) => {
+  if (!context.auth || !context.auth.sub) {
+    throw new Error('INVALID_TOKEN')
+  }
+}
+
 // create graphql schema in schema language
 const typeDefs = [
   `
@@ -12,11 +20,11 @@ const typeDefs = [
     allQuestions(userId: ID): [Question]
     allSessions(userId: ID): [Session]
     allTags(userId: ID): [Tag]
-    user(id: ID): User
+    user: User
   }
 
   type Mutation {
-    createTag(userId: ID, name: String): Tag
+    createTag(name: String): Tag
     createUser(email: String, password: String, shortname: String): User
   }
 
@@ -31,38 +39,48 @@ const typeDefs = [
 // define graphql resolvers for schema above
 const resolvers = {
   Query: {
-    allQuestions: async (root, { userId }) => {
-      const user = await UserModel.findById(userId).populate(['questions'])
+    allQuestions: async (parentValue, args, context) => {
+      isAuthenticated(context)
+
+      const user = await UserModel.findById(context.auth.sub).populate(['questions'])
       return user.questions
     },
-    allSessions: async (root, { userId }) => {
-      const user = await UserModel.findById(userId).populate(['sessions'])
+    allSessions: async (parentValue, args, context) => {
+      isAuthenticated(context)
+
+      const user = await UserModel.findById(context.auth.sub).populate(['sessions'])
       return user.sessions
     },
-    allTags: async (root, { userId }) => {
-      const user = await UserModel.findById(userId).populate(['tags'])
+    allTags: async (parentValue, args, context) => {
+      isAuthenticated(context)
+
+      const user = await UserModel.findById(context.auth.sub).populate(['tags'])
       return user.tags
     },
-    user: async (root, { id }) =>
-      UserModel.findById(id).populate(['questions', 'sessions', 'tags']),
+    user: async (parentValue, args, context) => {
+      isAuthenticated(context)
+
+      return UserModel.findById(context.auth.sub).populate(['questions', 'sessions', 'tags'])
+    },
   },
   Mutation: {
-    createTag: async (root, { name, userId }, context, info) => {
+    createTag: async (parentValue, { name }, context) => {
+      isAuthenticated(context)
+
       const newTag = await new TagModel({
         name,
       }).save()
 
-      const user = await UserModel.findById(userId)
-      const updatedUser = await user.update({
+      const user = await UserModel.findById(context.auth.sub)
+
+      await user.update({
         $set: { tags: [...user.tags, newTag.id] },
         $currentDate: { updatedAt: true },
       })
 
-      console.dir(updatedUser)
-
       return newTag
     },
-    createUser: async (root, { email, password, shortname }, context, info) => {
+    createUser: async (parentValue, { email, password, shortname }) => {
       const newUser = new UserModel({
         email,
         password,
@@ -111,7 +129,7 @@ module.exports = makeExecutableSchema({
   {
     "email": "Helsloworld",
     "password": "abc",
-    "shortname": "hehehe",
+    "shortname": "hehehe"
   }
 
   mutation {

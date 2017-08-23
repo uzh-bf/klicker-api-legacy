@@ -32,7 +32,11 @@ const server = express()
 // parse JWT that are passed as a header and attach their content to req.user
 server.use(
   '/graphql',
-  jwt({ credentialsRequired: false, secret: process.env.JWT_SECRET || 'hello-world' }),
+  jwt({
+    credentialsRequired: false,
+    requestProperty: 'auth',
+    secret: process.env.JWT_SECRET || 'hello-world',
+  }),
   bodyParser.json(),
   graphqlExpress({ schema }),
 )
@@ -40,10 +44,10 @@ server.use(
 // expose GraphQL and GraphiQL in dev mode
 // as GraphiQL cannot handle JWT authentication, don't check tokens in development
 // TODO: will probably need to mock JWT's here
-if (dev) {
+/* if (dev) {
   server.use('/graphql-dev', bodyParser.json(), graphqlExpress({ schema }))
   server.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql-dev' }))
-}
+} */
 
 server.listen(3000, (err) => {
   if (err) throw err
