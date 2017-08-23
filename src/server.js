@@ -17,10 +17,10 @@ mongoose.connect(
 
 mongoose.connection
   .once('open', () => {
-    console.log('hello mongo!')
+    console.log('> Connection to MongoDB established.')
   })
   .on('error', (error) => {
-    console.warn('Warning', error)
+    console.warn('> Warning: ', error)
   })
 
 // initialize an express server
@@ -41,5 +41,5 @@ server.use(
 
 server.listen(3000, (err) => {
   if (err) throw err
-  console.log('> Ready on http://localhost:3000')
+  console.log('> API ready on http://localhost:3000!')
 })
