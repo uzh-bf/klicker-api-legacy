@@ -124,19 +124,29 @@ module.exports = makeExecutableSchema({
 
 /*
   {
-    user(id:"5995eb5f778d9eef0594ad9f") {
+  user {
+    id
+    email
+    questions {
+      id
+    }
+    sessions {
+      id
+    }
+    tags {
+      id
+      name
+    }
+  }
+}
+
+mutation Signup($email: String!, $password: String!, $shortname:String!) {
+    createUser(email: $email, password: $password, shortname :$shortname) {
       id
       email
-      questions {
-        id
-      }
-      sessions {
-        id
-      }
-      tags {
-        id
-        name
-      }
+      shortname
+      isActive
+      isAAI
     }
   }
 
@@ -155,10 +165,24 @@ module.exports = makeExecutableSchema({
     "shortname": "hehehe"
   }
 
-  mutation {
-    createTag(userId:"5995eb5f778d9eef0594ad9f", name:"Blablas") {
+ mutation {
+  createTag(name:"Blablas") {
+    id
+  }
+}
+
+mutation {
+  createQuestion(title:"blalblaas", type:"SC", tags: ["599d9b227e22d14055cc23f5"]) {
+    id
+    title
+    type
+    tags {
       id
     }
+
+    createdAt
+    updatedAt
   }
+}
 
 */
