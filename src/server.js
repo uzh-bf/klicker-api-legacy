@@ -4,12 +4,10 @@ require('dotenv').config()
 
 const bodyParser = require('body-parser')
 const express = require('express')
-const { graphqlExpress, graphiqlExpress } = require('graphql-server-express')
+const { graphqlExpress } = require('apollo-server-express')
 const schema = require('./schema')
 const mongoose = require('mongoose')
 const jwt = require('express-jwt')
-
-const dev = process.env.NODE_ENV !== 'production'
 
 mongoose.Promise = Promise
 
@@ -38,16 +36,8 @@ server.use(
     secret: process.env.JWT_SECRET || 'hello-world',
   }),
   bodyParser.json(),
-  graphqlExpress({ schema }),
+  graphqlExpress(req => ({ context: { auth: req.auth }, schema })),
 )
-
-// expose GraphQL and GraphiQL in dev mode
-// as GraphiQL cannot handle JWT authentication, don't check tokens in development
-// TODO: will probably need to mock JWT's here
-/* if (dev) {
-  server.use('/graphql-dev', bodyParser.json(), graphqlExpress({ schema }))
-  server.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql-dev' }))
-} */
 
 server.listen(3000, (err) => {
   if (err) throw err
