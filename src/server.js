@@ -5,7 +5,7 @@ require('dotenv').config()
 const bodyParser = require('body-parser')
 const express = require('express')
 const { graphqlExpress, graphiqlExpress } = require('graphql-server-express')
-const schema = require('./schema/schema')
+const schema = require('./schema')
 const mongoose = require('mongoose')
 
 mongoose.Promise = Promise
