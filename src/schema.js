@@ -7,8 +7,8 @@ const { allTypes } = require('./types')
 
 // check if auth property is available
 // throw if not properly authenticated
-const isAuthenticated = (context) => {
-  if (!context.auth || !context.auth.sub) {
+const isAuthenticated = (auth) => {
+  if (!auth || !auth.sub) {
     throw new Error('INVALID_TOKEN')
   }
 }
@@ -17,13 +17,14 @@ const isAuthenticated = (context) => {
 const typeDefs = [
   `
   type Query {
-    allQuestions(userId: ID): [Question]
-    allSessions(userId: ID): [Session]
-    allTags(userId: ID): [Tag]
+    allQuestions: [Question]
+    allSessions: [Session]
+    allTags: [Tag]
     user: User
   }
 
   type Mutation {
+    createQuestion(title: String, type: String, tags: [ID]): Question
     createTag(name: String): Tag
     createUser(email: String, password: String, shortname: String): User
   }
@@ -39,39 +40,61 @@ const typeDefs = [
 // define graphql resolvers for schema above
 const resolvers = {
   Query: {
-    allQuestions: async (parentValue, args, context) => {
-      isAuthenticated(context)
+    allQuestions: async (parentValue, args, { auth }) => {
+      isAuthenticated(auth)
 
-      const user = await UserModel.findById(context.auth.sub).populate(['questions'])
+      const user = await UserModel.findById(auth.sub).populate(['questions'])
       return user.questions
     },
-    allSessions: async (parentValue, args, context) => {
-      isAuthenticated(context)
+    allSessions: async (parentValue, args, { auth }) => {
+      isAuthenticated(auth)
 
-      const user = await UserModel.findById(context.auth.sub).populate(['sessions'])
+      const user = await UserModel.findById(auth.sub).populate(['sessions'])
       return user.sessions
     },
-    allTags: async (parentValue, args, context) => {
-      isAuthenticated(context)
+    allTags: async (parentValue, args, { auth }) => {
+      isAuthenticated(auth)
 
-      const user = await UserModel.findById(context.auth.sub).populate(['tags'])
+      const user = await UserModel.findById(auth.sub).populate(['tags'])
       return user.tags
     },
-    user: async (parentValue, args, context) => {
-      isAuthenticated(context)
+    user: async (parentValue, args, { auth }) => {
+      isAuthenticated(auth)
 
-      return UserModel.findById(context.auth.sub).populate(['questions', 'sessions', 'tags'])
+      return UserModel.findById(auth.sub).populate(['questions', 'sessions', 'tags'])
     },
   },
   Mutation: {
-    createTag: async (parentValue, { name }, context) => {
-      isAuthenticated(context)
+    createQuestion: async (parentValue, { tags, title, type }, { auth }) => {
+      isAuthenticated(auth)
+
+      // TODO: if non-existent tags are passed, they need to be created
+      const fetchTags = await TagModel.find({ _id: { $in: tags } })
+
+      const newQuestion = await new QuestionModel({
+        tags: fetchTags,
+        title,
+        type,
+      }).save()
+
+      const user = await UserModel.findById(auth.sub).populate(['questions'])
+      user.questions.push(newQuestion.id)
+
+      await user.update({
+        $set: { questions: [...user.questions, newQuestion.id] },
+        $currentDate: { updatedAt: true },
+      })
+
+      return newQuestion
+    },
+    createTag: async (parentValue, { name }, { auth }) => {
+      isAuthenticated(auth)
 
       const newTag = await new TagModel({
         name,
       }).save()
 
-      const user = await UserModel.findById(context.auth.sub)
+      const user = await UserModel.findById(auth.sub)
 
       await user.update({
         $set: { tags: [...user.tags, newTag.id] },
