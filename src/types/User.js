@@ -12,9 +12,9 @@ const User = `
     id: ID!
 
     email: String!
-    shortname: String!
     isActive: Boolean
     isAAI: Boolean
+    shortname: String!
 
     questions: [Question]
     sessions: [Session]
