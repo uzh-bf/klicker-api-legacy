@@ -46,11 +46,13 @@ server.use(
     secret: process.env.JWT_SECRET,
     getToken: (req) => {
       // try to parse an authorization cookie
+      // TODO: check whether the JWT is valid
       if (req.cookies && req.cookies.jwt) {
         return req.cookies.jwt
       }
 
       // try to parse the authorization header
+      // TODO: check whether the JWT is valid
       if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
         return req.headers.authorization.split(' ')[1]
       }
