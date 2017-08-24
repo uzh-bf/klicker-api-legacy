@@ -9,6 +9,11 @@ const { allTypes } = require('./types')
 // create graphql schema in schema language
 const typeDefs = [
   `
+  schema {
+    query: Query
+    mutation: Mutation
+  }
+
   type Query {
     allQuestions: [Question]
     allSessions: [Session]
@@ -24,11 +29,6 @@ const typeDefs = [
     createTag(name: String): Tag
     createUser(email: String, password: String, shortname: String): User
     login(email: String, password: String): User
-  }
-
-  schema {
-    query: Query
-    mutation: Mutation
   }
 `,
   ...allTypes,
@@ -55,12 +55,12 @@ const resolvers = {
       const user = await UserModel.findById(auth.sub).populate(['tags'])
       return user.tags
     },
-    question: async (parentValue, { id }, { auth }) => {
+    question: (parentValue, { id }, { auth }) => {
       AuthService.isAuthenticated(auth)
 
       return QuestionModel.findOne({ id, user: auth.sub })
     },
-    user: async (parentValue, args, { auth }) => {
+    user: (parentValue, args, { auth }) => {
       AuthService.isAuthenticated(auth)
 
       return UserModel.findById(auth.sub).populate(['questions', 'sessions', 'tags'])
@@ -105,12 +105,8 @@ const resolvers = {
 
       return newTag
     },
-    createUser: async (parentValue, { email, password, shortname }) => {
-      return AuthService.signup(email, password, shortname)
-    },
-    login: async (parentValue, { email, password }) => {
-      return AuthService.login(email, password)
-    },
+    createUser: (parentValue, { email, password, shortname }) => AuthService.signup(email, password, shortname),
+    login: (parentValue, { email, password }) => AuthService.login(email, password),
   },
 }
 
@@ -121,8 +117,6 @@ module.exports = makeExecutableSchema({
 })
 
 /*
-  JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1OTk1ZWI2Yjc3OGQ5ZWVmMDU5NGFkYTAiLCJwZXJtaXNzaW9ucyI6WyJ1c2VyIiwiYWRtaW4iXX0.6E7SzoVXFstKJ7WUEHZ1NBxQZgmK-bOAKZXEH6n8tao
-
   mutation {
     login(email:"aw@ibf.ch", password:"abcd") {
       id
