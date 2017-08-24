@@ -3,6 +3,7 @@
 require('dotenv').config()
 
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
 const express = require('express')
 const { graphqlExpress } = require('apollo-server-express')
 const schema = require('./schema')
@@ -38,10 +39,25 @@ const server = express()
 // parse JWT that are passed as a header and attach their content to req.user
 server.use(
   '/graphql',
+  cookieParser(),
   jwt({
     credentialsRequired: false,
     requestProperty: 'auth',
     secret: process.env.JWT_SECRET,
+    getToken: (req) => {
+      // try to parse an authorization cookie
+      if (req.cookies && req.cookies.jwt) {
+        return req.cookies.jwt
+      }
+
+      // try to parse the authorization header
+      if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+        return req.headers.authorization.split(' ')[1]
+      }
+
+      // no token found
+      return null
+    },
   }),
   bodyParser.json(),
   graphqlExpress(req => ({ context: { auth: req.auth }, schema })),
