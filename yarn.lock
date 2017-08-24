@@ -1207,13 +1207,6 @@ expand-range@^1.8.1:
   dependencies:
     fill-range "^2.1.0"
 
-express-jwt-permissions@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/express-jwt-permissions/-/express-jwt-permissions-1.0.0.tgz#ed6171d06f662dfa58f3a7707b7d2c8e37583a7d"
-  dependencies:
-    lodash.get "^4.4.2"
-    xtend "^4.0.1"
-
 express-jwt@5.3.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/express-jwt/-/express-jwt-5.3.0.tgz#3d90cd65802e6336252f19e6a3df3e149e0c5ea0"
@@ -2463,10 +2456,6 @@ lodash.defaults@^3.1.2:
   dependencies:
     lodash.assign "^3.0.0"
     lodash.restparam "^3.0.0"
-
-lodash.get@^4.4.2:
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
 
 lodash.isarguments@^3.0.0:
   version "3.1.0"

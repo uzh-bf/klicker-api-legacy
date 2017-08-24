@@ -1,6 +1,5 @@
 // @flow
 
-const Permissions = require('express-jwt-permissions')
 const { makeExecutableSchema } = require('graphql-tools')
 
 const AuthService = require('./services/auth')
