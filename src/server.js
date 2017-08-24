@@ -11,9 +11,17 @@ const jwt = require('express-jwt')
 
 mongoose.Promise = Promise
 
-mongoose.connect(
-  `mongodb://${process.env.MONGO_URL || 'klicker:klicker@ds161042.mlab.com:61042/klicker-dev'}`,
-)
+if (!process.env.MONGO_URL) {
+  console.warn('> Error: Please pass the MONGO_URL as an environment variable.')
+  process.exit(1)
+}
+
+if (!process.env.JWT_SECRET) {
+  console.warn('> Error: Please pass the JWT_SECRET as an environment variable.')
+  process.exit(1)
+}
+
+mongoose.connect(`mongodb://${process.env.MONGO_URL}`)
 
 mongoose.connection
   .once('open', () => {
@@ -33,7 +41,7 @@ server.use(
   jwt({
     credentialsRequired: false,
     requestProperty: 'auth',
-    secret: process.env.JWT_SECRET || 'hello-world',
+    secret: process.env.JWT_SECRET,
   }),
   bodyParser.json(),
   graphqlExpress(req => ({ context: { auth: req.auth }, schema })),
