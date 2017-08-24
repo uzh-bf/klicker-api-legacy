@@ -1,17 +1,11 @@
 // @flow
 
+const Permissions = require('express-jwt-permissions')
 const { makeExecutableSchema } = require('graphql-tools')
 
-const { QuestionModel, SessionModel, TagModel, UserModel } = require('./models')
+const AuthService = require('./services/auth')
+const { QuestionModel, TagModel, UserModel } = require('./models')
 const { allTypes } = require('./types')
-
-// check if auth property is available
-// throw if not properly authenticated
-const isAuthenticated = (auth) => {
-  if (!auth || !auth.sub) {
-    throw new Error('INVALID_TOKEN')
-  }
-}
 
 // create graphql schema in schema language
 const typeDefs = [
@@ -20,6 +14,9 @@ const typeDefs = [
     allQuestions: [Question]
     allSessions: [Session]
     allTags: [Tag]
+    question(id: ID): Question
+    session(id: ID): Session
+    tag(id: ID): Tag
     user: User
   }
 
@@ -27,6 +24,7 @@ const typeDefs = [
     createQuestion(title: String, type: String, tags: [ID]): Question
     createTag(name: String): Tag
     createUser(email: String, password: String, shortname: String): User
+    login(email: String, password: String): User
   }
 
   schema {
@@ -41,32 +39,37 @@ const typeDefs = [
 const resolvers = {
   Query: {
     allQuestions: async (parentValue, args, { auth }) => {
-      isAuthenticated(auth)
+      AuthService.isAuthenticated(auth)
 
       const user = await UserModel.findById(auth.sub).populate(['questions'])
       return user.questions
     },
     allSessions: async (parentValue, args, { auth }) => {
-      isAuthenticated(auth)
+      AuthService.isAuthenticated(auth)
 
       const user = await UserModel.findById(auth.sub).populate(['sessions'])
       return user.sessions
     },
     allTags: async (parentValue, args, { auth }) => {
-      isAuthenticated(auth)
+      AuthService.isAuthenticated(auth)
 
       const user = await UserModel.findById(auth.sub).populate(['tags'])
       return user.tags
     },
+    question: async (parentValue, { id }, { auth }) => {
+      AuthService.isAuthenticated(auth)
+
+      return QuestionModel.findOne({ id, user: auth.sub })
+    },
     user: async (parentValue, args, { auth }) => {
-      isAuthenticated(auth)
+      AuthService.isAuthenticated(auth)
 
       return UserModel.findById(auth.sub).populate(['questions', 'sessions', 'tags'])
     },
   },
   Mutation: {
     createQuestion: async (parentValue, { tags, title, type }, { auth }) => {
-      isAuthenticated(auth)
+      AuthService.isAuthenticated(auth)
 
       // TODO: if non-existent tags are passed, they need to be created
       const fetchTags = await TagModel.find({ _id: { $in: tags } })
@@ -88,7 +91,7 @@ const resolvers = {
       return newQuestion
     },
     createTag: async (parentValue, { name }, { auth }) => {
-      isAuthenticated(auth)
+      AuthService.isAuthenticated(auth)
 
       const newTag = await new TagModel({
         name,
@@ -104,14 +107,10 @@ const resolvers = {
       return newTag
     },
     createUser: async (parentValue, { email, password, shortname }) => {
-      const newUser = new UserModel({
-        email,
-        password,
-        shortname,
-        isAAI: false,
-      })
-
-      return newUser.save()
+      return AuthService.signup(email, password, shortname)
+    },
+    login: async (parentValue, { email, password }) => {
+      return AuthService.login(email, password)
     },
   },
 }
@@ -123,6 +122,14 @@ module.exports = makeExecutableSchema({
 })
 
 /*
+  JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1OTk1ZWI2Yjc3OGQ5ZWVmMDU5NGFkYTAiLCJwZXJtaXNzaW9ucyI6WyJ1c2VyIiwiYWRtaW4iXX0.6E7SzoVXFstKJ7WUEHZ1NBxQZgmK-bOAKZXEH6n8tao
+
+  mutation {
+    login(email:"aw@ibf.ch", password:"abcd") {
+      id
+    }
+  }
+
   {
   user {
     id
