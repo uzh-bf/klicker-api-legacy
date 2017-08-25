@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs')
 const JWT = require('jsonwebtoken')
 
 const UserModel = require('../models/User')
@@ -18,10 +19,16 @@ const isValidJWT = (jwt, secret) => {
 }
 
 const signup = async (email, password, shortname) => {
+  // TODO: validation etc.
+
+  // generate a salt with bcyrpt using 10 rounds
+  // hash and salt the password
+  const hash = bcrypt.hashSync(password, 10)
+
   // create a new user based on the passed data
   const newUser = await new UserModel({
     email,
-    password,
+    password: hash,
     shortname,
     isAAI: false,
   }).save()
