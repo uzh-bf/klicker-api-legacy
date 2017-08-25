@@ -48,8 +48,7 @@
   "jest": {
     "testEnvironment": "node",
     "roots": [
-      "src/",
-      "test/"
+      "src/"
     ]
   },
   "pre-commit": [
