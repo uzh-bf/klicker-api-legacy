@@ -46,7 +46,7 @@ server.use(
     secret: process.env.JWT_SECRET,
     getToken: (req) => {
       // try to parse an authorization cookie
-      if (req.cookies && req.cookies.jwt && isValidJWT(req.cookies.jwt)) {
+      if (req.cookies && req.cookies.jwt && isValidJWT(req.cookies.jwt, process.env.JWT_SECRET)) {
         return req.cookies.jwt
       }
 
