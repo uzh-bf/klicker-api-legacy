@@ -1,34 +1,21 @@
-// @flow
 const JWT = require('jsonwebtoken')
 
 const UserModel = require('../models/User')
 
-const isValidJWT = (jwt) => {
+const isAuthenticated = (auth) => {
+  if (!auth || !auth.sub) {
+    throw new Error('INVALID_TOKEN')
+  }
+}
+
+const isValidJWT = (jwt, secret) => {
   try {
-    JWT.verify(jwt, process.env.JWT_SECRET)
+    JWT.verify(jwt, secret)
     return true
   } catch (err) {
     return false
   }
 }
-
-const isAuthenticated = (auth) => {
-  if (auth && !auth.sub) {
-    return
-  }
-
-  throw new Error('INVALID_TOKEN')
-}
-
-/* const isAuthenticated = (auth, callback) => {
-  return new Promise((resolve, reject) => {
-    if (auth && !auth.sub) {
-      resolve(callback())
-    }
-
-    reject('INVALID_TOKEN')
-  })
-} */
 
 const signup = async (email, password, shortname) => {
   // create a new user based on the passed data
