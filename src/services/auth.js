@@ -1,6 +1,16 @@
 // @flow
+const JWT = require('jsonwebtoken')
 
 const UserModel = require('../models/User')
+
+const isValidJWT = (jwt) => {
+  try {
+    JWT.verify(jwt, process.env.JWT_SECRET)
+    return true
+  } catch (err) {
+    return false
+  }
+}
 
 const isAuthenticated = (auth) => {
   if (auth && !auth.sub) {
@@ -51,13 +61,23 @@ const login = async (res, email, password) => {
       reject('INVALID_LOGIN')
     }
 
-    res.cookie('someCookie', 'asdasd', { maxAge: 900000, httpOnly: true })
+    // generate a JWT for future authentication
+    // TODO: extend the JWT contents with necessary properties
+    const jwt = JWT.sign({ sub: user.id, scope: ['user'] }, process.env.JWT_SECRET)
+
+    // set a cookie with the generated JWT
+    // TODO: set a reasonable maxAge
+    // TODO: set other important cookie settings (path etc.)
+    res.cookie('jwt', jwt, { httpOnly: true, maxAge: 900000, path: '/graphql' })
+
+    // resolve with data about the user
     resolve(user)
   })
 }
 
 module.exports = {
   isAuthenticated,
+  isValidJWT,
   signup,
   login,
 }

@@ -6,7 +6,9 @@ const express = require('express')
 const { graphqlExpress } = require('apollo-server-express')
 const schema = require('./schema')
 const mongoose = require('mongoose')
-const jwt = require('express-jwt')
+const expressJWT = require('express-jwt')
+
+const { isValidJWT } = require('./services/auth')
 
 mongoose.Promise = Promise
 
@@ -38,20 +40,22 @@ const server = express()
 server.use(
   '/graphql',
   cookieParser(),
-  jwt({
+  expressJWT({
     credentialsRequired: false,
     requestProperty: 'auth',
     secret: process.env.JWT_SECRET,
     getToken: (req) => {
       // try to parse an authorization cookie
-      // TODO: check whether the JWT is valid
-      if (req.cookies && req.cookies.jwt) {
+      if (req.cookies && req.cookies.jwt && isValidJWT(req.cookies.jwt)) {
         return req.cookies.jwt
       }
 
       // try to parse the authorization header
-      // TODO: check whether the JWT is valid
-      if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      if (
+        req.headers.authorization &&
+        req.headers.authorization.split(' ')[0] === 'Bearer' &&
+        isValidJWT(req.headers.authorization)
+      ) {
         return req.headers.authorization.split(' ')[1]
       }
 
