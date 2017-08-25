@@ -1,7 +1,9 @@
 const { makeExecutableSchema } = require('graphql-tools')
 
-const AuthService = require('./services/auth')
-const { QuestionModel, TagModel, UserModel } = require('./models')
+const { allQuestions, question, createQuestion } = require('./resolvers/questions')
+const { allSessions, session } = require('./resolvers/sessions')
+const { allTags, createTag } = require('./resolvers/tags')
+const { createUser, login, user } = require('./resolvers/users')
 const { allTypes } = require('./types')
 
 // create graphql schema in schema language
@@ -35,78 +37,18 @@ const typeDefs = [
 // define graphql resolvers for schema above
 const resolvers = {
   Query: {
-    allQuestions: async (parentValue, args, { auth }) => {
-      AuthService.isAuthenticated(auth)
-
-      const user = await UserModel.findById(auth.sub).populate(['questions'])
-      return user.questions
-    },
-    allSessions: async (parentValue, args, { auth }) => {
-      AuthService.isAuthenticated(auth)
-
-      const user = await UserModel.findById(auth.sub).populate(['sessions'])
-      return user.sessions
-    },
-    allTags: async (parentValue, args, { auth }) => {
-      AuthService.isAuthenticated(auth)
-
-      const user = await UserModel.findById(auth.sub).populate(['tags'])
-      return user.tags
-    },
-    question: (parentValue, { id }, { auth }) => {
-      AuthService.isAuthenticated(auth)
-
-      return QuestionModel.findOne({ id, user: auth.sub })
-    },
-    user: (parentValue, args, { auth }) => {
-      AuthService.isAuthenticated(auth)
-
-      return UserModel.findById(auth.sub).populate(['questions', 'sessions', 'tags'])
-    },
+    allQuestions,
+    allSessions,
+    allTags,
+    question,
+    session,
+    user,
   },
   Mutation: {
-    createQuestion: async (parentValue, { question: { tags, title, type } }, { auth }) => {
-      AuthService.isAuthenticated(auth)
-
-      // if non-existent tags are passed, they need to be created
-      const fetchTags = await TagModel.find({ _id: { $in: tags } })
-      console.dir(fetchTags)
-
-      const newQuestion = await new QuestionModel({
-        tags: fetchTags,
-        title,
-        type,
-      }).save()
-
-      const user = await UserModel.findById(auth.sub).populate(['questions'])
-      user.questions.push(newQuestion.id)
-
-      await user.update({
-        $set: { questions: [...user.questions, newQuestion.id] },
-        $currentDate: { updatedAt: true },
-      })
-
-      return newQuestion
-    },
-    createTag: async (parentValue, { tag: { name } }, { auth }) => {
-      AuthService.isAuthenticated(auth)
-
-      const newTag = await new TagModel({
-        name,
-      }).save()
-
-      const user = await UserModel.findById(auth.sub)
-
-      await user.update({
-        $set: { tags: [...user.tags, newTag.id] },
-        $currentDate: { updatedAt: true },
-      })
-
-      return newTag
-    },
-    createUser: (parentValue, { user: { email, password, shortname } }) =>
-      AuthService.signup(email, password, shortname),
-    login: (parentValue, { email, password }, { res }) => AuthService.login(res, email, password),
+    createQuestion,
+    createTag,
+    createUser,
+    login,
   },
 }
 
