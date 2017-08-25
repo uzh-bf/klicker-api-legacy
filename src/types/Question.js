@@ -6,6 +6,13 @@ module.exports = () => [Question, Tag]
 const Tag = require('./Tag')
 
 const Question = `
+  input QuestionInput {
+    title: String
+    type: String
+
+    tags: [ID]
+  }
+
   type Question {
     id: ID!
 

@@ -23,9 +23,9 @@ const typeDefs = [
   }
 
   type Mutation {
-    createQuestion(title: String, type: String, tags: [ID]): Question
-    createTag(name: String): Tag
-    createUser(email: String, password: String, shortname: String): User
+    createQuestion(question: QuestionInput): Question
+    createTag(tag: TagInput): Tag
+    createUser(user: UserInput): User
     login(email: String, password: String): User
   }
 `,
@@ -65,7 +65,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    createQuestion: async (parentValue, { tags, title, type }, { auth }) => {
+    createQuestion: async (parentValue, { question: { tags, title, type } }, { auth }) => {
       AuthService.isAuthenticated(auth)
 
       // TODO: if non-existent tags are passed, they need to be created
@@ -87,7 +87,7 @@ const resolvers = {
 
       return newQuestion
     },
-    createTag: async (parentValue, { name }, { auth }) => {
+    createTag: async (parentValue, { tag: { name } }, { auth }) => {
       AuthService.isAuthenticated(auth)
 
       const newTag = await new TagModel({
@@ -103,7 +103,8 @@ const resolvers = {
 
       return newTag
     },
-    createUser: (parentValue, { email, password, shortname }) => AuthService.signup(email, password, shortname),
+    createUser: (parentValue, { user: { email, password, shortname } }) =>
+      AuthService.signup(email, password, shortname),
     login: (parentValue, { email, password }, { res }) => AuthService.login(res, email, password),
   },
 }
