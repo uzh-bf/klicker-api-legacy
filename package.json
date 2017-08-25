@@ -43,7 +43,8 @@
     "format:ci": "prettier-eslint --single-quote --no-semi --list-different 'src/**/*.js'",
     "lint": "eslint 'src/**/*.js'",
     "start": "cross-env NODE_ENV=production node src/server.js",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "jest": {
     "testEnvironment": "node",
