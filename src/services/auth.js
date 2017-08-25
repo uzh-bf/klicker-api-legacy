@@ -10,6 +10,16 @@ const isAuthenticated = (auth) => {
   throw new Error('INVALID_TOKEN')
 }
 
+/* const isAuthenticated = (auth, callback) => {
+  return new Promise((resolve, reject) => {
+    if (auth && !auth.sub) {
+      resolve(callback())
+    }
+
+    reject('INVALID_TOKEN')
+  })
+} */
+
 const signup = async (email, password, shortname) => {
   // create a new user based on the passed data
   const newUser = await new UserModel({
@@ -29,7 +39,7 @@ const signup = async (email, password, shortname) => {
   })
 }
 
-const login = async (email, password) => {
+const login = async (res, email, password) => {
   // TODO: salt, hash, etc.
   const preparedPassword = password
 
@@ -41,6 +51,7 @@ const login = async (email, password) => {
       reject('INVALID_LOGIN')
     }
 
+    res.cookie('someCookie', 'asdasd', { maxAge: 900000, httpOnly: true })
     resolve(user)
   })
 }

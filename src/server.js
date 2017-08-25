@@ -1,5 +1,3 @@
-// @flow
-
 require('dotenv').config()
 
 const bodyParser = require('body-parser')
@@ -62,7 +60,7 @@ server.use(
     },
   }),
   bodyParser.json(),
-  graphqlExpress(req => ({ context: { auth: req.auth }, schema })),
+  graphqlExpress((req, res) => ({ context: { auth: req.auth, res }, schema })),
 )
 
 server.listen(3000, (err) => {

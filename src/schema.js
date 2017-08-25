@@ -106,7 +106,7 @@ const resolvers = {
       return newTag
     },
     createUser: (parentValue, { email, password, shortname }) => AuthService.signup(email, password, shortname),
-    login: (parentValue, { email, password }) => AuthService.login(email, password),
+    login: (parentValue, { email, password }, { res }) => AuthService.login(res, email, password),
   },
 }
 
