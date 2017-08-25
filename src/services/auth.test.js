@@ -5,8 +5,16 @@ mongoose.Promise = Promise
 process.env.JWT_SECRET = 'hello-world'
 
 const { isAuthenticated, isValidJWT, signup, login } = require('./auth')
+const { UserModel } = require('../models')
 
 describe('AuthService', () => {
+  beforeAll(() => {
+    mongoose.connect('mongodb://klicker:klicker@ds161042.mlab.com:61042/klicker-dev')
+  })
+  afterAll((done) => {
+    mongoose.disconnect(done)
+  })
+
   describe('isAuthenticated', () => {
     it('correctly validates authentication state', () => {
       const auth1 = null
@@ -34,32 +42,38 @@ describe('AuthService', () => {
   })
 
   describe('signup', () => {
-    beforeAll(() => {
-      mongoose.connect('mongodb://klicker:klicker@ds161042.mlab.com:61042/klicker-dev')
-    })
-    afterAll((done) => {
-      mongoose.disconnect(done)
-    })
+    it('works with valid user data', async () => {
+      // remove a user with the given test email if he already exists
+      await UserModel.findOneAndRemove({ email: 'testEmail@bf.uzh.ch' })
 
-    it('works')
+      // try creating a new user with valid data
+      const newUser = await signup('testEmail@bf.uzh.ch', 'somePassword', 'shorty')
+
+      // expect the new user to contain correct data
+      expect(newUser).toEqual(
+        expect.objectContaining({
+          email: 'testEmail@bf.uzh.ch',
+          shortname: 'shorty',
+          isAAI: false,
+        }),
+      )
+
+      // expect the password to not be the same (as it is hashed)
+      expect(newUser.password).not.toEqual('somePassword')
+    })
   })
 
   describe('login', () => {
-    let cookieStore
-
     // mock the response object
-    // let it save the params to res.cookie(...) into a temporary store
+    // let it save the params to res.cookie(...) into a temporary cookieStore
+    let cookieStore
     const res = {
       cookie: (...params) => {
         cookieStore = params
       },
     }
 
-    beforeAll(() => {
-      mongoose.connect('mongodb://klicker:klicker@ds161042.mlab.com:61042/klicker-dev')
-    })
-    afterAll((done) => {
-      mongoose.disconnect(done)
+    afterAll(() => {
       cookieStore = undefined
     })
 
