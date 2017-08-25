@@ -18,11 +18,15 @@ const Session = `
     isFeedbackChannelPublic: Boolean
   }
 
+  input SessionInput {
+    name: String
+  }
+
   type Session {
     id: ID!
 
     name: String!
-    status: SessionStatus!
+    status: Int!
     settings: SessionSettings
 
     feedbacks: [Feedback]

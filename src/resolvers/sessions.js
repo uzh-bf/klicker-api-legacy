@@ -16,8 +16,14 @@ const sessionQuery = async (parentValue, { id }, { auth }) => {
 }
 
 /* ----- mutations ----- */
+const createSessionMutation = async (parentValue, { session: { name } }, { auth }) => {
+  AuthService.isAuthenticated(auth)
+
+  return new SessionModel({ name, user: auth.sub }).save()
+}
 
 module.exports = {
   allSessions: allSessionsQuery,
+  createSession: createSessionMutation,
   session: sessionQuery,
 }
