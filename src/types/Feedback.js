@@ -11,4 +11,3 @@ const Feedback = `
     createdAt: String
   }
 `
-
