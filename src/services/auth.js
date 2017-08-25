@@ -44,25 +44,27 @@ const signup = async (email, password, shortname) => {
 }
 
 const login = async (res, email, password) => {
-  // TODO: salt, hash, etc.
-  const preparedPassword = password
-
-  // look for a single user with the given email/password combination
-  const user = await UserModel.findOne({ email, password: preparedPassword })
+  // look for a single user with the given email
+  const user = await UserModel.findOne({ email })
 
   return new Promise((resolve, reject) => {
-    if (!user) {
+    // check whether the user exists and hashed passwords match
+    if (!user || !bcrypt.compareSync(password, user.password)) {
       reject('INVALID_LOGIN')
     }
 
     // generate a JWT for future authentication
-    // TODO: extend the JWT contents with necessary properties
-    const jwt = JWT.sign({ sub: user.id, scope: ['user'] }, process.env.JWT_SECRET)
+    // expiresIn: one day equals 86400 seconds
+    // TODO: add more necessary properties for the JWT
+    const jwt = JWT.sign({ expiresIn: 86400, sub: user.id, scope: ['user'] }, process.env.JWT_SECRET)
 
     // set a cookie with the generated JWT
-    // TODO: set a reasonable maxAge
-    // TODO: set other important cookie settings (path etc.)
-    res.cookie('jwt', jwt, { httpOnly: true, maxAge: 900000, path: '/graphql' })
+    // maxAge: one day equals 86400000 milliseconds
+    // path: cookie should only be valid for the graphql API
+    // httpOnly: don't allow interactions from javascript
+    // TODO: set other important cookie settings
+    // TODO: restrict the cookie to https?
+    res.cookie('jwt', jwt, { httpOnly: true, maxAge: 86400000, path: '/graphql' })
 
     // resolve with data about the user
     resolve(user)

@@ -68,8 +68,9 @@ const resolvers = {
     createQuestion: async (parentValue, { question: { tags, title, type } }, { auth }) => {
       AuthService.isAuthenticated(auth)
 
-      // TODO: if non-existent tags are passed, they need to be created
+      // if non-existent tags are passed, they need to be created
       const fetchTags = await TagModel.find({ _id: { $in: tags } })
+      console.dir(fetchTags)
 
       const newQuestion = await new QuestionModel({
         tags: fetchTags,
