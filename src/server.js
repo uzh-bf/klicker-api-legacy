@@ -40,7 +40,10 @@ const server = express()
 // parse JWT that are passed as a header and attach their content to req.user
 server.use(
   '/graphql',
-  cors(),
+  cors({
+    origin: 'http://localhost:3000',
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  }),
   cookieParser(),
   expressJWT({
     credentialsRequired: false,
