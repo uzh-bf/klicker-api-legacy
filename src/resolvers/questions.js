@@ -5,6 +5,7 @@ const { QuestionModel, TagModel, UserModel } = require('../models')
 const allQuestionsQuery = async (parentValue, args, { auth }) => {
   AuthService.isAuthenticated(auth)
 
+  // TODO: only populate tags if asked for in the query
   const user = await UserModel.findById(auth.sub).populate({ path: 'questions', populate: { path: 'tags' } })
 
   return user.questions
@@ -13,6 +14,7 @@ const allQuestionsQuery = async (parentValue, args, { auth }) => {
 const questionQuery = (parentValue, { id }, { auth }) => {
   AuthService.isAuthenticated(auth)
 
+  // TODO: only populate tags if asked for in the query
   return QuestionModel.findOne({ id, user: auth.sub }).populate({ path: 'questions', populate: { path: 'tags' } })
 }
 
