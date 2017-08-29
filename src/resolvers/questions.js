@@ -20,21 +20,21 @@ const createQuestionMutation = async (parentValue, { question: { tags, title, ty
   AuthService.isAuthenticated(auth)
 
   // if non-existent tags are passed, they need to be created
-  const fetchTags = await TagModel.find({ _id: { $in: tags } })
+  // const fetchTags = await TagModel.find({ _id: { $in: tags } })
 
   const newQuestion = await new QuestionModel({
-    tags: fetchTags,
+    tags: [],
     title,
     type,
   }).save()
 
-  const user = await UserModel.findById(auth.sub).populate(['questions'])
-  user.questions.push(newQuestion.id)
-
-  user.update({
-    $set: { questions: [...user.questions, newQuestion.id] },
-    $currentDate: { updatedAt: true },
-  })
+  await UserModel.update(
+    { _id: auth.sub },
+    {
+      $push: { questions: newQuestion.id },
+      $currentDate: { updatedAt: true },
+    },
+  )
 
   return newQuestion
 }
