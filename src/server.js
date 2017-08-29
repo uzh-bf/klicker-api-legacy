@@ -1,13 +1,14 @@
 require('dotenv').config()
 
 const bodyParser = require('body-parser')
+const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const express = require('express')
-const { graphqlExpress } = require('apollo-server-express')
-const schema = require('./schema')
-const mongoose = require('mongoose')
 const expressJWT = require('express-jwt')
+const mongoose = require('mongoose')
+const { graphqlExpress } = require('apollo-server-express')
 
+const schema = require('./schema')
 const { isValidJWT } = require('./services/auth')
 
 mongoose.Promise = Promise
@@ -39,6 +40,7 @@ const server = express()
 // parse JWT that are passed as a header and attach their content to req.user
 server.use(
   '/graphql',
+  cors(),
   cookieParser(),
   expressJWT({
     credentialsRequired: false,
