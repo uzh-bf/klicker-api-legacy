@@ -8,25 +8,32 @@
   "timezone": "Europe/Zurich",
   "packageRules": [
     {
-      "packagePatterns": [
-        "^babel-eslint",
-        "^eslint",
-        "^prettier",
-        "^pre-commit"
-      ],
-      "groupName": "code style"
+      "packageNames": ["mongodb", "mongoose"],
+      "groupName": "database"
+    },
+    {
+      "packagePatterns": ["^babel-eslint", "^eslint"],
+      "groupName": "eslint",
+      "automerge": "patch"
     },
     {
       "packageNames": ["flow-bin"],
-      "groupName": "flow"
+      "groupName": "flow",
+      "automerge": "patch"
+    },
+    {
+      "packageNames": ["apollo-server-express", "graphql", "graphql-tools"],
+      "groupName": "graphql"
+    },
+    {
+      "packagePatterns": ["^prettier"],
+      "groupName": "prettier",
+      "automerge": "patch"
     },
     {
       "packageNames": ["jest"],
-      "groupName": "test"
-    },
-    {
-      "packageNames": ["mongodb", "mongoose"],
-      "groupName": "database"
+      "groupName": "test",
+      "automerge": "patch"
     }
   ]
 }
