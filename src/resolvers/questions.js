@@ -21,7 +21,7 @@ const questionQuery = (parentValue, { id }, { auth }) => {
 /* ----- mutations ----- */
 const createQuestionMutation = async (parentValue, {
   question: {
-    description, tags, title, type,
+    description, options, tags, title, type,
   },
 }, { auth }) => {
   AuthService.isAuthenticated(auth)
@@ -48,7 +48,7 @@ const createQuestionMutation = async (parentValue, {
     tags: [...allTags],
     title,
     type,
-    versions: [{ description, options: [], solution: {} }],
+    versions: [{ description, options, solution: {} }],
   })
 
   const allTagsUpdate = allTags.map((tag) => {
