@@ -19,11 +19,15 @@ const questionQuery = (parentValue, { id }, { auth }) => {
 }
 
 /* ----- mutations ----- */
-const createQuestionMutation = async (parentValue, {
-  question: {
-    description, options, tags, title, type,
+const createQuestionMutation = async (
+  parentValue,
+  {
+    question: {
+      description, options, tags, title, type,
+    },
   },
-}, { auth }) => {
+  { auth },
+) => {
   AuthService.isAuthenticated(auth)
 
   // find the corresponding user
