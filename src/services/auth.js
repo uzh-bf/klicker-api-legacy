@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const JWT = require('jsonwebtoken')
 
-const UserModel = require('../models/User')
+const { UserModel } = require('../models')
 
 const dev = process.env.NODE_ENV !== 'production'
 
