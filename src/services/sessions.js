@@ -1,12 +1,18 @@
 const { QuestionInstanceModel, SessionModel, UserModel } = require('../models')
 
 const createSession = async ({ name, questionBlocks, user }) => {
+  // ensure that the session contains at least one question block
+  if (questionBlocks.length === 0) {
+    throw new Error('EMPTY_SESSION')
+  }
+
   // initialize a store for newly created instance models
   let instances = []
 
-  // pass through all the question block in params
+  // pass through all the question blocks in params
+  // skip any blocks that are empty (erroneous blocks)
   // create question instances for all questions within
-  const blocks = questionBlocks.map(block => ({
+  const blocks = questionBlocks.filter(block => block.questions.length > 0).map(block => ({
     questions: block.questions.map((question) => {
       // create a new question instance model
       const instance = new QuestionInstanceModel({

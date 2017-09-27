@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SessionService createSession allows creating a valid session 1`] = `
+
+    Name: hello world
+    Status: 0
+    User: 59b11befc9eaa334b8340239
+
+    Blocks:
+      { status: 0,
+  timeLimit: -1,
+  showSolutions: false,
+  questions: [ 59cbb17300d04d0680e97b88, 59cbb17300d04d0680e97b89 ],
+  createdAt: 2017-09-27T14:10:58.504Z,
+  updatedAt: 2017-09-27T14:10:58.504Z,
+  _id: 59cbb17300d04d0680e97b8d },{ status: 0,
+  timeLimit: -1,
+  showSolutions: false,
+  questions: [ 59cbb17300d04d0680e97b8a ],
+  createdAt: 2017-09-27T14:10:58.504Z,
+  updatedAt: 2017-09-27T14:10:58.504Z,
+  _id: 59cbb17300d04d0680e97b8c }
+
+    Settings:
+      { isConfusionBarometerActive: false,
+  isFeedbackChannelActive: false,
+  isFeedbackChannelPublic: false }
+  
+`;

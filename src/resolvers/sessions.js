@@ -20,7 +20,11 @@ const sessionQuery = async (parentValue, { id }, { auth }) => {
 const createSessionMutation = async (parentValue, { session: { name, blocks } }, { auth }) => {
   AuthService.isAuthenticated(auth)
 
-  const newSession = await SessionService.createSession({ name, questionBlocks: blocks, user: auth.sub })
+  const newSession = await SessionService.createSession({
+    name,
+    questionBlocks: blocks,
+    user: auth.sub,
+  })
   return newSession
 }
 
