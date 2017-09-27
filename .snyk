@@ -6,3 +6,7 @@ patch:
   'npm:debug:20170905':
     - mongoose > mquery > debug:
         patched: '2017-09-27T00:10:03.062Z'
+      babel-traverse > debug:
+        patched: '2017-09-27T11:51:00.572Z'
+    - mongoose > mquery > debug:
+        patched: '2017-09-27T11:51:00.572Z'
