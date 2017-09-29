@@ -60,6 +60,7 @@ describe('QuestionService', () => {
         userId: user.id,
       })
 
+      expect(newQuestion.versions.length).toEqual(1)
       expect(newQuestion).toMatchSnapshot()
     })
   })
