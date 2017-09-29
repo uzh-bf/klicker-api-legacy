@@ -7,9 +7,19 @@ const dev = process.env.NODE_ENV !== 'production'
 
 // check whether an authentication object is valid
 const isAuthenticated = (auth) => {
-  if (!auth || !auth.sub) {
+  if (auth && auth.sub) {
+    return true
+  }
+  return false
+}
+
+// HOC to ensure the requester is authenticated
+// wraps a graphql resolver
+const requireAuth = wrapped => (parentValue, args, context) => {
+  if (!isAuthenticated(context.auth)) {
     throw new Error('INVALID_LOGIN')
   }
+  return wrapped(parentValue, args, context)
 }
 
 // check whether a JWT is valid
@@ -87,6 +97,7 @@ const login = async (res, email, password) => {
 
 module.exports = {
   isAuthenticated,
+  requireAuth,
   isValidJWT,
   signup,
   login,

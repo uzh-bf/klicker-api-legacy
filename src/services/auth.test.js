@@ -5,7 +5,7 @@ mongoose.Promise = Promise
 process.env.APP_SECRET = 'hello-world'
 
 const {
-  isAuthenticated, isValidJWT, signup, login,
+  isAuthenticated, isValidJWT, signup, login, requireAuth,
 } = require('./auth')
 const { UserModel } = require('../models')
 
@@ -24,10 +24,26 @@ describe('AuthService', () => {
       const auth3 = { sub: null }
       const auth4 = { sub: 'abcd' }
 
-      expect(() => isAuthenticated(auth1)).toThrow('INVALID_LOGIN')
-      expect(() => isAuthenticated(auth2)).toThrow('INVALID_LOGIN')
-      expect(() => isAuthenticated(auth3)).toThrow('INVALID_LOGIN')
-      expect(isAuthenticated(auth4)).toBeUndefined()
+      expect(isAuthenticated(auth1)).toEqual(false)
+      expect(isAuthenticated(auth2)).toEqual(false)
+      expect(isAuthenticated(auth3)).toEqual(false)
+      expect(isAuthenticated(auth4)).toEqual(true)
+    })
+  })
+
+  describe('requireAuth', () => {
+    it('restricts access to authenticated users', () => {
+      const auth1 = null
+      const auth2 = {}
+      const auth3 = { sub: null }
+      const auth4 = { sub: 'abcd' }
+
+      const wrappedFunction = requireAuth(() => 'something')
+
+      expect(() => wrappedFunction(null, null, { auth: auth1 })).toThrow('INVALID_LOGIN')
+      expect(() => wrappedFunction(null, null, { auth: auth2 })).toThrow('INVALID_LOGIN')
+      expect(() => wrappedFunction(null, null, { auth: auth3 })).toThrow('INVALID_LOGIN')
+      expect(wrappedFunction(null, null, { auth: auth4 })).toEqual('something')
     })
   })
 
