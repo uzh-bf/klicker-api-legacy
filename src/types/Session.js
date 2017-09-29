@@ -8,8 +8,8 @@ const QuestionInstance = require('./QuestionInstance')
 
 const Session = `
   enum SessionStatus {
-    CREATED,
-    RUNNING,
+    CREATED
+    RUNNING
     COMPLETED
   }
 
@@ -17,13 +17,13 @@ const Session = `
     id: ID!
   }
 
-  input QuestionBlockInput {
+  input Session_QuestionBlockInput {
     questions: [Session_QuestionInput]
   }
 
   input SessionInput {
     name: String!
-    blocks: [QuestionBlockInput]!
+    blocks: [Session_QuestionBlockInput]!
   }
 
   type SessionSettings {

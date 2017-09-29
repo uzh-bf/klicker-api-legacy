@@ -6,20 +6,57 @@ exports[`SessionService createSession allows creating a valid session 1`] = `
     Status: 0
     User: 59b11befc9eaa334b8340239
 
-    Blocks:
-      { status: 0,
-  timeLimit: -1,
-  showSolutions: false,
-  questions: [ 59cbb17300d04d0680e97b88, 59cbb17300d04d0680e97b89 ],
-  createdAt: 2017-09-27T14:10:58.504Z,
-  updatedAt: 2017-09-27T14:10:58.504Z,
-  _id: 59cbb17300d04d0680e97b8d },{ status: 0,
-  timeLimit: -1,
-  showSolutions: false,
-  questions: [ 59cbb17300d04d0680e97b8a ],
-  createdAt: 2017-09-27T14:10:58.504Z,
-  updatedAt: 2017-09-27T14:10:58.504Z,
-  _id: 59cbb17300d04d0680e97b8c }
+    Blocks: 
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 2
+    ,
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 1
+    
+
+    Settings:
+      { isConfusionBarometerActive: false,
+  isFeedbackChannelActive: false,
+  isFeedbackChannelPublic: false }
+  
+`;
+
+exports[`SessionService endSession allows ending a running session 1`] = `
+
+    Name: testing session
+    Status: 2
+    User: 59b11befc9eaa334b8340239
+
+    Blocks: 
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 1
+    
+
+    Settings:
+      { isConfusionBarometerActive: false,
+  isFeedbackChannelActive: false,
+  isFeedbackChannelPublic: false }
+  
+`;
+
+exports[`SessionService startSession allows starting a created session 1`] = `
+
+    Name: testing session
+    Status: 1
+    User: 59b11befc9eaa334b8340239
+
+    Blocks: 
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 1
+    
 
     Settings:
       { isConfusionBarometerActive: false,

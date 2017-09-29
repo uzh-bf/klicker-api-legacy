@@ -53,9 +53,54 @@ const createSession = async ({ name, questionBlocks, user }) => {
   return newSession
 }
 
-const startSession = () => ({})
+const startSession = async ({ id }) => {
+  // TODO: hydrate caches?
+  // TODO: ...
+
+  const session = await SessionModel.findById(id)
+
+  // if the session is already running, return it
+  if (session.status === 1) {
+    return session
+  }
+
+  // if the session was already completed, throw an error
+  if (session.status === 2) {
+    throw new Error('SESSION_ALREADY_COMPLETED')
+  }
+
+  session.status = 1
+
+  await session.save({
+    // TODO: calculate the id of the active instance
+    $currentDate: { updatedAt: true },
+  })
+
+  return session
+}
+
+const endSession = async ({ id }) => {
+  // TODO: date compression?
+  // TODO: cleanup caches?
+  // TODO: ...
+
+  const session = await SessionModel.findById(id)
+
+  if (session.status === 2) {
+    return session
+  }
+
+  session.status = 2
+
+  await session.save({
+    $currentDate: { updatedAt: true },
+  })
+
+  return session
+}
 
 module.exports = {
   createSession,
   startSession,
+  endSession,
 }
