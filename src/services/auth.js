@@ -5,12 +5,14 @@ const { UserModel } = require('../models')
 
 const dev = process.env.NODE_ENV !== 'production'
 
+// check whether an authentication object is valid
 const isAuthenticated = (auth) => {
   if (!auth || !auth.sub) {
     throw new Error('INVALID_LOGIN')
   }
 }
 
+// check whether a JWT is valid
 const isValidJWT = (jwt, secret) => {
   try {
     JWT.verify(jwt, secret)
@@ -20,6 +22,7 @@ const isValidJWT = (jwt, secret) => {
   }
 }
 
+// signup a new user
 // make this an async function such that it returns a promise
 // we can later use this promise as a return value for resolvers or similar
 const signup = async (email, password, shortname) => {
@@ -44,6 +47,7 @@ const signup = async (email, password, shortname) => {
   throw new Error('SIGNUP_FAILED')
 }
 
+// login an existing user
 // make this an async function such that it returns a promise
 // we can later use this promise as a return value for resolvers or similar
 const login = async (res, email, password) => {

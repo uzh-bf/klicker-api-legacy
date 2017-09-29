@@ -1,5 +1,6 @@
 const { QuestionInstanceModel, SessionModel, UserModel } = require('../models')
 
+// create a new session
 const createSession = async ({ name, questionBlocks, user }) => {
   // ensure that the session contains at least one question block
   if (questionBlocks.length === 0) {
@@ -53,6 +54,7 @@ const createSession = async ({ name, questionBlocks, user }) => {
   return newSession
 }
 
+// start an existing session
 const startSession = async ({ id, userId }) => {
   // TODO: hydrate caches?
   // TODO: ...
@@ -90,6 +92,7 @@ const startSession = async ({ id, userId }) => {
   return session
 }
 
+// end (complete) an existing session
 const endSession = async ({ id, userId }) => {
   // TODO: date compression? data aggregation?
   // TODO: cleanup caches?
