@@ -119,9 +119,15 @@ describe('SessionService', () => {
     })
 
     it('prevents starting an already completed session', async () => {
-      await SessionService.endSession({ id: preparedSession.id, userId: user.id })
+      await SessionService.endSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
 
-      expect(SessionService.startSession({ id: preparedSession.id, userId: user.id })).rejects.toEqual(new Error('SESSION_ALREADY_COMPLETED'))
+      expect(SessionService.startSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })).rejects.toEqual(new Error('SESSION_ALREADY_COMPLETED'))
     })
   })
 
@@ -133,7 +139,10 @@ describe('SessionService', () => {
     })
 
     it('prevents completing a newly created session', async () => {
-      expect(SessionService.endSession({ id: preparedSession.id, userId: user.id })).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
+      expect(SessionService.endSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
     })
 
     it('allows ending a running session', async () => {
@@ -142,14 +151,20 @@ describe('SessionService', () => {
         userId: user.id,
       })
 
-      const endedSession = await SessionService.endSession({ id: preparedSession.id, userId: user.id })
+      const endedSession = await SessionService.endSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
 
       expect(endedSession.status).toEqual(2)
       expect(endedSession).toMatchSnapshot()
     })
 
     it('returns on an already completed session', async () => {
-      const session = await SessionService.endSession({ id: preparedSession.id, userId: user.id })
+      const session = await SessionService.endSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
 
       expect(session).toMatchSnapshot()
     })
