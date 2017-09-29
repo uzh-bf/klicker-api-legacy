@@ -1,10 +1,11 @@
 const { makeExecutableSchema } = require('graphql-tools')
 
+const { requireAuth } = require('./services/auth')
 const { allQuestions, createQuestion, question } = require('./resolvers/questions')
 const {
   allSessions, createSession, endSession, session, startSession,
 } = require('./resolvers/sessions')
-const { allTags, createTag } = require('./resolvers/tags')
+const { allTags, createTag, tag } = require('./resolvers/tags')
 const { createUser, login, user } = require('./resolvers/users')
 const { allTypes } = require('./types')
 
@@ -48,21 +49,30 @@ const typeDefs = [
 // everything imported from their respective modules in resolvers/
 const resolvers = {
   Query: {
-    allQuestions,
-    allSessions,
-    allTags,
-    question,
-    session,
-    user,
+    allQuestions: requireAuth(allQuestions),
+    allSessions: requireAuth(allSessions),
+    allTags: requireAuth(allTags),
+    question: requireAuth(question),
+    session: requireAuth(session),
+    tag: requireAuth(tag),
+    user: requireAuth(user),
   },
   Mutation: {
-    createQuestion,
-    createSession,
-    createTag,
+    createQuestion: requireAuth(createQuestion),
+    createSession: requireAuth(createSession),
+    createTag: requireAuth(createTag),
     createUser,
-    endSession,
+    endSession: requireAuth(endSession),
     login,
-    startSession,
+    startSession: requireAuth(startSession),
+  },
+  Question: {
+    tags: (parentValue, args, context) => parentValue.tags.map(id => tag(parentValue, { id }, context)),
+  },
+  User: {
+    questions: (parentValue, args, context) => parentValue.questions.map(id => question(parentValue, { id }, context)),
+    sessions: (parentValue, args, context) => parentValue.sessions.map(id => session(parentValue, { id }, context)),
+    tags: (parentValue, args, context) => parentValue.tags.map(id => tag(parentValue, { id }, context)),
   },
 }
 
