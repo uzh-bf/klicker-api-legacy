@@ -1,8 +1,9 @@
+require('dotenv').config()
+
 const mongoose = require('mongoose')
 const JWT = require('jsonwebtoken')
 
 mongoose.Promise = Promise
-process.env.APP_SECRET = 'hello-world'
 
 const {
   isAuthenticated, isValidJWT, signup, login,
@@ -11,7 +12,11 @@ const { UserModel } = require('../models')
 
 describe('AuthService', () => {
   beforeAll(async () => {
-    await mongoose.connect('mongodb://klicker:klicker@ds161042.mlab.com:61042/klicker-dev')
+    await mongoose.connect(`mongodb://${process.env.MONGO_URL}`, {
+      keepAlive: true,
+      reconnectTries: 10,
+      useMongoClient: true,
+    })
   })
   afterAll((done) => {
     mongoose.disconnect(done)

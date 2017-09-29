@@ -1,11 +1,11 @@
+require('dotenv').config()
+
 const mongoose = require('mongoose')
-// const JWT = require('jsonwebtoken')
 
 const AuthService = require('./auth')
 const SessionService = require('./sessions')
 
 mongoose.Promise = Promise
-process.env.APP_SECRET = 'hello-world'
 
 // define how jest should serialize objects into snapshots
 // we need to strip ids and dates as they are always changing
@@ -45,7 +45,11 @@ describe('SessionService', () => {
 
   beforeAll(async () => {
     // connect to the database
-    await mongoose.connect('mongodb://klicker:klicker@ds161042.mlab.com:61042/klicker-dev')
+    await mongoose.connect(`mongodb://${process.env.MONGO_URL}`, {
+      keepAlive: true,
+      reconnectTries: 10,
+      useMongoClient: true,
+    })
 
     // login as a test user
     user = await AuthService.login(null, 'roland.schlaefli@bf.uzh.ch', 'abcdabcd')
