@@ -45,6 +45,26 @@ exports[`SessionService endSession allows ending a running session 1`] = `
   
 `;
 
+exports[`SessionService endSession returns on an already completed session 1`] = `
+
+    Name: testing session
+    Status: 2
+    User: 59b11befc9eaa334b8340239
+
+    Blocks: 
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 1
+    
+
+    Settings:
+      { isConfusionBarometerActive: false,
+  isFeedbackChannelActive: false,
+  isFeedbackChannelPublic: false }
+  
+`;
+
 exports[`SessionService startSession allows starting a created session 1`] = `
 
     Name: testing session

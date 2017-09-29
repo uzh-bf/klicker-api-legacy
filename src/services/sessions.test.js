@@ -7,6 +7,8 @@ const SessionService = require('./sessions')
 mongoose.Promise = Promise
 process.env.APP_SECRET = 'hello-world'
 
+// define how jest should serialize objects into snapshots
+// we need to strip ids and dates as they are always changing
 expect.addSnapshotSerializer({
   test: val => val.id && val.blocks && val.name && val.status >= 0 && val.settings && val.user,
   print: val => `
@@ -26,6 +28,7 @@ expect.addSnapshotSerializer({
   `,
 })
 
+// prepare a new session instance
 const prepareSession = user =>
   SessionService.createSession({
     name: 'testing session',
@@ -129,6 +132,10 @@ describe('SessionService', () => {
       preparedSession = await prepareSession(user.id)
     })
 
+    it('prevents completing a newly created session', async () => {
+      expect(SessionService.endSession({ id: preparedSession.id, userId: user.id })).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
+    })
+
     it('allows ending a running session', async () => {
       await SessionService.startSession({
         id: preparedSession.id,
@@ -139,6 +146,12 @@ describe('SessionService', () => {
 
       expect(endedSession.status).toEqual(2)
       expect(endedSession).toMatchSnapshot()
+    })
+
+    it('returns on an already completed session', async () => {
+      const session = await SessionService.endSession({ id: preparedSession.id, userId: user.id })
+
+      expect(session).toMatchSnapshot()
     })
   })
 })

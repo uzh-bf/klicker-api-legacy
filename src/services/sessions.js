@@ -97,6 +97,11 @@ const endSession = async ({ id, userId }) => {
 
   const session = await SessionModel.findById(id)
 
+  // if the session is not yet running, throw an error
+  if (session.status === 0) {
+    throw new Error('SESSION_NOT_STARTED')
+  }
+
   // if the session was already completed, return it
   if (session.status === 2) {
     return session
