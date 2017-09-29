@@ -42,6 +42,7 @@ const Session = `
     name: String!
     status: Int!
     settings: SessionSettings
+    user: User!
 
     blocks: [QuestionBlock]
     feedbacks: [Feedback]

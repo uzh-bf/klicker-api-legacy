@@ -7,13 +7,17 @@ const allQuestionsQuery = async (parentValue, args, { auth }) => {
   return user.questions
 }
 
-const questionQuery = (parentValue, { id }, { auth }) => QuestionModel.findOne({ id, user: auth.sub })
+const questionQuery = (parentValue, { id }) => QuestionModel.findById(id)
+const questionsQuery = (parentValue, args, context) =>
+  parentValue.questions.map(id => questionQuery(parentValue, { id }, context))
 
 /* ----- mutations ----- */
-const createQuestionMutation = (parentValue, { question }, { auth }) => QuestionService.createQuestion({ ...question, userId: auth.sub })
+const createQuestionMutation = (parentValue, { question }, { auth }) =>
+  QuestionService.createQuestion({ ...question, userId: auth.sub })
 
 module.exports = {
   allQuestions: allQuestionsQuery,
   createQuestion: createQuestionMutation,
   question: questionQuery,
+  questions: questionsQuery,
 }

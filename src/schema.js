@@ -1,12 +1,14 @@
 const { makeExecutableSchema } = require('graphql-tools')
 
 const { requireAuth } = require('./services/auth')
-const { allQuestions, createQuestion, question } = require('./resolvers/questions')
+const { allQuestions, createQuestion, questions } = require('./resolvers/questions')
 const {
-  allSessions, createSession, endSession, session, startSession,
+  allSessions, createSession, endSession, sessions, startSession,
 } = require('./resolvers/sessions')
-const { allTags, createTag, tag } = require('./resolvers/tags')
-const { createUser, login, user } = require('./resolvers/users')
+const { allTags, createTag, tags } = require('./resolvers/tags')
+const {
+  createUser, login, user, authUser,
+} = require('./resolvers/users')
 const { allTypes } = require('./types')
 
 // create graphql schema in schema language
@@ -23,9 +25,6 @@ const typeDefs = [
     allQuestions: [Question]
     allSessions: [Session]
     allTags: [Tag]
-    question(id: ID): Question
-    session(id: ID): Session
-    tag(id: ID): Tag
     user: User
   }
 
@@ -52,10 +51,7 @@ const resolvers = {
     allQuestions: requireAuth(allQuestions),
     allSessions: requireAuth(allSessions),
     allTags: requireAuth(allTags),
-    question: requireAuth(question),
-    session: requireAuth(session),
-    tag: requireAuth(tag),
-    user: requireAuth(user),
+    user: requireAuth(authUser),
   },
   Mutation: {
     createQuestion: requireAuth(createQuestion),
@@ -67,12 +63,20 @@ const resolvers = {
     startSession: requireAuth(startSession),
   },
   Question: {
-    tags: (parentValue, args, context) => parentValue.tags.map(id => tag(parentValue, { id }, context)),
+    tags,
+    user,
+  },
+  Session: {
+    user,
+  },
+  Tag: {
+    questions,
+    user,
   },
   User: {
-    questions: (parentValue, args, context) => parentValue.questions.map(id => question(parentValue, { id }, context)),
-    sessions: (parentValue, args, context) => parentValue.sessions.map(id => session(parentValue, { id }, context)),
-    tags: (parentValue, args, context) => parentValue.tags.map(id => tag(parentValue, { id }, context)),
+    questions,
+    sessions,
+    tags,
   },
 }
 

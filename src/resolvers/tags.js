@@ -6,7 +6,8 @@ const allTagsQuery = async (parentValue, args, { auth }) => {
   return user.tags
 }
 
-const tagQuery = (parentValue, { id }, { auth }) => TagModel.findOne({ id, user: auth.sub })
+const tagQuery = (parentValue, { id }) => TagModel.findById(id)
+const tagsQuery = (parentValue, args, context) => parentValue.tags.map(id => tagQuery(parentValue, { id }, context))
 
 /* ----- mutations ----- */
 const createTagMutation = async (parentValue, { tag: { name } }, { auth }) => {
@@ -32,4 +33,5 @@ module.exports = {
   allTags: allTagsQuery,
   createTag: createTagMutation,
   tag: tagQuery,
+  tags: tagsQuery,
 }
