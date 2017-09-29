@@ -26,15 +26,16 @@ expect.addSnapshotSerializer({
   `,
 })
 
-const prepareSession = user => SessionService.createSession({
-  name: 'testing session',
-  questionBlocks: [
-    {
-      questions: [{ id: '59b1481857f3c34af09a4736' }],
-    },
-  ],
-  user,
-})
+const prepareSession = user =>
+  SessionService.createSession({
+    name: 'testing session',
+    questionBlocks: [
+      {
+        questions: [{ id: '59b1481857f3c34af09a4736' }],
+      },
+    ],
+    user,
+  })
 
 describe('SessionService', () => {
   let user
@@ -107,6 +108,7 @@ describe('SessionService', () => {
     it('allows starting a created session', async () => {
       const startedSession = await SessionService.startSession({
         id: preparedSession.id,
+        userId: user.id,
       })
 
       expect(startedSession.status).toEqual(1)
@@ -114,9 +116,9 @@ describe('SessionService', () => {
     })
 
     it('prevents starting an already completed session', async () => {
-      await SessionService.endSession({ id: preparedSession.id })
+      await SessionService.endSession({ id: preparedSession.id, userId: user.id })
 
-      expect(SessionService.startSession({ id: preparedSession.id })).rejects.toEqual(new Error('SESSION_ALREADY_COMPLETED'))
+      expect(SessionService.startSession({ id: preparedSession.id, userId: user.id })).rejects.toEqual(new Error('SESSION_ALREADY_COMPLETED'))
     })
   })
 
@@ -130,9 +132,10 @@ describe('SessionService', () => {
     it('allows ending a running session', async () => {
       await SessionService.startSession({
         id: preparedSession.id,
+        userId: user.id,
       })
 
-      const endedSession = await SessionService.endSession({ id: preparedSession.id })
+      const endedSession = await SessionService.endSession({ id: preparedSession.id, userId: user.id })
 
       expect(endedSession.status).toEqual(2)
       expect(endedSession).toMatchSnapshot()

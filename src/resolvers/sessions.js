@@ -20,16 +20,29 @@ const sessionQuery = async (parentValue, { id }, { auth }) => {
 const createSessionMutation = async (parentValue, { session: { name, blocks } }, { auth }) => {
   AuthService.isAuthenticated(auth)
 
-  const newSession = await SessionService.createSession({
+  return SessionService.createSession({
     name,
     questionBlocks: blocks,
     user: auth.sub,
   })
-  return newSession
+}
+
+const startSessionMutation = async (parentValue, { id }, { auth }) => {
+  AuthService.isAuthenticated(auth)
+
+  return SessionService.startSession({ id, userId: auth.sub })
+}
+
+const endSessionMutation = async (parentValue, { id }, { auth }) => {
+  AuthService.isAuthenticated(auth)
+
+  return SessionService.endSession({ id, userId: auth.sub })
 }
 
 module.exports = {
   allSessions: allSessionsQuery,
   createSession: createSessionMutation,
+  endSession: endSessionMutation,
   session: sessionQuery,
+  startSession: startSessionMutation,
 }

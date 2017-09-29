@@ -53,9 +53,14 @@ const createSession = async ({ name, questionBlocks, user }) => {
   return newSession
 }
 
-const startSession = async ({ id }) => {
+const startSession = async ({ id, userId }) => {
   // TODO: hydrate caches?
   // TODO: ...
+  const user = await UserModel.findById(userId)
+
+  if (user.runningSession) {
+    throw new Error('RUNNING_ANOTHER_SESSION')
+  }
 
   const session = await SessionModel.findById(id)
 
@@ -69,32 +74,47 @@ const startSession = async ({ id }) => {
     throw new Error('SESSION_ALREADY_COMPLETED')
   }
 
+  // update the session status to RUNNING
   session.status = 1
 
-  await session.save({
-    // TODO: calculate the id of the active instance
+  const updatedUser = UserModel.findByIdAndUpdate(userId, {
+    runningSession: session.id,
     $currentDate: { updatedAt: true },
   })
+
+  // TODO: $currentDate
+  const savedSession = session.save()
+
+  await Promise.all([updatedUser, savedSession])
 
   return session
 }
 
-const endSession = async ({ id }) => {
-  // TODO: date compression?
+const endSession = async ({ id, userId }) => {
+  // TODO: date compression? data aggregation?
   // TODO: cleanup caches?
   // TODO: ...
 
   const session = await SessionModel.findById(id)
 
+  // if the session was already completed, return it
   if (session.status === 2) {
     return session
   }
 
+  // update the session status to COMPLETED
   session.status = 2
 
-  await session.save({
+  // reset the running session id on the user
+  const updatedUser = UserModel.findByIdAndUpdate(userId, {
+    runningSession: null,
     $currentDate: { updatedAt: true },
   })
+
+  // TODO: $currentDate ...
+  const savedSession = session.save()
+
+  await Promise.all([updatedUser, savedSession])
 
   return session
 }
