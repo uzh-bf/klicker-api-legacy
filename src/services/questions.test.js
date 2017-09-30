@@ -5,6 +5,8 @@ const mongoose = require('mongoose')
 const AuthService = require('./auth')
 const QuestionService = require('./questions')
 
+const { setupTestEnv } = require('../utils/testHelpers')
+
 mongoose.Promise = Promise
 
 // define how jest should serialize objects into snapshots
@@ -35,8 +37,11 @@ describe('QuestionService', () => {
       reconnectTries: 10,
       useMongoClient: true,
     })
+
+    await setupTestEnv({ email: 'testQuestions@bf.uzh.ch', password: 'somePassword', shortname: 'questi' })
+
     // login as a test user
-    user = await AuthService.login(null, 'roland.schlaefli@bf.uzh.ch', 'abcdabcd')
+    user = await AuthService.login(null, 'testQuestions@bf.uzh.ch', 'somePassword')
   })
   afterAll((done) => {
     mongoose.disconnect(done)

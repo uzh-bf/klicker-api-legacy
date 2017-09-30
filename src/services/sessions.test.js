@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 
 const AuthService = require('./auth')
 const SessionService = require('./sessions')
+const { setupTestEnv } = require('../utils/testHelpers')
 
 mongoose.Promise = Promise
 
@@ -14,7 +15,6 @@ expect.addSnapshotSerializer({
   print: val => `
     Name: ${val.name}
     Status: ${val.status}
-    User: ${val.user}
 
     Blocks: ${val.blocks.map(block => `
       Show solutions: ${block.showSolutions}
@@ -51,8 +51,10 @@ describe('SessionService', () => {
       useMongoClient: true,
     })
 
+    await setupTestEnv({ email: 'testSessions@bf.uzh.ch', password: 'somePassword', shortname: 'sessio' })
+
     // login as a test user
-    user = await AuthService.login(null, 'roland.schlaefli@bf.uzh.ch', 'abcdabcd')
+    user = await AuthService.login(null, 'testSessions@bf.uzh.ch', 'somePassword')
   })
   afterAll((done) => {
     mongoose.disconnect(done)
