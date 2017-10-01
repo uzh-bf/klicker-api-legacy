@@ -56,17 +56,14 @@ const server = express()
 // parse JWT that are passed as a header and attach their content to req.user
 server.use(
   '/graphql',
-
   // setup CORS
   cors({
     credentials: dev, // allow passing credentials over CORS in dev mode
     origin: 'http://localhost:3000',
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   }),
-
   // enable cookie parsing
   cookieParser(),
-
   // setup JWT authentication
   expressJWT({
     credentialsRequired: false,
@@ -74,13 +71,10 @@ server.use(
     secret: process.env.APP_SECRET,
     getToken: AuthService.getToken,
   }),
-
   // parse json contents
   bodyParser.json(),
-
   // setup Apollo Optics if enabled
   withOptics ? opticsAgent.middleware() : f => f,
-
   // delegate to the GraphQL API
   graphqlExpress((req, res) => ({ context: { auth: req.auth, res, opticsContext: opticsAgent.context(req) }, schema })),
 )
