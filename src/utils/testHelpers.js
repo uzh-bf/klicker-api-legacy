@@ -7,21 +7,18 @@ const setupTestEnv = async ({ email, password, shortname }) => {
   // find the id of the user to reset
   const user = await UserModel.findOne({ email })
 
+  // if the user already exists, delete everything associated
   if (user) {
-    await QuestionInstanceModel.remove({ user: user.id })
-    await SessionModel.remove({ user: user.id })
-    await QuestionModel.remove({ user: user.id })
-    await TagModel.remove({ user: user.id })
-    await UserModel.findByIdAndRemove(user.id)
+    await Promise.all([
+      QuestionInstanceModel.remove({ user: user.id }),
+      SessionModel.remove({ user: user.id }),
+      QuestionModel.remove({ user: user.id }),
+      TagModel.remove({ user: user.id }),
+      UserModel.findByIdAndRemove(user.id),
+    ])
   }
 
-  // delete everything that belongs to the specified user (including the account)
-  // const models = [QuestionInstanceModel, SessionModel, QuestionModel, TagModel]
-  // const promises = models.map(model => model.remove({ user: user.id }))
-  // const userPromise = UserModel.findOneAndRemove({ id: user.id })
-
-  // await Promise.all([...promises, userPromise])
-
+  // sign up a fresh user
   return AuthService.signup(email, password, shortname)
 }
 
