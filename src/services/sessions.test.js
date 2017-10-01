@@ -3,6 +3,7 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 
 const AuthService = require('./auth')
+const QuestionService = require('./questions')
 const SessionService = require('./sessions')
 const { setupTestEnv } = require('../utils/testHelpers')
 
@@ -42,6 +43,8 @@ const prepareSession = userId =>
 
 describe('SessionService', () => {
   let user
+  let question1
+  let question2
 
   beforeAll(async () => {
     // connect to the database
@@ -55,6 +58,21 @@ describe('SessionService', () => {
 
     // login as a test user
     user = await AuthService.login(null, 'testSessions@bf.uzh.ch', 'somePassword')
+
+    question1 = await QuestionService.createQuestion({
+      description: 'a description',
+      tags: ['AZA', 'BBB'],
+      title: 'first question',
+      type: 'SC',
+      userId: user.id,
+    })
+    question2 = await QuestionService.createQuestion({
+      description: 'very good',
+      tags: ['CDEF'],
+      title: 'second question',
+      type: 'SC',
+      userId: user.id,
+    })
   })
   afterAll((done) => {
     mongoose.disconnect(done)
@@ -75,19 +93,20 @@ describe('SessionService', () => {
         name: 'session with an empty block',
         questionBlocks: [
           {
-            questions: [{ id: '59b13d288b01b731583850ab' }, { id: '59b13d6f8b01b731583850af' }],
+            questions: [{ id: question1.id }, { id: question2.id }],
           },
           {
             questions: [],
           },
           {
-            questions: [{ id: '59b1481857f3c34af09a4736' }],
+            questions: [{ id: question1.id }],
           },
         ],
         userId: user.id,
       })
 
       expect(newSession.blocks.length).toEqual(2)
+      expect(newSession).toMatchSnapshot()
     })
 
     it('allows creating a valid session', async () => {
@@ -95,10 +114,10 @@ describe('SessionService', () => {
         name: 'hello world',
         questionBlocks: [
           {
-            questions: [{ id: '59b13d288b01b731583850ab' }, { id: '59b13d6f8b01b731583850af' }],
+            questions: [{ id: question1.id }, { id: question2.id }],
           },
           {
-            questions: [{ id: '59b1481857f3c34af09a4736' }],
+            questions: [{ id: question1.id }],
           },
         ],
         userId: user.id,

@@ -7,13 +7,13 @@ const setupTestEnv = async ({ email, password, shortname }) => {
   // find the id of the user to reset
   const user = await UserModel.findOne({ email })
 
-  console.dir(user)
-
-  await QuestionInstanceModel.remove({ user: user.id })
-  await SessionModel.remove({ user: user.id })
-  await QuestionModel.remove({ user: user.id })
-  await TagModel.remove({ user: user.id })
-  await UserModel.findOneAndRemove({ id: user.id })
+  if (user) {
+    await QuestionInstanceModel.remove({ user: user.id })
+    await SessionModel.remove({ user: user.id })
+    await QuestionModel.remove({ user: user.id })
+    await TagModel.remove({ user: user.id })
+    await UserModel.findByIdAndRemove(user.id)
+  }
 
   // delete everything that belongs to the specified user (including the account)
   // const models = [QuestionInstanceModel, SessionModel, QuestionModel, TagModel]
