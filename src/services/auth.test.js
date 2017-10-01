@@ -6,10 +6,12 @@ const JWT = require('jsonwebtoken')
 mongoose.Promise = Promise
 
 const {
-  isAuthenticated, isValidJWT, signup, login, requireAuth,
+  isAuthenticated, isValidJWT, signup, login, requireAuth, getToken,
 } = require('./auth')
 const { UserModel } = require('../models')
 const { setupTestEnv } = require('../utils/testHelpers')
+
+const appSecret = process.env.APP_SECRET
 
 describe('AuthService', () => {
   beforeAll(async () => {
@@ -59,11 +61,59 @@ describe('AuthService', () => {
     it('correctly validates JWTs', () => {
       const jwt1 = null
       const jwt2 = 'abcd'
-      const jwt3 = JWT.sign({ id: 'abcd' }, 'hello-world')
+      const jwt3 = JWT.sign({ id: 'abcd' }, appSecret)
 
-      expect(isValidJWT(jwt1, 'hello-world')).toBeFalsy()
-      expect(isValidJWT(jwt2, 'hello-world')).toBeFalsy()
-      expect(isValidJWT(jwt3, 'hello-world')).toBeTruthy()
+      expect(isValidJWT(jwt1, appSecret)).toBeFalsy()
+      expect(isValidJWT(jwt2, appSecret)).toBeFalsy()
+      expect(isValidJWT(jwt3, appSecret)).toBeTruthy()
+    })
+  })
+
+  describe('getToken', () => {
+    const baseReq = {
+      cookies: {},
+      headers: {},
+    }
+    const validJWT = JWT.sign({ id: 'abcd' }, appSecret)
+
+    it('handles nonexistent tokens', () => {
+      expect(getToken(baseReq)).toBeNull()
+    })
+
+    it('extracts tokens from cookies', () => {
+      // invalid JWT handling
+      expect(getToken({
+        ...baseReq,
+        cookies: {
+          jwt: 'invalid-token',
+        },
+      })).toBeNull()
+
+      // valid JWT handling
+      expect(getToken({
+        ...baseReq,
+        cookies: {
+          jwt: validJWT,
+        },
+      })).toEqual(validJWT)
+    })
+
+    it('extracts tokens from headers', () => {
+      // invalid JWT handling
+      expect(getToken({
+        ...baseReq,
+        headers: {
+          authorization: 'Bearer invalid-token',
+        },
+      })).toBeNull()
+
+      // valid JWT handling
+      expect(getToken({
+        ...baseReq,
+        headers: {
+          authorization: `Bearer ${validJWT}`,
+        },
+      })).toEqual(validJWT)
     })
   })
 
