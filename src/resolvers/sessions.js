@@ -7,8 +7,8 @@ const allSessionsQuery = async (parentValue, args, { auth }) => {
   return user.sessions
 }
 
-const sessionQuery = (parentValue, { id }) => SessionModel.findById(id)
-const sessionsQuery = parentValue => parentValue.sessions.map(id => sessionQuery(parentValue, { id }))
+const sessionByIDQuery = (parentValue, { id }) => SessionModel.findById(id)
+const sessionsByPVQuery = parentValue => parentValue.sessions.map(id => sessionByIDQuery(parentValue, { id }))
 
 /* ----- mutations ----- */
 const createSessionMutation = (parentValue, { session: { name, blocks } }, { auth }) =>
@@ -23,10 +23,13 @@ const startSessionMutation = (parentValue, { id }, { auth }) => SessionService.s
 const endSessionMutation = (parentValue, { id }, { auth }) => SessionService.endSession({ id, userId: auth.sub })
 
 module.exports = {
+  // queries
   allSessions: allSessionsQuery,
+  session: sessionByIDQuery,
+  sessionsByPV: sessionsByPVQuery,
+
+  // mutations
   createSession: createSessionMutation,
   endSession: endSessionMutation,
-  session: sessionQuery,
-  sessions: sessionsQuery,
   startSession: startSessionMutation,
 }

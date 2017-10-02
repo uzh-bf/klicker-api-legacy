@@ -6,8 +6,9 @@ const allTagsQuery = async (parentValue, args, { auth }) => {
   return user.tags
 }
 
-const tagQuery = (parentValue, { id }) => TagModel.findById(id)
-const tagsQuery = (parentValue, args, context) => parentValue.tags.map(id => tagQuery(parentValue, { id }, context))
+const tagByIDQuery = (parentValue, { id }) => TagModel.findById(id)
+const tagsByPVQuery = (parentValue, args, context) =>
+  parentValue.tags.map(id => tagByIDQuery(parentValue, { id }, context))
 
 /* ----- mutations ----- */
 const createTagMutation = async (parentValue, { tag: { name } }, { auth }) => {
@@ -30,8 +31,11 @@ const createTagMutation = async (parentValue, { tag: { name } }, { auth }) => {
 }
 
 module.exports = {
+  // queries
   allTags: allTagsQuery,
+  tag: tagByIDQuery,
+  tags: tagsByPVQuery,
+
+  // mutations
   createTag: createTagMutation,
-  tag: tagQuery,
-  tags: tagsQuery,
 }

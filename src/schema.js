@@ -2,10 +2,14 @@ const { makeExecutableSchema } = require('graphql-tools')
 
 const { requireAuth } = require('./services/auth')
 const {
-  allQuestions, createQuestion, questions, question, questionInstances,
+  allQuestions,
+  createQuestion,
+  questionsByPV,
+  questionByPV,
+  questionInstancesByPV,
 } = require('./resolvers/questions')
 const {
-  allSessions, createSession, endSession, sessions, startSession,
+  allSessions, createSession, endSession, sessionsByPV, startSession,
 } = require('./resolvers/sessions')
 const { allTags, createTag, tags } = require('./resolvers/tags')
 const {
@@ -69,21 +73,21 @@ const resolvers = {
     user,
   },
   QuestionBlock: {
-    instances: questionInstances,
+    instances: questionInstancesByPV,
   },
   QuestionInstance: {
-    question,
+    question: questionByPV,
   },
   Session: {
     user,
   },
   Tag: {
-    questions,
+    questions: questionsByPV,
     user,
   },
   User: {
-    questions,
-    sessions,
+    questions: questionsByPV,
+    sessions: sessionsByPV,
     tags,
   },
 }
