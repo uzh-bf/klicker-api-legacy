@@ -1,5 +1,5 @@
 const QuestionService = require('../services/questions')
-const { QuestionModel, UserModel } = require('../models')
+const { QuestionModel, QuestionInstanceModel, UserModel } = require('../models')
 
 /* ----- queries ----- */
 const allQuestionsQuery = async (parentValue, args, { auth }) => {
@@ -8,8 +8,11 @@ const allQuestionsQuery = async (parentValue, args, { auth }) => {
 }
 
 const questionQuery = (parentValue, { id }) => QuestionModel.findById(id)
-const questionsQuery = (parentValue, args, context) =>
-  parentValue.questions.map(id => questionQuery(parentValue, { id }, context))
+const questionsQuery = parentValue => parentValue.questions.map(id => questionQuery(parentValue, { id }))
+
+const questionInstanceQuery = (parentValue, { id }) => QuestionInstanceModel.findById(id)
+const questionInstancesQuery = parentValue =>
+  parentValue.instances.map(id => questionInstanceQuery(parentValue, { id }))
 
 /* ----- mutations ----- */
 const createQuestionMutation = (parentValue, { question }, { auth }) =>
@@ -20,4 +23,6 @@ module.exports = {
   createQuestion: createQuestionMutation,
   question: questionQuery,
   questions: questionsQuery,
+  questionInstance: questionInstanceQuery,
+  questionInstances: questionInstancesQuery,
 }

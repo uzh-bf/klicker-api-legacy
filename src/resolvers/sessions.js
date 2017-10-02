@@ -8,15 +8,14 @@ const allSessionsQuery = async (parentValue, args, { auth }) => {
 }
 
 const sessionQuery = (parentValue, { id }) => SessionModel.findById(id)
-const sessionsQuery = (parentValue, args, context) =>
-  parentValue.sessions.map(id => sessionQuery(parentValue, { id }, context))
+const sessionsQuery = parentValue => parentValue.sessions.map(id => sessionQuery(parentValue, { id }))
 
 /* ----- mutations ----- */
 const createSessionMutation = (parentValue, { session: { name, blocks } }, { auth }) =>
   SessionService.createSession({
     name,
     questionBlocks: blocks,
-    user: auth.sub,
+    userId: auth.sub,
   })
 
 const startSessionMutation = (parentValue, { id }, { auth }) => SessionService.startSession({ id, userId: auth.sub })

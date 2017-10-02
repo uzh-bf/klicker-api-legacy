@@ -1,7 +1,9 @@
 const { makeExecutableSchema } = require('graphql-tools')
 
 const { requireAuth } = require('./services/auth')
-const { allQuestions, createQuestion, questions } = require('./resolvers/questions')
+const {
+  allQuestions, createQuestion, questions, question, questionInstances,
+} = require('./resolvers/questions')
 const {
   allSessions, createSession, endSession, sessions, startSession,
 } = require('./resolvers/sessions')
@@ -65,6 +67,12 @@ const resolvers = {
   Question: {
     tags,
     user,
+  },
+  QuestionBlock: {
+    instances: questionInstances,
+  },
+  QuestionInstance: {
+    question,
   },
   Session: {
     user,
