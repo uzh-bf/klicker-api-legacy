@@ -8,7 +8,7 @@ const allSessionsQuery = async (parentValue, args, { auth }) => {
 }
 
 const sessionByIDQuery = (parentValue, { id }) => SessionModel.findById(id)
-const sessionsByPVQuery = parentValue => parentValue.sessions.map(id => sessionByIDQuery(parentValue, { id }))
+const sessionsByPVQuery = parentValue => SessionModel.find({ _id: { $in: parentValue.sessions } })
 
 /* ----- mutations ----- */
 const createSessionMutation = (parentValue, { session: { name, blocks } }, { auth }) =>

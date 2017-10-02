@@ -7,8 +7,7 @@ const allTagsQuery = async (parentValue, args, { auth }) => {
 }
 
 const tagByIDQuery = (parentValue, { id }) => TagModel.findById(id)
-const tagsByPVQuery = (parentValue, args, context) =>
-  parentValue.tags.map(id => tagByIDQuery(parentValue, { id }, context))
+const tagsByPVQuery = parentValue => TagModel.find({ _id: { $in: parentValue.tags } })
 
 /* ----- mutations ----- */
 const createTagMutation = async (parentValue, { tag: { name } }, { auth }) => {

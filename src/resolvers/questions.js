@@ -9,11 +9,10 @@ const allQuestionsQuery = async (parentValue, args, { auth }) => {
 
 const questionByIDQuery = (parentValue, { id }) => QuestionModel.findById(id)
 const questionByPVQuery = parentValue => QuestionModel.findById(parentValue.question)
-const questionsByPVQuery = parentValue => parentValue.questions.map(id => questionByIDQuery(parentValue, { id }))
+const questionsByPVQuery = parentValue => QuestionModel.find({ _id: { $in: parentValue.questions } })
 
 const questionInstanceByIDQuery = (parentValue, { id }) => QuestionInstanceModel.findById(id)
-const questionInstancesByPVQuery = parentValue =>
-  parentValue.instances.map(id => questionInstanceByIDQuery(parentValue, { id }))
+const questionInstancesByPVQuery = parentValue => QuestionInstanceModel.find({ _id: { $in: parentValue.instances } })
 
 /* ----- mutations ----- */
 const createQuestionMutation = (parentValue, { question }, { auth }) =>
