@@ -5,6 +5,7 @@ module.exports = () => [Feedback]
 
 const Feedback = `
   type Feedback {
+    key: Int!
     content: String!
     votes: Int
 

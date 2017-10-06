@@ -33,6 +33,8 @@ const Session = `
   }
 
   type QuestionBlock {
+    key: Int!
+    status: Int!
     instances: [QuestionInstance]
   }
 
