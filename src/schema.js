@@ -9,7 +9,12 @@ const {
   questionInstancesByPV,
 } = require('./resolvers/questions')
 const {
-  allSessions, createSession, endSession, sessionsByPV, startSession,
+  allSessions,
+  createSession,
+  endSession,
+  sessionByPV,
+  sessionsByPV,
+  startSession,
 } = require('./resolvers/sessions')
 const { allTags, createTag, tags } = require('./resolvers/tags')
 const {
@@ -87,6 +92,7 @@ const resolvers = {
   },
   User: {
     questions: questionsByPV,
+    runningSession: sessionByPV,
     sessions: sessionsByPV,
     tags,
   },

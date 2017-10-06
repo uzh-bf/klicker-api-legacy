@@ -8,6 +8,7 @@ const allSessionsQuery = async (parentValue, args, { auth }) => {
 }
 
 const sessionByIDQuery = (parentValue, { id }) => SessionModel.findById(id)
+const sessionByPVQuery = parentValue => SessionModel.findById(parentValue.runningSession)
 const sessionsByPVQuery = parentValue => SessionModel.find({ _id: { $in: parentValue.sessions } })
 
 /* ----- mutations ----- */
@@ -26,6 +27,7 @@ module.exports = {
   // queries
   allSessions: allSessionsQuery,
   session: sessionByIDQuery,
+  sessionByPV: sessionByPVQuery,
   sessionsByPV: sessionsByPVQuery,
 
   // mutations
