@@ -51,6 +51,10 @@ const typeDefs = [
     createUser(user: UserInput): User
     login(email: String, password: String): User
   }
+
+  type Subscription {
+    getResults(id: ID): QuestionInstance
+  }
 `,
   ...allTypes,
 ]
