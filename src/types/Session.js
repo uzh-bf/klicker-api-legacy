@@ -1,8 +1,9 @@
 /* eslint-disable no-use-before-define */
 
 // HACK: export before require such that circular dependencies can be handled
-module.exports = () => [Session, Feedback, QuestionInstance]
+module.exports = () => [Session, Feedback, ConfusionTimestep, QuestionInstance]
 
+const ConfusionTimestep = require('./ConfusionTimestep')
 const Feedback = require('./Feedback')
 const QuestionInstance = require('./QuestionInstance')
 
@@ -47,6 +48,7 @@ const Session = `
     user: User!
 
     blocks: [QuestionBlock]
+    confusionTS: [ConfusionTimestep]
     feedbacks: [Feedback]
 
     createdAt: String
