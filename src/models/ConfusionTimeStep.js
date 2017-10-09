@@ -1,13 +1,13 @@
 const mongoose = require('mongoose')
 
 const ConfusionTimeStep = new mongoose.Schema({
-  comprehensibility: {
+  difficulty: {
     type: Number,
     default: 0,
     min: -50,
     max: 50,
   },
-  difficulty: {
+  speed: {
     type: Number,
     default: 0,
     min: -50,
