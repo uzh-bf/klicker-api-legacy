@@ -129,8 +129,37 @@ const endSession = async ({ id, userId }) => {
   return session
 }
 
+// add a new feedback to a session
+const addFeedback = async ({ sessionId, content }) => {
+  // TODO: security
+  // TODO: rate limiting
+  // TODO: ...
+
+  const session = await SessionModel.findById(sessionId)
+
+  // if the session is not yet running, throw an error
+  if (session.status === 0) {
+    throw new Error('SESSION_NOT_STARTED')
+  }
+
+  // if the session has already finished, throw an error
+  if (session.status === 2) {
+    throw new Error('SESSION_FINISHED')
+  }
+
+  // push a new feedback into the array
+  session.feedbacks.push({ key: session.feedbacks.length, content })
+
+  // save the updated session
+  await session.save()
+
+  // return the updated session
+  return session
+}
+
 module.exports = {
   createSession,
   startSession,
   endSession,
+  addFeedback,
 }

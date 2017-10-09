@@ -23,6 +23,8 @@ const startSessionMutation = (parentValue, { id }, { auth }) => SessionService.s
 
 const endSessionMutation = (parentValue, { id }, { auth }) => SessionService.endSession({ id, userId: auth.sub })
 
+const addFeedbackMutation = (parentValue, { sessionId, content }) => SessionService.addFeedback({ sessionId, content })
+
 module.exports = {
   // queries
   allSessions: allSessionsQuery,
@@ -34,4 +36,5 @@ module.exports = {
   createSession: createSessionMutation,
   endSession: endSessionMutation,
   startSession: startSessionMutation,
+  addFeedback: addFeedbackMutation,
 }

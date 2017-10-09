@@ -195,4 +195,8 @@ describe('SessionService', () => {
       expect(session).toMatchSnapshot()
     })
   })
+
+  describe('addFeedback', () => {
+    // TODO
+  })
 })
