@@ -32,7 +32,14 @@ const createQuestion = async ({
     title,
     type,
     user: userId,
-    versions: [{ description, options, solution: {} }],
+    versions: [
+      {
+        key: 0,
+        description,
+        options,
+        solution: {},
+      },
+    ],
   })
 
   const allTagsUpdate = allTags.map((tag) => {
