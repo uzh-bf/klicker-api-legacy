@@ -9,6 +9,7 @@ const {
   questionInstancesByPV,
 } = require('./resolvers/questions')
 const {
+  addFeedback,
   allSessions,
   createSession,
   endSession,
@@ -50,6 +51,8 @@ const typeDefs = [
 
     createUser(user: UserInput): User
     login(email: String, password: String): User
+
+    addFeedback(sessionId: ID!, content: String!): Session
   }
 
   type Subscription {
@@ -69,6 +72,7 @@ const resolvers = {
     user: requireAuth(authUser),
   },
   Mutation: {
+    addFeedback,
     createQuestion: requireAuth(createQuestion),
     createSession: requireAuth(createSession),
     createTag: requireAuth(createTag),
