@@ -27,6 +27,12 @@ const Session = `
     blocks: [Session_QuestionBlockInput]!
   }
 
+  input SessionSettingsInput {
+    isConfusionBarometerActive: Boolean
+    isFeedbackChannelActive: Boolean
+    isFeedbackChannelPublic: Boolean
+  }
+
   type SessionSettings {
     isConfusionBarometerActive: Boolean
     isFeedbackChannelActive: Boolean

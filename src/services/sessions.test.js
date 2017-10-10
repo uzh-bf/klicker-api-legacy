@@ -199,4 +199,8 @@ describe('SessionService', () => {
   describe('addFeedback', () => {
     // TODO
   })
+
+  describe('addConfusionTS', () => {
+    // TODO
+  })
 })

@@ -25,6 +25,16 @@ const endSessionMutation = (parentValue, { id }, { auth }) => SessionService.end
 
 const addFeedbackMutation = (parentValue, { sessionId, content }) => SessionService.addFeedback({ sessionId, content })
 
+const addConfusionTSMutation = (parentValue, { sessionId, difficulty, speed }) =>
+  SessionService.addConfusionTS({ sessionId, difficulty, speed })
+
+const updateSessionSettingsMutation = (parentValue, { sessionId, settings }, { auth }) =>
+  SessionService.updateSettings({
+    sessionId,
+    userId: auth.sub,
+    settings,
+  })
+
 module.exports = {
   // queries
   allSessions: allSessionsQuery,
@@ -37,4 +47,6 @@ module.exports = {
   endSession: endSessionMutation,
   startSession: startSessionMutation,
   addFeedback: addFeedbackMutation,
+  addConfusionTS: addConfusionTSMutation,
+  updateSessionSettings: updateSessionSettingsMutation,
 }

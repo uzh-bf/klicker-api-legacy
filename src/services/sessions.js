@@ -1,5 +1,21 @@
 const { QuestionInstanceModel, SessionModel, UserModel } = require('../models')
 
+const getRunningSession = async (sessionId) => {
+  const session = await SessionModel.findById(sessionId)
+
+  // if the session is not yet running, throw an error
+  if (session.status === 0) {
+    throw new Error('SESSION_NOT_STARTED')
+  }
+
+  // if the session has already finished, throw an error
+  if (session.status === 2) {
+    throw new Error('SESSION_FINISHED')
+  }
+
+  return session
+}
+
 // create a new session
 const createSession = async ({ name, questionBlocks, userId }) => {
   // ensure that the session contains at least one question block
@@ -68,6 +84,11 @@ const startSession = async ({ id, userId }) => {
 
   const session = await SessionModel.findById(id)
 
+  // ensure the user is authorized to modify this session
+  if (session.user !== userId) {
+    throw new Error('UNAUTHORIZED')
+  }
+
   // if the session is already running, return it
   if (session.status === 1) {
     return session
@@ -102,6 +123,11 @@ const endSession = async ({ id, userId }) => {
 
   const session = await SessionModel.findById(id)
 
+  // ensure the user is authorized to modify this session
+  if (session.user !== userId) {
+    throw new Error('UNAUTHORIZED')
+  }
+
   // if the session is not yet running, throw an error
   if (session.status === 0) {
     throw new Error('SESSION_NOT_STARTED')
@@ -135,20 +161,63 @@ const addFeedback = async ({ sessionId, content }) => {
   // TODO: rate limiting
   // TODO: ...
 
-  const session = await SessionModel.findById(sessionId)
+  const session = await getRunningSession(sessionId)
 
-  // if the session is not yet running, throw an error
-  if (session.status === 0) {
-    throw new Error('SESSION_NOT_STARTED')
-  }
-
-  // if the session has already finished, throw an error
-  if (session.status === 2) {
-    throw new Error('SESSION_FINISHED')
+  // if the feedback channel is not activated, do not allow new additions
+  if (!session.settings.isFeedbackChannelActive) {
+    throw new Error('SESSION_FEEDBACKS_DEACTIVATED')
   }
 
   // push a new feedback into the array
   session.feedbacks.push({ key: session.feedbacks.length, content })
+
+  // save the updated session
+  await session.save()
+
+  // return the updated session
+  return session
+}
+
+// add a new confusion timestep to the session
+const addConfusionTS = async ({ sessionId, difficulty, speed }) => {
+  // TODO: security
+  // TODO: rate limiting
+  // TODO: ...
+
+  const session = await getRunningSession(sessionId)
+
+  // if the confusion barometer is not activated, do not allow new additions
+  if (!session.settings.isConfusionBarometerActive) {
+    throw new Error('SESSION_CONFUSION_DEACTIVATED')
+  }
+
+  // push a new timestep into the array
+  session.confusionTS.push({ difficulty, speed })
+
+  // save the updated session
+  await session.save()
+
+  // return the updated session
+  return session
+}
+
+// update session settings
+const updateSettings = async ({ sessionId, userId, settings }) => {
+  // TODO: security
+  // TODO: ...
+
+  const session = await getRunningSession(sessionId)
+
+  // ensure the user is authorized to modify this session
+  if (session.user !== userId) {
+    throw new Error('UNAUTHORIZED')
+  }
+
+  // merge the existing settings with the new settings
+  session.settings = {
+    ...session.settings,
+    ...settings,
+  }
 
   // save the updated session
   await session.save()
@@ -162,4 +231,6 @@ module.exports = {
   startSession,
   endSession,
   addFeedback,
+  addConfusionTS,
+  updateSettings,
 }

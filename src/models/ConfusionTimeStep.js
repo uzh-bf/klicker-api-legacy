@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const ConfusionTimeStep = new mongoose.Schema({
+const ConfusionTimestep = new mongoose.Schema({
   difficulty: {
     type: Number,
     default: 0,
@@ -17,4 +17,4 @@ const ConfusionTimeStep = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now() },
 })
 
-module.exports = ConfusionTimeStep
+module.exports = ConfusionTimestep
