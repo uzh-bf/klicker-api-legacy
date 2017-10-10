@@ -36,7 +36,7 @@ const createQuestion = async ({
       {
         key: 0,
         description,
-        options,
+        options: options.map((option, index) => ({ key: index, ...option })),
         solution: {},
       },
     ],

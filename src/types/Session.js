@@ -34,7 +34,7 @@ const Session = `
   }
 
   type QuestionBlock {
-    key: Int!
+    key: Int
     status: Int!
     instances: [QuestionInstance]
   }

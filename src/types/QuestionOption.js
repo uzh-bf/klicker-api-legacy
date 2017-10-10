@@ -10,7 +10,7 @@ const QuestionOption = `
   }
 
   type QuestionOption {
-    key: Int!
+    key: Int
     correct: Boolean
     name: String
   }
