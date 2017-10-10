@@ -199,10 +199,69 @@ describe('SessionService', () => {
   })
 
   describe('addFeedback', () => {
-    // TODO
+    let preparedSession
+
+    beforeAll(async () => {
+      preparedSession = await prepareSession(user.id)
+      await SessionService.startSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
+    })
+
+    it('allows adding new feedbacks', () => {
+      expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'feedback1' })).resolves.toMatchSnapshot()
+      expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'feedback2' })).resolves.toMatchSnapshot()
+    })
+
+    afterAll(async () => {
+      await SessionService.stopSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
+    })
   })
 
   describe('addConfusionTS', () => {
-    // TODO
+    let preparedSession
+
+    beforeAll(async () => {
+      preparedSession = await prepareSession(user.id)
+      await SessionService.startSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
+    })
+
+    it('allows adding new timesteps', () => {
+      expect(SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 20, speed: 10 })).resolves.toMatchSnapshot()
+      expect(SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 40, speed: -10 })).resolves.toMatchSnapshot()
+    })
+
+    afterAll(async () => {
+      await SessionService.stopSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
+    })
+  })
+
+  describe('updateSessionSettings', () => {
+    let preparedSession
+
+    beforeAll(async () => {
+      preparedSession = await prepareSession(user.id)
+      await SessionService.startSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
+    })
+
+    afterAll(async () => {
+      await SessionService.stopSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
+    })
   })
 })

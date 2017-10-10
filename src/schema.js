@@ -19,7 +19,7 @@ const {
   startSession,
   updateSessionSettings,
 } = require('./resolvers/sessions')
-const { allTags, createTag, tags } = require('./resolvers/tags')
+const { allTags, tags } = require('./resolvers/tags')
 const {
   createUser, login, user, authUser,
 } = require('./resolvers/users')
@@ -77,7 +77,6 @@ const resolvers = {
     addConfusionTS,
     createQuestion: requireAuth(createQuestion),
     createSession: requireAuth(createSession),
-    createTag: requireAuth(createTag),
     createUser,
     endSession: requireAuth(endSession),
     login,
