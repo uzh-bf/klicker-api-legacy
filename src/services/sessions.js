@@ -85,7 +85,7 @@ const startSession = async ({ id, userId }) => {
   const session = await SessionModel.findById(id)
 
   // ensure the user is authorized to modify this session
-  if (session.user !== userId) {
+  if (!session.user.equals(userId)) {
     throw new Error('UNAUTHORIZED')
   }
 
@@ -124,7 +124,7 @@ const endSession = async ({ id, userId }) => {
   const session = await SessionModel.findById(id)
 
   // ensure the user is authorized to modify this session
-  if (session.user !== userId) {
+  if (!session.user.equals(userId)) {
     throw new Error('UNAUTHORIZED')
   }
 
@@ -209,7 +209,7 @@ const updateSettings = async ({ sessionId, userId, settings }) => {
   const session = await getRunningSession(sessionId)
 
   // ensure the user is authorized to modify this session
-  if (session.user !== userId) {
+  if (!session.user.equals(userId)) {
     throw new Error('UNAUTHORIZED')
   }
 
