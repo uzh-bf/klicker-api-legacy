@@ -218,7 +218,10 @@ describe('SessionService', () => {
     })
 
     it('prevents adding feedbacks if a session is not yet running', () => {
-      expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'FAIL' })).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
+      expect(SessionService.addFeedback({
+        sessionId: preparedSession.id,
+        content: 'FAIL',
+      })).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
     })
 
     it('prevents adding feedbacks if the functionality is deactivated', async () => {
@@ -227,7 +230,10 @@ describe('SessionService', () => {
         userId: user.id,
       })
 
-      expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'FAIL' })).rejects.toEqual(new Error('SESSION_FEEDBACKS_DEACTIVATED'))
+      expect(SessionService.addFeedback({
+        sessionId: preparedSession.id,
+        content: 'FAIL',
+      })).rejects.toEqual(new Error('SESSION_FEEDBACKS_DEACTIVATED'))
     })
 
     it('allows adding new feedbacks to a running session', async () => {
@@ -239,10 +245,16 @@ describe('SessionService', () => {
         },
       })
 
-      const session = await SessionService.addFeedback({ sessionId: preparedSession.id, content: 'feedback1' })
+      const session = await SessionService.addFeedback({
+        sessionId: preparedSession.id,
+        content: 'feedback1',
+      })
       expect(session).toMatchSnapshot()
 
-      const session2 = await SessionService.addFeedback({ sessionId: preparedSession.id, content: 'feedback2' })
+      const session2 = await SessionService.addFeedback({
+        sessionId: preparedSession.id,
+        content: 'feedback2',
+      })
       expect(session2).toMatchSnapshot()
     })
 
@@ -253,7 +265,6 @@ describe('SessionService', () => {
       })
 
       // TODO: add assertion
-      /* expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'FAIL' })).rejects.toEqual(new Error('SESSION_FINISHED')) */
     })
   })
 
@@ -265,7 +276,11 @@ describe('SessionService', () => {
     })
 
     it('prevents adding timesteps if a session is not yet running', () => {
-      expect(SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 9, speed: 15 })).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
+      expect(SessionService.addConfusionTS({
+        sessionId: preparedSession.id,
+        difficulty: 9,
+        speed: 15,
+      })).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
     })
 
     it('prevents adding timesteps if the functionality is deactivated', async () => {
@@ -274,7 +289,11 @@ describe('SessionService', () => {
         userId: user.id,
       })
 
-      expect(SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 9, speed: 15 })).rejects.toEqual(new Error('SESSION_CONFUSION_DEACTIVATED'))
+      expect(SessionService.addConfusionTS({
+        sessionId: preparedSession.id,
+        difficulty: 9,
+        speed: 15,
+      })).rejects.toEqual(new Error('SESSION_CONFUSION_DEACTIVATED'))
     })
 
     it('allows adding new timesteps', async () => {
@@ -286,7 +305,11 @@ describe('SessionService', () => {
         },
       })
 
-      const session = await SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 20, speed: 10 })
+      const session = await SessionService.addConfusionTS({
+        sessionId: preparedSession.id,
+        difficulty: 20,
+        speed: 10,
+      })
       expect(session).toMatchSnapshot()
 
       const session2 = await SessionService.addConfusionTS({
@@ -369,7 +392,11 @@ describe('SessionService', () => {
       const session = await SessionService.updateSettings({
         sessionId: preparedSession.id,
         userId: user.id,
-        settings: { isConfusionBarometerActive: false, isFeedbackChannelActive: false, isFeedbackChannelPublic: false },
+        settings: {
+          isConfusionBarometerActive: false,
+          isFeedbackChannelActive: false,
+          isFeedbackChannelPublic: false,
+        },
       })
       const { isConfusionBarometerActive, isFeedbackChannelActive, isFeedbackChannelPublic } = session.settings
       expect(isConfusionBarometerActive).toBeFalsy()
