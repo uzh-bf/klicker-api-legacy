@@ -17,16 +17,28 @@ expect.addSnapshotSerializer({
     Name: ${val.name}
     Status: ${val.status}
 
-    Blocks: ${val.blocks.map(block => `
+    Blocks: [${val.blocks.map(block => `
       Show solutions: ${block.showSolutions}
       Status: ${block.status}
       Time limit: ${block.timeLimit}
       Number of instances: ${block.instances.length}
-    `)}
+    `)}]
+
+    ConfusionTS: [${val.confusionTS.map(TS => `
+      Difficulty: ${TS.difficulty}
+      Speed: ${TS.speed}
+    `)}]
+
+    Feedbacks: [${val.feedbacks.map(feedback => `
+      Content: ${feedback.content}
+      Votes: ${feedback.votes}
+    `)}]
 
     Settings:
-      ${val.settings}
-  `,
+      ConfusionActive: ${val.settings.isConfusionBarometerActive}
+      FeedbacksActive: ${val.settings.isFeedbackChannelActive}
+      FeedbacksPublic: ${val.settings.isFeedbackChannelPublic}
+    `,
 })
 
 // prepare a new session instance
@@ -203,22 +215,45 @@ describe('SessionService', () => {
 
     beforeAll(async () => {
       preparedSession = await prepareSession(user.id)
+    })
+
+    it('prevents adding feedbacks if a session is not yet running', () => {
+      expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'FAIL' })).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
+    })
+
+    it('prevents adding feedbacks if the functionality is deactivated', async () => {
       await SessionService.startSession({
         id: preparedSession.id,
         userId: user.id,
       })
+
+      expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'FAIL' })).rejects.toEqual(new Error('SESSION_FEEDBACKS_DEACTIVATED'))
     })
 
-    it('allows adding new feedbacks', () => {
-      expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'feedback1' })).resolves.toMatchSnapshot()
-      expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'feedback2' })).resolves.toMatchSnapshot()
+    it('allows adding new feedbacks to a running session', async () => {
+      await SessionService.updateSettings({
+        sessionId: preparedSession.id,
+        userId: user.id,
+        settings: {
+          isFeedbackChannelActive: true,
+        },
+      })
+
+      const session = await SessionService.addFeedback({ sessionId: preparedSession.id, content: 'feedback1' })
+      expect(session).toMatchSnapshot()
+
+      const session2 = await SessionService.addFeedback({ sessionId: preparedSession.id, content: 'feedback2' })
+      expect(session2).toMatchSnapshot()
     })
 
-    afterAll(async () => {
-      await SessionService.stopSession({
+    it('prevents adding feedbacks to an already finished session', async () => {
+      await SessionService.endSession({
         id: preparedSession.id,
         userId: user.id,
       })
+
+      // TODO: add assertion
+      /* expect(SessionService.addFeedback({ sessionId: preparedSession.id, content: 'FAIL' })).rejects.toEqual(new Error('SESSION_FINISHED')) */
     })
   })
 
@@ -227,22 +262,48 @@ describe('SessionService', () => {
 
     beforeAll(async () => {
       preparedSession = await prepareSession(user.id)
+    })
+
+    it('prevents adding timesteps if a session is not yet running', () => {
+      expect(SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 9, speed: 15 })).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
+    })
+
+    it('prevents adding timesteps if the functionality is deactivated', async () => {
       await SessionService.startSession({
         id: preparedSession.id,
         userId: user.id,
       })
+
+      expect(SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 9, speed: 15 })).rejects.toEqual(new Error('SESSION_CONFUSION_DEACTIVATED'))
     })
 
-    it('allows adding new timesteps', () => {
-      expect(SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 20, speed: 10 })).resolves.toMatchSnapshot()
-      expect(SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 40, speed: -10 })).resolves.toMatchSnapshot()
+    it('allows adding new timesteps', async () => {
+      await SessionService.updateSettings({
+        sessionId: preparedSession.id,
+        userId: user.id,
+        settings: {
+          isConfusionBarometerActive: true,
+        },
+      })
+
+      const session = await SessionService.addConfusionTS({ sessionId: preparedSession.id, difficulty: 20, speed: 10 })
+      expect(session).toMatchSnapshot()
+
+      const session2 = await SessionService.addConfusionTS({
+        sessionId: preparedSession.id,
+        difficulty: 40,
+        speed: -10,
+      })
+      expect(session2).toMatchSnapshot()
     })
 
-    afterAll(async () => {
-      await SessionService.stopSession({
+    it('prevents adding timesteps to an already finished session', async () => {
+      await SessionService.endSession({
         id: preparedSession.id,
         userId: user.id,
       })
+
+      // TODO: add assertion
     })
   })
 
@@ -255,6 +316,31 @@ describe('SessionService', () => {
         id: preparedSession.id,
         userId: user.id,
       })
+    })
+
+    it('allows changing each setting seperately', () => {
+      ['isConfusionBarometerActive', 'isFeedbackChannelActive', 'isFeedbackChannelPublic'].forEach(async (setting) => {
+        const session = await SessionService.updateSettings({
+          sessionId: preparedSession.id,
+          userId: user.id,
+          settings: { [setting]: true },
+        })
+        expect(session.settings[setting]).toBeTruthy()
+        expect(session).toMatchSnapshot()
+      })
+    })
+
+    it('allows changing all settings at once', async () => {
+      const session = await SessionService.updateSettings({
+        sessionId: preparedSession.id,
+        userId: user.id,
+        settings: { isConfusionBarometerActive: false, isFeedbackChannelActive: false, isFeedbackChannelPublic: false },
+      })
+      const { isConfusionBarometerActive, isFeedbackChannelActive, isFeedbackChannelPublic } = session.settings
+      expect(isConfusionBarometerActive).toBeFalsy()
+      expect(isFeedbackChannelActive).toBeFalsy()
+      expect(isFeedbackChannelPublic).toBeFalsy()
+      expect(session).toMatchSnapshot()
     })
 
     afterAll(async () => {
