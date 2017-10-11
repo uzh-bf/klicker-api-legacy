@@ -257,3 +257,118 @@ exports[`SessionService updateSessionSettings allows changing all settings at on
       FeedbacksPublic: false
     
 `;
+
+exports[`SessionService updateSessionSettings allows changing each setting seperately 1`] = `
+
+    Name: testing session
+    Status: 1
+
+    Blocks: [
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: true
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    
+`;
+
+exports[`SessionService updateSessionSettings allows changing each setting seperately 2`] = `
+
+    Name: testing session
+    Status: 1
+
+    Blocks: [
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: true
+      FeedbacksActive: true
+      FeedbacksPublic: false
+    
+`;
+
+exports[`SessionService updateSessionSettings allows changing each setting seperately 3`] = `
+
+    Name: testing session
+    Status: 1
+
+    Blocks: [
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: true
+      FeedbacksActive: true
+      FeedbacksPublic: true
+    
+`;
+
+exports[`SessionService updateSessionSettings allows changing each setting seperately 4`] = `
+
+    Name: testing session
+    Status: 1
+
+    Blocks: [
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: true
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    
+`;
+
+exports[`SessionService updateSessionSettings allows changing each setting seperately 5`] = `
+
+    Name: testing session
+    Status: 1
+
+    Blocks: [
+      Show solutions: false
+      Status: 0
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    
+`;

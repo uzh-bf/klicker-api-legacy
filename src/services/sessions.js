@@ -219,6 +219,12 @@ const updateSettings = async ({ sessionId, userId, settings }) => {
     ...settings,
   }
 
+  // if the feedback channel functionality is set to be deactivated
+  // automatically unpublish the channel (needs manual reactivation)
+  if (settings.isFeedbackChannelActive === false) {
+    session.settings.isFeedbackChannelPublic = false
+  }
+
   // save the updated session
   await session.save()
 

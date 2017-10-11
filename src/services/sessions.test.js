@@ -318,16 +318,51 @@ describe('SessionService', () => {
       })
     })
 
-    it('allows changing each setting seperately', () => {
-      ['isConfusionBarometerActive', 'isFeedbackChannelActive', 'isFeedbackChannelPublic'].forEach(async (setting) => {
-        const session = await SessionService.updateSettings({
-          sessionId: preparedSession.id,
-          userId: user.id,
-          settings: { [setting]: true },
-        })
-        expect(session.settings[setting]).toBeTruthy()
-        expect(session).toMatchSnapshot()
+    it('allows changing each setting seperately', async () => {
+      // update isConfusionBarometerActive
+      const session = await SessionService.updateSettings({
+        sessionId: preparedSession.id,
+        userId: user.id,
+        settings: { isConfusionBarometerActive: true },
       })
+      expect(session.settings.isConfusionBarometerActive).toBeTruthy()
+      expect(session).toMatchSnapshot()
+
+      // update isFeedbackChannelActive
+      const session2 = await SessionService.updateSettings({
+        sessionId: preparedSession.id,
+        userId: user.id,
+        settings: { isFeedbackChannelActive: true },
+      })
+      expect(session2.settings.isFeedbackChannelActive).toBeTruthy()
+      expect(session2).toMatchSnapshot()
+
+      // update isFeedbackChannelPublic
+      const session3 = await SessionService.updateSettings({
+        sessionId: preparedSession.id,
+        userId: user.id,
+        settings: { isFeedbackChannelPublic: true },
+      })
+      expect(session3.settings.isFeedbackChannelPublic).toBeTruthy()
+      expect(session3).toMatchSnapshot()
+
+      // update isConfusionBarometerActive
+      const session4 = await SessionService.updateSettings({
+        sessionId: preparedSession.id,
+        userId: user.id,
+        settings: { isConfusionBarometerActive: false },
+      })
+      expect(session4.settings.isConfusionBarometerActive).toBeFalsy()
+      expect(session4).toMatchSnapshot()
+
+      // update isFeedbackChannelActive
+      const session5 = await SessionService.updateSettings({
+        sessionId: preparedSession.id,
+        userId: user.id,
+        settings: { isFeedbackChannelActive: false },
+      })
+      expect(session5.settings.isFeedbackChannelActive).toBeFalsy()
+      expect(session5).toMatchSnapshot()
     })
 
     it('allows changing all settings at once', async () => {
