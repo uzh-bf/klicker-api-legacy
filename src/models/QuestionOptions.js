@@ -1,18 +1,9 @@
 const mongoose = require('mongoose')
 
 // for SC and MC questions, define the choices and related settings
-const Choices = new mongoose.Schema({
-  items: [
-    {
-      key: { type: Number, min: 0, required: true },
-      correct: { type: Boolean, required: true },
-      name: { type: String, required: false },
-    },
-  ],
-  randomized: {
-    type: Boolean,
-    default: false,
-  },
+const Choice = new mongoose.Schema({
+  correct: { type: Boolean, required: true },
+  name: { type: String, required: false },
 })
 
 // for FREE questions, define optional restrictions
@@ -24,6 +15,7 @@ const Restrictions = new mongoose.Schema({
 })
 
 module.exports = new mongoose.Schema({
-  choices: { type: Choices },
+  choices: [{ type: Choice }],
+  randomized: { type: Boolean, default: false },
   restrictions: { type: Restrictions },
 })

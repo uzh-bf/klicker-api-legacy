@@ -9,39 +9,39 @@ const FREEQuestionOptions = require('./questionTypes/FREEQuestionOptions')
 const SCQuestionOptions = require('./questionTypes/SCQuestionOptions')
 
 const Question = `
-  type Question {
-    id: ID!
-
+  input QuestionInput {
     title: String!
     type: String!
+    description: String!
+
+    options: SCQuestionOptionsInput!
+
+    tags: [ID!]!
+  }
+  type Question {
+    id: ID!
+    title: String!
+    type: String!
+
     user: User!
 
-    instances: [QuestionInstance]
-    tags: [Tag]!
-    versions: [Question_Version]!
+    instances: [QuestionInstance!]
+    tags: [Tag!]!
+    versions: [Question_Version!]!
 
     createdAt: String!
     updatedAt: String!
   }
 
   type Question_Version {
-    key: Int!
+    id: ID!
     description: String!
 
-    instances: [QuestionInstance]!
     options: SCQuestionOptions!
+
+    instances: [QuestionInstance!]!
 
     createdAt: String!
     updatedAt: String!
-  }
-
-  input QuestionInput {
-    title: String!
-    type: String!
-
-    description: String!
-    options: SCQuestionOptionsInput!
-
-    tags: [ID]!
   }
 `

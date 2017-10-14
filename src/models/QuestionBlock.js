@@ -3,7 +3,6 @@ const mongoose = require('mongoose')
 const { ObjectId } = mongoose.Schema.Types
 
 module.exports = new mongoose.Schema({
-  key: { type: Number, min: 0, required: true },
   status: {
     type: String,
     enum: ['PLANNED', 'ACTIVE', 'EXECUTED'],

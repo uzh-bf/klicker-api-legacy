@@ -1,11 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`QuestionService prepareOptions handles options for FREE questions 1`] = `
-Object {
-  "restrictions": Object {
-    "kind": "RANGE",
-    "max": 100,
-    "min": 10,
-  },
-}
+exports[`QuestionService createQuestion allows creating a valid FREE question 1`] = `
+
+    Title: question without tags
+    Type: FREE
+
+    Instances: []
+    Tags: [,]
+    Versions: 
+      Description: blabla
+      Instances: []
+      Options: { restrictions: 
+   { min: 10,
+     max: 100,
+     kind: 'RANGE',
+     _id: 59e26de4dc118e183812bb5b },
+  _id: 59e26de4dc118e183812bb5a,
+  randomized: false,
+  choices: [] }
+    
+  
+`;
+
+exports[`QuestionService createQuestion allows creating a valid SC question 1`] = `
+
+    Title: question without tags
+    Type: SC
+
+    Instances: []
+    Tags: [,]
+    Versions: 
+      Description: blabla
+      Instances: []
+      Options: { _id: 59e26de3dc118e183812bb55,
+  randomized: true,
+  choices: 
+   [ { correct: false,
+       name: 'option1',
+       _id: 59e26de3dc118e183812bb57 },
+     { correct: true, name: 'option2', _id: 59e26de3dc118e183812bb56 } ] }
+    
+  
 `;

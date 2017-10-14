@@ -5,7 +5,6 @@ const { ObjectId } = mongoose.Schema.Types
 const QuestionOptions = require('./QuestionOptions')
 
 module.exports = new mongoose.Schema({
-  key: { type: Number, min: 0, required: true },
   description: { type: String, required: true },
   options: { type: QuestionOptions, required: true },
   solution: { type: Object, required: true },

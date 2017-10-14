@@ -12,35 +12,49 @@ const Session = `
     COMPLETED
   }
 
+  input SessionInput {
+    name: String!
+    blocks: [Session_QuestionBlockInput]!
+  }
   type Session {
     id: ID!
-
     name: String!
+
     status: Session_Status!
     settings: Session_Settings!
     user: User!
 
-    blocks: [Session_QuestionBlock]!
-    confusionTS: [Session_ConfusionTimestep]!
-    feedbacks: [Session_Feedback]!
+    blocks: [Session_QuestionBlock!]!
+    confusionTS: [Session_ConfusionTimestep!]!
+    feedbacks: [Session_Feedback!]!
 
     createdAt: String!
     updatedAt: String!
   }
 
+  input Session_SettingsInput {
+    isConfusionBarometerActive: Boolean
+    isFeedbackChannelActive: Boolean
+    isFeedbackChannelPublic: Boolean
+  }
   type Session_Settings {
     isConfusionBarometerActive: Boolean!
     isFeedbackChannelActive: Boolean!
     isFeedbackChannelPublic: Boolean!
   }
 
+  input Session_QuestionBlockInput {
+    questions: [ID!]!
+  }
   type Session_QuestionBlock {
-    key: Int!
+    id: ID!
     status: Int!
-    instances: [QuestionInstance]!
+
+    instances: [QuestionInstance!]!
   }
 
   type Session_ConfusionTimestep {
+    id: ID!
     difficulty: Int!
     speed: Int!
 
@@ -48,25 +62,10 @@ const Session = `
   }
 
   type Session_Feedback {
-    key: Int!
+    id: ID!
     content: String!
     votes: Int!
 
     createdAt: String!
-  }
-
-  input SessionInput {
-    name: String!
-    blocks: [Session_QuestionBlockInput]!
-  }
-
-  input Session_QuestionBlockInput {
-    questions: [ID]!
-  }
-
-  input Session_SettingsInput {
-    isConfusionBarometerActive: Boolean
-    isFeedbackChannelActive: Boolean
-    isFeedbackChannelPublic: Boolean
   }
 `

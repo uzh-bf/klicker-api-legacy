@@ -6,9 +6,9 @@ module.exports = () => [QuestionInstance]
 const QuestionInstance = `
   type QuestionInstance {
     id: ID!
+    version: Int!
 
     question: Question!
-    version: Int!
 
     createdAt: String!
     updatedAt: String!

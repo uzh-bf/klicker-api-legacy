@@ -52,42 +52,16 @@ describe('QuestionService', () => {
     user = undefined
   })
 
-  describe('prepareOptions', () => {
-    it('handles options for SC questions', () => {
-      const options = {
-        choices: {
-          items: [{ correct: false, name: 'choice 1' }, { correct: true, name: 'choice 2' }],
-          randomized: true,
-        },
-      }
-      expect(QuestionService.prepareOptions('SC', options)).toEqual({})
-    })
-
-    it('handles options for FREE questions', () => {
-      const options = {
-        restrictions: {
-          min: 10,
-          max: 100,
-          kind: 'RANGE',
-        },
-      }
-      expect(QuestionService.prepareOptions('FREE', options)).toEqual({})
-    })
-  })
-
   describe('createQuestion', () => {
     const question = {
       description: 'blabla',
       options: {
-        choices: {
-          items: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
-          randomized: true,
-        },
+        choices: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
+        randomized: true,
       },
       tags: ['ABCD', 'test'],
       title: 'question without tags',
       type: 'SC',
-      userId: user.id,
     }
 
     it('prevents creating a question without tags', () => {
@@ -105,7 +79,7 @@ describe('QuestionService', () => {
     })
 
     it('allows creating a valid SC question', async () => {
-      const newQuestion = await QuestionService.createQuestion(question)
+      const newQuestion = await QuestionService.createQuestion({ ...question, userId: user.id })
 
       expect(newQuestion.versions.length).toEqual(1)
       expect(newQuestion).toMatchSnapshot()
@@ -114,6 +88,7 @@ describe('QuestionService', () => {
     it('allows creating a valid FREE question', async () => {
       const newQuestion = await QuestionService.createQuestion({
         ...question,
+        userId: user.id,
         type: 'FREE',
         options: {
           restrictions: {

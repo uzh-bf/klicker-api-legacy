@@ -8,23 +8,23 @@ const FREEQuestionOptions = `
     RANGE
   }
 
+  input FREEQuestionOptionsInput {
+    restrictions: FREEQuestionOptions_RestrictionsInput!
+  }
   type FREEQuestionOptions {
     restrictions: FREEQuestionOptions_Restrictions!
   }
 
-  type FREEQuestionOptions_Restrictions {
-    kind: FREEQuestionOptions_RestrictionKind!
-    min: Int
-    max: Int
-  }
-
-  input FREEQuestionOptionsInput {
-    restrictions: FREEQuestionOptions_RestrictionsInput!
-  }
-
   input FREEQuestionOptions_RestrictionsInput {
-    kind: FREEQuestionOptions_RestrictionKind!
     min: Int
     max: Int
+
+    kind: FREEQuestionOptions_RestrictionKind!
+  }
+  type FREEQuestionOptions_Restrictions {
+    min: Int
+    max: Int
+
+    kind: FREEQuestionOptions_RestrictionKind!
   }
 `

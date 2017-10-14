@@ -12,7 +12,7 @@ mongoose.Promise = Promise
 // define how jest should serialize objects into snapshots
 // we need to strip ids and dates as they are always changing
 expect.addSnapshotSerializer({
-  test: val => val.id && val.blocks && val.name && val.status >= 0 && val.settings && val.user,
+  test: val => val.id && val.blocks && val.name && val.status && val.settings && val.user,
   print: val => `
     Name: ${val.name}
     Status: ${val.status}
@@ -47,7 +47,7 @@ const prepareSession = userId =>
     name: 'testing session',
     questionBlocks: [
       {
-        questions: [{ id: '59b1481857f3c34af09a4736' }],
+        questions: ['59b1481857f3c34af09a4736'],
       },
     ],
     userId,
@@ -78,9 +78,7 @@ describe('SessionService', () => {
     question1 = await QuestionService.createQuestion({
       description: 'a description',
       options: {
-        choices: {
-          items: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
-        },
+        choices: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
       },
       tags: ['AZA', 'BBB'],
       title: 'first question',
@@ -90,9 +88,8 @@ describe('SessionService', () => {
     question2 = await QuestionService.createQuestion({
       description: 'very good',
       options: {
-        choices: {
-          items: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
-        },
+        choices: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
+        randomized: true,
       },
       tags: ['CDEF'],
       title: 'second question',
@@ -119,13 +116,13 @@ describe('SessionService', () => {
         name: 'session with an empty block',
         questionBlocks: [
           {
-            questions: [{ id: question1.id }, { id: question2.id }],
+            questions: [question1.id, question2.id],
           },
           {
             questions: [],
           },
           {
-            questions: [{ id: question1.id }],
+            questions: [question1.id],
           },
         ],
         userId: user.id,
@@ -140,10 +137,10 @@ describe('SessionService', () => {
         name: 'hello world',
         questionBlocks: [
           {
-            questions: [{ id: question1.id }, { id: question2.id }],
+            questions: [question1.id, question2.id],
           },
           {
-            questions: [{ id: question1.id }],
+            questions: [question1.id],
           },
         ],
         userId: user.id,
@@ -166,7 +163,7 @@ describe('SessionService', () => {
         userId: user.id,
       })
 
-      expect(startedSession.status).toEqual(1)
+      expect(startedSession.status).toEqual(SessionService.SessionStatus.RUNNING)
       expect(startedSession).toMatchSnapshot()
     })
 
@@ -208,7 +205,7 @@ describe('SessionService', () => {
         userId: user.id,
       })
 
-      expect(endedSession.status).toEqual(2)
+      expect(endedSession.status).toEqual(SessionService.SessionStatus.COMPLETED)
       expect(endedSession).toMatchSnapshot()
     })
 

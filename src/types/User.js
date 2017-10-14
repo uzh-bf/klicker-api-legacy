@@ -10,27 +10,25 @@ const Session = require('./Session')
 const Tag = require('./Tag')
 
 const User = `
+  input UserInput {
+    email: String
+    password: String
+    shortname: String
+  }
   type User {
     id: ID!
-
     email: String!
     isActive: Boolean!
     isAAI: Boolean!
     shortname: String!
 
-    questions: [Question]!
-    sessions: [Session]!
-    tags: [Tag]!
-
     runningSession: Session
+
+    questions: [Question!]!
+    sessions: [Session!]!
+    tags: [Tag!]!
 
     createdAt: String!
     updatedAt: String!
-  }
-
-  input UserInput {
-    email: String
-    password: String
-    shortname: String
   }
 `
