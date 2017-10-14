@@ -4,11 +4,6 @@
 module.exports = () => [SCQuestionOptions]
 
 const SCQuestionOptions = `
-  input SCQuestionOptionsInput {
-    randomized: Boolean
-
-    choices: [SCQuestionOptions_ChoiceInput!]!
-  }
   type SCQuestionOptions {
     randomized: Boolean!
 

@@ -8,9 +8,6 @@ const FREEQuestionOptions = `
     RANGE
   }
 
-  input FREEQuestionOptionsInput {
-    restrictions: FREEQuestionOptions_RestrictionsInput!
-  }
   type FREEQuestionOptions {
     restrictions: FREEQuestionOptions_Restrictions!
   }
