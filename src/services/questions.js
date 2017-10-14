@@ -1,5 +1,21 @@
 const { QuestionModel, TagModel, UserModel } = require('../models')
 
+const prepareOptions = (type, options) => {
+  if (type === 'SC') {
+    const { choices, restrictions } = options
+
+    return {
+      choices: {
+        ...choices,
+        items: choices.items.map((option, index) => ({ key: index, ...option })),
+      },
+      restrictions,
+    }
+  }
+
+  return options
+}
+
 // create a new question
 const createQuestion = async ({
   title, type, description, options, tags, userId,
@@ -10,7 +26,7 @@ const createQuestion = async ({
   }
 
   // if no options have been assigned, throw
-  if (!options || options.length === 0) {
+  if (!options) {
     throw new Error('NO_OPTIONS_SPECIFIED')
   }
 
@@ -41,7 +57,7 @@ const createQuestion = async ({
       {
         key: 0,
         description,
-        options: options.map((option, index) => ({ key: index, ...option })),
+        options: prepareOptions(type, options),
         solution: {},
       },
     ],
@@ -66,4 +82,5 @@ const createQuestion = async ({
 
 module.exports = {
   createQuestion,
+  prepareOptions,
 }

@@ -10,7 +10,7 @@ const QuestionInstance = `
     question: Question!
     version: Int!
 
-    createdAt: String
-    updatedAt: String
+    createdAt: String!
+    updatedAt: String!
   }
 `

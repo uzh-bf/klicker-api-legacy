@@ -1,25 +1,58 @@
 /* eslint-disable no-use-before-define */
 
 // HACK: export before require such that circular dependencies can be handled
-module.exports = () => [Session, Feedback, ConfusionTimestep, QuestionInstance]
+module.exports = () => [Session, QuestionInstance]
 
-const ConfusionTimestep = require('./ConfusionTimestep')
-const Feedback = require('./Feedback')
 const QuestionInstance = require('./QuestionInstance')
 
 const Session = `
-  enum SessionStatus {
+  enum Session_Status {
     CREATED
     RUNNING
     COMPLETED
   }
 
-  input Session_QuestionInput {
+  type Session {
     id: ID!
+
+    name: String!
+    status: Session_Status!
+    settings: Session_Settings!
+    user: User!
+
+    blocks: [Session_QuestionBlock]!
+    confusionTS: [Session_ConfusionTimestep]!
+    feedbacks: [Session_Feedback]!
+
+    createdAt: String!
+    updatedAt: String!
   }
 
-  input Session_QuestionBlockInput {
-    questions: [Session_QuestionInput]
+  type Session_Settings {
+    isConfusionBarometerActive: Boolean!
+    isFeedbackChannelActive: Boolean!
+    isFeedbackChannelPublic: Boolean!
+  }
+
+  type Session_QuestionBlock {
+    key: Int!
+    status: Int!
+    instances: [QuestionInstance]!
+  }
+
+  type Session_ConfusionTimestep {
+    difficulty: Int!
+    speed: Int!
+
+    createdAt: String!
+  }
+
+  type Session_Feedback {
+    key: Int!
+    content: String!
+    votes: Int!
+
+    createdAt: String!
   }
 
   input SessionInput {
@@ -27,37 +60,13 @@ const Session = `
     blocks: [Session_QuestionBlockInput]!
   }
 
-  input SessionSettingsInput {
+  input Session_QuestionBlockInput {
+    questions: [ID]!
+  }
+
+  input Session_SettingsInput {
     isConfusionBarometerActive: Boolean
     isFeedbackChannelActive: Boolean
     isFeedbackChannelPublic: Boolean
-  }
-
-  type SessionSettings {
-    isConfusionBarometerActive: Boolean
-    isFeedbackChannelActive: Boolean
-    isFeedbackChannelPublic: Boolean
-  }
-
-  type QuestionBlock {
-    key: Int
-    status: Int!
-    instances: [QuestionInstance]
-  }
-
-  type Session {
-    id: ID!
-
-    name: String!
-    status: Int!
-    settings: SessionSettings
-    user: User!
-
-    blocks: [QuestionBlock]
-    confusionTS: [ConfusionTimestep]
-    feedbacks: [Feedback]
-
-    createdAt: String
-    updatedAt: String
   }
 `

@@ -1,16 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`QuestionService createQuestion allows creating a valid question 1`] = `
-
-    Title: valid question
-    Type: SC
-
-    Instances: []
-    Tags: [ABCD,test]
-    Versions: 
-      Description: blabla
-      Instances: []
-      Options: [option1 false,option2 true]
-    
-  
+exports[`QuestionService prepareOptions handles options for FREE questions 1`] = `
+Object {
+  "restrictions": Object {
+    "kind": "RANGE",
+    "max": 100,
+    "min": 10,
+  },
+}
 `;

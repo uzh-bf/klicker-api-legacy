@@ -6,11 +6,6 @@ module.exports = () => [Tag, Question]
 const Question = require('./Question')
 
 const Tag = `
-  input TagInput {
-    name: String
-    question: ID
-  }
-
   type Tag {
     id: ID!
 
@@ -19,7 +14,12 @@ const Tag = `
 
     questions: [Question]!
 
-    createdAt: String
-    updatedAt: String
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input TagInput {
+    name: String!
+    question: ID!
   }
 `

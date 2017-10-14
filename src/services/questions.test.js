@@ -22,7 +22,7 @@ expect.addSnapshotSerializer({
     Versions: ${val.versions.map(version => `
       Description: ${version.description}
       Instances: [${version.instances}]
-      Options: [${version.options.map(option => `${option.name} ${option.correct}`)}]
+      Options: ${version.options}
     `)}
   `,
 })
@@ -52,37 +52,76 @@ describe('QuestionService', () => {
     user = undefined
   })
 
+  describe('prepareOptions', () => {
+    it('handles options for SC questions', () => {
+      const options = {
+        choices: {
+          items: [{ correct: false, name: 'choice 1' }, { correct: true, name: 'choice 2' }],
+          randomized: true,
+        },
+      }
+      expect(QuestionService.prepareOptions('SC', options)).toEqual({})
+    })
+
+    it('handles options for FREE questions', () => {
+      const options = {
+        restrictions: {
+          min: 10,
+          max: 100,
+          kind: 'RANGE',
+        },
+      }
+      expect(QuestionService.prepareOptions('FREE', options)).toEqual({})
+    })
+  })
+
   describe('createQuestion', () => {
+    const question = {
+      description: 'blabla',
+      options: {
+        choices: {
+          items: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
+          randomized: true,
+        },
+      },
+      tags: ['ABCD', 'test'],
+      title: 'question without tags',
+      type: 'SC',
+      userId: user.id,
+    }
+
     it('prevents creating a question without tags', () => {
       expect(QuestionService.createQuestion({
-        description: 'blabla',
-        options: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
+        ...question,
         tags: [],
-        title: 'question without tags',
-        type: 'SC',
-        userId: user.id,
       })).rejects.toEqual(new Error('NO_TAGS_SPECIFIED'))
     })
 
     it('prevents creating a question without options', () => {
       expect(QuestionService.createQuestion({
-        description: 'blabla',
-        options: [],
-        tags: ['ABCD', 'test'],
-        title: 'valid question',
-        type: 'SC',
-        userId: user.id,
+        ...question,
+        options: undefined,
       })).rejects.toEqual(new Error('NO_OPTIONS_SPECIFIED'))
     })
 
-    it('allows creating a valid question', async () => {
+    it('allows creating a valid SC question', async () => {
+      const newQuestion = await QuestionService.createQuestion(question)
+
+      expect(newQuestion.versions.length).toEqual(1)
+      expect(newQuestion).toMatchSnapshot()
+    })
+
+    it('allows creating a valid FREE question', async () => {
       const newQuestion = await QuestionService.createQuestion({
-        description: 'blabla',
-        options: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
-        tags: ['ABCD', 'test'],
-        title: 'valid question',
-        type: 'SC',
-        userId: user.id,
+        ...question,
+        type: 'FREE',
+        options: {
+          restrictions: {
+            min: 10,
+            max: 100,
+            kind: 'RANGE',
+          },
+        },
       })
 
       expect(newQuestion.versions.length).toEqual(1)
