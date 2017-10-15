@@ -11,7 +11,7 @@ exports[`QuestionService createQuestion allows creating a valid FREE question 1`
       Description: blabla
       Instances: []
       Options: {
-        Choices: []
+        Choices: null
         Randomized: false
         Restrictions: {
           Max: 100
@@ -35,14 +35,15 @@ exports[`QuestionService createQuestion allows creating a valid SC question 1`] 
       Instances: []
       Options: {
         Choices: [
-          Correct: false
-          Name: option1
-        ,
-          Correct: true
-          Name: option2
+            Correct: false
+            Name: option1
+          ,
+            Correct: true
+            Name: option2
+          
         ]
         Randomized: true
-        Restrictions: undefined
+        Restrictions: null
       }
     ]
   

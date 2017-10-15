@@ -23,10 +23,12 @@ expect.addSnapshotSerializer({
       Description: ${description}
       Instances: [${instances}]
       Options: {
-        Choices: [${options.choices.map(({ correct, name }) => `
-          Correct: ${correct}
-          Name: ${name}
-        `)}]
+        Choices: ${options.choices &&
+          `[${options.choices.map(({ correct, name }) => `
+            Correct: ${correct}
+            Name: ${name}
+          `)}
+        ]`}
         Randomized: ${options.randomized}
         Restrictions: ${options.restrictions &&
           `{
