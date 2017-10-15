@@ -12,6 +12,12 @@ const Session = `
     COMPLETED
   }
 
+  enum Session_QuestionBlockStatus {
+    PLANNED
+    ACTIVE
+    EXECUTED
+  }
+
   input SessionInput {
     name: String!
     blocks: [Session_QuestionBlockInput]!
@@ -48,7 +54,8 @@ const Session = `
   }
   type Session_QuestionBlock {
     id: ID!
-    status: Int!
+
+    status: Session_QuestionBlockStatus!
 
     instances: [QuestionInstance!]!
   }
