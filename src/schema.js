@@ -87,6 +87,17 @@ const resolvers = {
     tags,
     user,
   },
+  QuestionOptions: {
+    __resolveType(obj) {
+      if (obj.restrictions) {
+        return 'FREEQuestionOptions'
+      }
+      if (obj.choices) {
+        return 'SCQuestionOptions'
+      }
+      return null
+    },
+  },
   Session_QuestionBlock: {
     instances: questionInstancesByPV,
   },

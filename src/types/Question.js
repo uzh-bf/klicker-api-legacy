@@ -11,13 +11,6 @@ const SCQuestionOptions = require('./questionTypes/SCQuestionOptions')
 const Question = `
   union QuestionOptions = SCQuestionOptions | FREEQuestionOptions
 
-  input QuestionOptionsInput {
-    randomized: Boolean
-
-    restrictions: FREEQuestionOptions_RestrictionsInput!
-
-    choices: [SCQuestionOptions_ChoiceInput!]!
-  }
   input QuestionInput {
     title: String!
     type: String!
@@ -26,6 +19,11 @@ const Question = `
     options: QuestionOptionsInput!
 
     tags: [ID!]!
+  }
+  input QuestionOptionsInput {
+    randomized: Boolean
+    restrictions: FREEQuestionOptions_RestrictionsInput
+    choices: [SCQuestionOptions_ChoiceInput!]
   }
   type Question {
     id: ID!
