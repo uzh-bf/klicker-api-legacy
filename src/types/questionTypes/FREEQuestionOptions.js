@@ -4,7 +4,8 @@
 module.exports = () => [FREEQuestionOptions]
 
 const FREEQuestionOptions = `
-  enum FREEQuestionOptions_RestrictionKind {
+  enum FREEQuestionOptions_RestrictionType {
+    NONE
     RANGE
   }
 
@@ -16,12 +17,12 @@ const FREEQuestionOptions = `
     min: Int
     max: Int
 
-    kind: FREEQuestionOptions_RestrictionKind!
+    type: FREEQuestionOptions_RestrictionType!
   }
   type FREEQuestionOptions_Restrictions {
     min: Int
     max: Int
 
-    kind: FREEQuestionOptions_RestrictionKind!
+    type: FREEQuestionOptions_RestrictionType!
   }
 `

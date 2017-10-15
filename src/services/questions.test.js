@@ -19,11 +19,23 @@ expect.addSnapshotSerializer({
 
     Instances: [${val.instances}]
     Tags: [${val.tags.map(tag => tag.name)}]
-    Versions: ${val.versions.map(version => `
-      Description: ${version.description}
-      Instances: [${version.instances}]
-      Options: ${version.options}
-    `)}
+    Versions: [${val.versions.map(({ description, instances, options }) => `
+      Description: ${description}
+      Instances: [${instances}]
+      Options: {
+        Choices: [${options.choices.map(({ correct, name }) => `
+          Correct: ${correct}
+          Name: ${name}
+        `)}]
+        Randomized: ${options.randomized}
+        Restrictions: ${options.restrictions &&
+          `{
+          Max: ${options.restrictions.max}
+          Min: ${options.restrictions.min}
+          Type: ${options.restrictions.type}
+        }`}
+      }
+    `)}]
   `,
 })
 
@@ -94,7 +106,7 @@ describe('QuestionService', () => {
           restrictions: {
             min: 10,
             max: 100,
-            kind: 'RANGE',
+            type: 'RANGE',
           },
         },
       })

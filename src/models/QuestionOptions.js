@@ -11,7 +11,7 @@ const Restrictions = new mongoose.Schema({
   min: { type: Number },
   max: { type: Number },
   // RANGE: numerical range with defined min and/or max values
-  kind: { type: String, enum: ['RANGE'] },
+  type: { type: String, enum: ['NONE', 'RANGE'], default: 'NONE' },
 })
 
 module.exports = new mongoose.Schema({

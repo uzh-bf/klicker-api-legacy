@@ -78,11 +78,15 @@ describe('SessionService', () => {
     question1 = await QuestionService.createQuestion({
       description: 'a description',
       options: {
-        choices: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
+        restrictions: {
+          min: 10,
+          max: 20,
+          type: 'RANGE',
+        },
       },
       tags: ['AZA', 'BBB'],
       title: 'first question',
-      type: 'SC',
+      type: 'FREE',
       userId: user.id,
     })
     question2 = await QuestionService.createQuestion({

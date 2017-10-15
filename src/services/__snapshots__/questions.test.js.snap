@@ -7,18 +7,19 @@ exports[`QuestionService createQuestion allows creating a valid FREE question 1`
 
     Instances: []
     Tags: [,]
-    Versions: 
+    Versions: [
       Description: blabla
       Instances: []
-      Options: { restrictions: 
-   { min: 10,
-     max: 100,
-     kind: 'RANGE',
-     _id: 59e26de4dc118e183812bb5b },
-  _id: 59e26de4dc118e183812bb5a,
-  randomized: false,
-  choices: [] }
-    
+      Options: {
+        Choices: []
+        Randomized: false
+        Restrictions: {
+          Max: 100
+          Min: 10
+          Type: RANGE
+        }
+      }
+    ]
   
 `;
 
@@ -29,16 +30,20 @@ exports[`QuestionService createQuestion allows creating a valid SC question 1`] 
 
     Instances: []
     Tags: [,]
-    Versions: 
+    Versions: [
       Description: blabla
       Instances: []
-      Options: { _id: 59e26de3dc118e183812bb55,
-  randomized: true,
-  choices: 
-   [ { correct: false,
-       name: 'option1',
-       _id: 59e26de3dc118e183812bb57 },
-     { correct: true, name: 'option2', _id: 59e26de3dc118e183812bb56 } ] }
-    
+      Options: {
+        Choices: [
+          Correct: false
+          Name: option1
+        ,
+          Correct: true
+          Name: option2
+        ]
+        Randomized: true
+        Restrictions: undefined
+      }
+    ]
   
 `;
