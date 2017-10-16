@@ -10,15 +10,17 @@ EXPOSE 3000
 ENV KLICKER_DIR /app
 
 # inject the application dependencies
-COPY --chown=1000:1000 package.json yarn.lock $KLICKER_DIR/
+COPY --chown=1000:0 package.json yarn.lock $KLICKER_DIR/
 
 # switch to the node user (uid 1000)
 # non-root as provided by the base image
 USER 1000
 WORKDIR $KLICKER_DIR
 
+# update permissions for klicker dir
 # install yarn packages
 RUN set -x \
+  && chmod g+rwx $KLICKER_DIR/ \
   && yarn install --frozen-lockfile
 
 # inject application sources and entrypoint
