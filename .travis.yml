@@ -27,9 +27,9 @@ jobs:
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         - chmod +x ./cc-test-reporter
         - ./cc-test-reporter before-build
+      script:
         - mv .env .env.dev
         - mv .env.travis .env
-      script:
         - yarn test:ci
       after_script:
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
@@ -47,8 +47,18 @@ jobs:
           - node_modules
 
     - stage: build
+      if: type = push
       script:
         - docker login -u$QUAY_USER -p$QUAY_TOKEN quay.io/uzh-bf/klicker-api
-        - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash -c "docker pull quay.io/uzh-bf/klicker-api:latest;docker build --cache-from quay.io/uzh-bf/klicker-api:latest -t quay.io/uzh-bf/klicker-api:latest .;docker push quay.io/uzh-bf/klicker-api:latest"; fi
-        - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "docker pull quay.io/uzh-bf/klicker-api:nightly;docker build --cache-from quay.io/uzh-bf/klicker-api:nightly -t quay.io/uzh-bf/klicker-api:nightly -t quay.io/uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST .;docker push quay.io/uzh-bf/klicker-api:nightly; docker push quay.io/uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST"; fi
+        - docker pull quay.io/uzh-bf/klicker-api:latest
+        - docker build --cache-from quay.io/uzh-bf/klicker-api:latest -t quay.io/uzh-bf/klicker-api:latest .
+        - docker push quay.io/uzh-bf/klicker-api:latest
 
+    - stage: build
+      if: type = pull_request
+      script:
+        - docker login -u$QUAY_USER -p$QUAY_TOKEN quay.io/uzh-bf/klicker-api
+        - docker pull quay.io/uzh-bf/klicker-api:nightly
+        - docker build --cache-from quay.io/uzh-bf/klicker-api:nightly -t quay.io/uzh-bf/klicker-api:nightly -t quay.io/uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST .
+        - docker push quay.io/uzh-bf/klicker-api:nightly
+        - docker push quay.io/uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST"
