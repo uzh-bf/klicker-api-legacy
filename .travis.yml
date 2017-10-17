@@ -8,20 +8,22 @@ jobs:
   include:
     - &test-setup
       stage: test
+      language: node_js
+      node_js:
+        - "8"
+      cache:
+        yarn: true
+        directories:
+          - node_modules
       before_install:
         - 'curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.2.0'
         - export PATH="$HOME/.yarn/bin:$PATH"
       script:
         - yarn run format:ci
-      cache:
-        yarn: true
-        directories:
-          - node_modules
-      language: node_js
-      node_js:
-        - "8"
 
     - <<: *test-setup
+      services:
+        - mongodb
       before_script:
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         - chmod +x ./cc-test-reporter
@@ -32,23 +34,20 @@ jobs:
         - yarn test:ci
       after_script:
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
-      services:
-        - mongodb
-
 
     - &build-setup
       stage: build
       if: type = push
+      addons:
+        apt:
+          packages:
+            - docker-ce
       before_script:
         - docker login -u$DOCKER_USER -p$DOCKER_PASSWORD
       script:
         - docker pull uzhbf/klicker-api:latest
         - docker build --cache-from uzhbf/klicker-api:latest -t uzhbf/klicker-api:latest .
         - docker push uzhbf/klicker-api:latest
-      addons:
-        apt:
-          packages:
-            - docker-ce
 
     - <<: *build-setup
       if: type = pull_request
