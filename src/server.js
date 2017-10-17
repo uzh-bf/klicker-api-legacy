@@ -58,8 +58,10 @@ server.use(
   '/graphql',
   // setup CORS
   cors({
-    credentials: dev, // allow passing credentials over CORS in dev mode
-    origin: 'http://localhost:3000',
+    // HACK: temporarily always allow sending credentials over CORS
+    // credentials: dev, // allow passing credentials over CORS in dev mode
+    credentials: true,
+    origin: process.env.ORIGIN || 'http://localhost:3000',
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   }),
   // enable cookie parsing
