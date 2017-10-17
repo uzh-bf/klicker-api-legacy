@@ -14,11 +14,11 @@ const AuthService = require('./services/auth')
 
 mongoose.Promise = Promise
 
-const dev = process.env.NODE_ENV !== 'production'
+// const dev = process.env.NODE_ENV !== 'production'
 
 // require important environment variables to be present
 // otherwise exit the application
-const appSettings = ['APP_DOMAIN', 'APP_PORT', 'APP_SECRET', 'MONGO_URL']
+const appSettings = ['APP_DOMAIN', 'APP_PORT', 'APP_SECRET', 'MONGO_URL', 'ORIGIN']
 appSettings.forEach((envVar) => {
   if (!process.env[envVar]) {
     console.warn(`> Error: Please pass the ${envVar} as an environment variable.`)
@@ -52,16 +52,14 @@ mongoose.connection
 // initialize an express server
 const server = express()
 
-// expose the GraphQL API endpoint
-// parse JWT that are passed as a header and attach their content to req.user
-server.use(
+let middleware = [
   '/graphql',
   // setup CORS
   cors({
     // HACK: temporarily always allow sending credentials over CORS
     // credentials: dev, // allow passing credentials over CORS in dev mode
     credentials: true,
-    origin: process.env.ORIGIN || 'http://localhost:3000',
+    origin: process.env.ORIGIN,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   }),
   // enable cookie parsing
@@ -75,8 +73,17 @@ server.use(
   }),
   // parse json contents
   bodyParser.json(),
-  // setup Apollo Optics if enabled
-  withOptics ? opticsAgent.middleware() : f => f,
+]
+
+// setup Apollo Optics if enabled
+if (withOptics) {
+  middleware = [...middleware, opticsAgent.middleware()]
+}
+
+// expose the GraphQL API endpoint
+// parse JWT that are passed as a header and attach their content to req.user
+server.use(
+  ...middleware,
   // delegate to the GraphQL API
   graphqlExpress((req, res) => ({
     context: { auth: req.auth, res, opticsContext: opticsAgent.context(req) },
