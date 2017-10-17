@@ -6,7 +6,7 @@ branches:
 
 jobs:
   include:
-    - &test-setup:
+    - &test-setup
       stage: test
       before_install:
         - 'curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.2.0'
@@ -36,7 +36,7 @@ jobs:
         - mongodb
 
 
-    - &build-setup:
+    - &build-setup
       stage: build
       if: type = push
       before_script:
