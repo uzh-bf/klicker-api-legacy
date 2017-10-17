@@ -1,38 +1,13 @@
 sudo: required
 
-
-
 branches:
   only:
     - master
 
 jobs:
   include:
-    - stage: test
-      before_install:
-        - 'curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.2.0'
-        - export PATH="$HOME/.yarn/bin:$PATH"
-      before_script:
-        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        - chmod +x ./cc-test-reporter
-        - ./cc-test-reporter before-build
-      script:
-        - mv .env .env.dev
-        - mv .env.travis .env
-        - yarn test:ci
-      after_script:
-        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
-      cache:
-        yarn: true
-        directories:
-          - node_modules
-      services:
-        - mongodb
-      language: node_js
-      node_js:
-        - "8"
-
-    - stage: test
+    - &test-setup:
+      stage: test
       before_install:
         - 'curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.2.0'
         - export PATH="$HOME/.yarn/bin:$PATH"
@@ -46,10 +21,27 @@ jobs:
       node_js:
         - "8"
 
-    - stage: build
-      if: type = push
+    - <<: *test-setup
+      before_script:
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
       script:
+        - mv .env .env.dev
+        - mv .env.travis .env
+        - yarn test:ci
+      after_script:
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+      services:
+        - mongodb
+
+
+    - &build-setup:
+      stage: build
+      if: type = push
+      before_script:
         - docker login -u$DOCKER_USER -p$DOCKER_PASSWORD
+      script:
         - docker pull uzhbf/klicker-api:latest
         - docker build --cache-from uzhbf/klicker-api:latest -t uzhbf/klicker-api:latest .
         - docker push uzhbf/klicker-api:latest
@@ -58,15 +50,10 @@ jobs:
           packages:
             - docker-ce
 
-    - stage: build
+    - <<: *build-setup
       if: type = pull_request
       script:
-        - docker login -u$DOCKER_USER -p$DOCKER_PASSWORD
         - docker pull uzhbf/klicker-api:nightly
         - docker build --cache-from uzhbf/klicker-api:nightly -t uzhbf/klicker-api:nightly -t uzhbf/klicker-api:nightly-$TRAVIS_PULL_REQUEST .
         - docker push uzhbf/klicker-api:nightly
         - docker push uzhbf/klicker-api:nightly-$TRAVIS_PULL_REQUEST
-      addons:
-        apt:
-          packages:
-            - docker-ce
