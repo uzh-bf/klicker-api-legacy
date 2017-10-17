@@ -50,15 +50,15 @@ jobs:
       if: type = push
       script:
         - docker login -u$DOCKER_USER -p$DOCKER_PASSWORD
-        - docker pull uzh-bf/klicker-api:latest
-        - docker build --cache-from uzh-bf/klicker-api:latest -t uzh-bf/klicker-api:latest .
-        - docker push uzh-bf/klicker-api:latest
+        - docker pull uzhbf/klicker-api:latest
+        - docker build --cache-from uzhbf/klicker-api:latest -t uzhbf/klicker-api:latest .
+        - docker push uzhbf/klicker-api:latest
 
     - stage: build
       if: type = pull_request
       script:
         - docker login -u$DOCKER_USER -p$DOCKER_PASSWORD
-        - docker pull uzh-bf/klicker-api:nightly
-        - docker build --cache-from uzh-bf/klicker-api:nightly -t uzh-bf/klicker-api:nightly -t uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST .
-        - docker push uzh-bf/klicker-api:nightly
-        - docker push uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST
+        - docker pull uzhbf/klicker-api:nightly
+        - docker build --cache-from uzhbf/klicker-api:nightly -t uzhbf/klicker-api:nightly -t uzhbf/klicker-api:nightly-$TRAVIS_PULL_REQUEST .
+        - docker push uzhbf/klicker-api:nightly
+        - docker push uzhbf/klicker-api:nightly-$TRAVIS_PULL_REQUEST
