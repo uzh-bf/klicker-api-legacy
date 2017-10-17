@@ -61,4 +61,4 @@ jobs:
         - docker pull uzh-bf/klicker-api:nightly
         - docker build --cache-from uzh-bf/klicker-api:nightly -t uzh-bf/klicker-api:nightly -t uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST .
         - docker push uzh-bf/klicker-api:nightly
-        - docker push uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST"
+        - docker push uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST
