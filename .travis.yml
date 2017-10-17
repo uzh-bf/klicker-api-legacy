@@ -49,16 +49,16 @@ jobs:
     - stage: build
       if: type = push
       script:
-        - docker login -u$QUAY_USER -p$QUAY_TOKEN quay.io/uzh-bf/klicker-api
-        - docker pull quay.io/uzh-bf/klicker-api:latest
-        - docker build --cache-from quay.io/uzh-bf/klicker-api:latest -t quay.io/uzh-bf/klicker-api:latest .
-        - docker push quay.io/uzh-bf/klicker-api:latest
+        - docker login -u$DOCKER_USER -p$DOCKER_PASSWORD
+        - docker pull uzh-bf/klicker-api:latest
+        - docker build --cache-from uzh-bf/klicker-api:latest -t uzh-bf/klicker-api:latest .
+        - docker push uzh-bf/klicker-api:latest
 
     - stage: build
       if: type = pull_request
       script:
-        - docker login -u$QUAY_USER -p$QUAY_TOKEN quay.io/uzh-bf/klicker-api
-        - docker pull quay.io/uzh-bf/klicker-api:nightly
-        - docker build --cache-from quay.io/uzh-bf/klicker-api:nightly -t quay.io/uzh-bf/klicker-api:nightly -t quay.io/uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST .
-        - docker push quay.io/uzh-bf/klicker-api:nightly
-        - docker push quay.io/uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST"
+        - docker login -u$DOCKER_USER -p$DOCKER_PASSWORD
+        - docker pull uzh-bf/klicker-api:nightly
+        - docker build --cache-from uzh-bf/klicker-api:nightly -t uzh-bf/klicker-api:nightly -t uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST .
+        - docker push uzh-bf/klicker-api:nightly
+        - docker push uzh-bf/klicker-api:nightly-$TRAVIS_PULL_REQUEST"
