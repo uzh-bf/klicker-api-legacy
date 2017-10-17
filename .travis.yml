@@ -15,11 +15,6 @@ branches:
 services:
   - mongodb
 
-addons:
-  apt:
-    packages:
-      - docker-ce
-
 jobs:
   include:
     - stage: test
@@ -53,6 +48,10 @@ jobs:
         - docker pull uzhbf/klicker-api:latest
         - docker build --cache-from uzhbf/klicker-api:latest -t uzhbf/klicker-api:latest .
         - docker push uzhbf/klicker-api:latest
+      addons:
+        apt:
+          packages:
+            - docker-ce
 
     - stage: build
       if: type = pull_request
@@ -62,3 +61,7 @@ jobs:
         - docker build --cache-from uzhbf/klicker-api:nightly -t uzhbf/klicker-api:nightly -t uzhbf/klicker-api:nightly-$TRAVIS_PULL_REQUEST .
         - docker push uzhbf/klicker-api:nightly
         - docker push uzhbf/klicker-api:nightly-$TRAVIS_PULL_REQUEST
+      addons:
+        apt:
+          packages:
+            - docker-ce
