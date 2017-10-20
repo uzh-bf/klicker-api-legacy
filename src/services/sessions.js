@@ -161,11 +161,17 @@ const activateNextBlock = async ({ userId }) => {
   const user = await UserModel.findById(userId).populate(['activeInstances', 'runningSession'])
   const { runningSession } = user
 
-  // TODO: check whether the currently active block was the last one => end session
+  // if all the blocks have already been activated, simply return the session
+  if (runningSession.activeBlock === runningSession.blocks.length) {
+    return user.runningSession
+  }
 
+  const prevBlockIndex = runningSession.activeBlock
   const nextBlockIndex = runningSession.activeBlock + 1
+
+  // while there is still a next session
   if (nextBlockIndex < runningSession.blocks.length) {
-    // find the next block
+    // find the next block for the running session
     const nextBlock = runningSession.blocks[nextBlockIndex]
 
     // update the instances in the new active block to be open
@@ -175,16 +181,20 @@ const activateNextBlock = async ({ userId }) => {
       { multi: true },
     )
 
+    // set the status of the instances in the next block to active
     runningSession.blocks[nextBlockIndex].status = 'ACTIVE'
 
+    // set the instances of the next block to be the users active instances
     user.activeInstances = nextBlock.instances
   }
 
+  // increase the index of the currently active block
   runningSession.activeBlock += 1
 
+  // if the newly activated block had a predecessor, close it
   if (runningSession.activeBlock > 0) {
     // find the currently active block
-    const previousBlock = runningSession.blocks[runningSession.activeBlock]
+    const previousBlock = runningSession.blocks[prevBlockIndex]
 
     // update the instances in the currently active block to be closed
     await QuestionInstanceModel.update(
@@ -194,9 +204,10 @@ const activateNextBlock = async ({ userId }) => {
     )
 
     // set the status of the previous block to executed
-    runningSession.blocks[previousBlock].status = 'EXECUTED'
+    runningSession.blocks[prevBlockIndex].status = 'EXECUTED'
   }
 
+  // save the updates for the running session and the user
   await Promise.all([runningSession.save(), user.save()])
 
   return user.runningSession
