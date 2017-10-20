@@ -223,21 +223,6 @@ describe('SessionService', () => {
     })
   })
 
-  describe('activateNext', () => {
-    let preparedSession
-
-    beforeAll(async () => {
-      preparedSession = await prepareSession(user.id)
-    })
-
-    it('allows activating the next question block', async () => {
-      await SessionService.startSession({
-        id: preparedSession.id,
-        userId: user.id,
-      })
-    })
-  })
-
   describe('addFeedback', () => {
     let preparedSession
 
@@ -439,6 +424,30 @@ describe('SessionService', () => {
 
     afterAll(async () => {
       await SessionService.stopSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
+    })
+  })
+
+  describe('activateNextBlock', () => {
+    let preparedSession
+
+    beforeAll(async () => {
+      preparedSession = await prepareSession(user.id)
+    })
+
+    it('allows activating the next question block', async () => {
+      const runningSession = await SessionService.startSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
+
+      expect(runningSession).toMatchSnapshot()
+    })
+
+    afterAll(async () => {
+      await SessionService.endSession({
         id: preparedSession.id,
         userId: user.id,
       })
