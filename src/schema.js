@@ -7,7 +7,7 @@ const {
   questionsByPV,
   questionByPV,
 } = require('./resolvers/questions')
-const { activeInstance, questionInstancesByPV } = require('./resolvers/questionInstances')
+const { activeInstances, questionInstancesByPV } = require('./resolvers/questionInstances')
 const {
   addFeedback,
   addConfusionTS,
@@ -19,6 +19,7 @@ const {
   sessionsByPV,
   startSession,
   updateSessionSettings,
+  activateNextBlock,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -40,7 +41,7 @@ const typeDefs = [
     allQuestions: [Question]!
     allSessions: [Session]!
     allTags: [Tag]!
-    activeInstance: QuestionInstance
+    activeInstances: [QuestionInstance]
     runningSession: Session
     user: User
   }
@@ -53,6 +54,7 @@ const typeDefs = [
 
     createSession(session: SessionInput!): Session!
     startSession(id: ID!): Session!
+    activateNextBlock: Session!
     endSession(id: ID!): Session!
     addFeedback(sessionId: ID!, content: String!): Session!
     addConfusionTS(sessionId: ID!, difficulty: Int!, speed: Int!): Session!
@@ -75,7 +77,7 @@ const resolvers = {
     allQuestions: requireAuth(allQuestions),
     allSessions: requireAuth(allSessions),
     allTags: requireAuth(allTags),
-    activeInstance: requireAuth(activeInstance),
+    activeInstances: requireAuth(activeInstances),
     runningSession: requireAuth(runningSession),
     user: requireAuth(authUser),
   },
@@ -89,6 +91,7 @@ const resolvers = {
     login,
     startSession: requireAuth(startSession),
     updateSessionSettings: requireAuth(updateSessionSettings),
+    activateNextBlock: requireAuth(activateNextBlock),
   },
   Question: {
     tags,

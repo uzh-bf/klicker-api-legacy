@@ -25,7 +25,7 @@ const User = new mongoose.Schema({
   questions: [{ type: ObjectId, ref: 'Question' }],
   sessions: [{ type: ObjectId, ref: 'Session' }],
 
-  activeInstance: { type: ObjectId, ref: 'QuestionInstance' },
+  activeInstances: [{ type: ObjectId, ref: 'QuestionInstance' }],
   runningSession: { type: ObjectId, ref: 'Session' },
 
   createdAt: { type: Date, default: Date.now() },

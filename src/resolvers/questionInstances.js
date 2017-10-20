@@ -1,9 +1,9 @@
 const { QuestionInstanceModel, UserModel } = require('../models')
 
 /* ----- queries ----- */
-const activeInstanceQuery = async (parentValue, args, { auth }) => {
-  const user = await UserModel.findById(auth.sub).populate('activeInstance')
-  return user.activeInstance
+const activeInstancesQuery = async (parentValue, args, { auth }) => {
+  const user = await UserModel.findById(auth.sub).populate('activeInstances')
+  return user.activeInstances
 }
 
 const questionInstanceByIDQuery = (parentValue, { id }) => QuestionInstanceModel.findById(id)
@@ -15,7 +15,7 @@ const addResponseMutation = () => {}
 
 module.exports = {
   // queries
-  activeInstance: activeInstanceQuery,
+  activeInstances: activeInstancesQuery,
   questionInstance: questionInstanceByIDQuery,
   questionInstancesByPV: questionInstancesByPVQuery,
 

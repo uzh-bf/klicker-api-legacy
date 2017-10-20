@@ -27,6 +27,9 @@ const createSessionMutation = (parentValue, { session: { name, blocks } }, { aut
 const startSessionMutation = (parentValue, { id }, { auth }) =>
   SessionService.startSession({ id, userId: auth.sub })
 
+const activateNextBlockMutation = (parentValue, args, { auth }) =>
+  SessionService.activateNextBlock({ userId: auth.sub })
+
 const endSessionMutation = (parentValue, { id }, { auth }) =>
   SessionService.endSession({ id, userId: auth.sub })
 
@@ -54,6 +57,7 @@ module.exports = {
   // mutations
   createSession: createSessionMutation,
   endSession: endSessionMutation,
+  activateNextBlock: activateNextBlockMutation,
   startSession: startSessionMutation,
   addFeedback: addFeedbackMutation,
   addConfusionTS: addConfusionTSMutation,

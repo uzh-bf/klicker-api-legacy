@@ -25,6 +25,7 @@ const Session = `
   type Session {
     id: ID!
     name: String!
+    activeBlock: Int!
 
     status: Session_Status!
     settings: Session_Settings!

@@ -223,6 +223,21 @@ describe('SessionService', () => {
     })
   })
 
+  describe('activateNext', () => {
+    let preparedSession
+
+    beforeAll(async () => {
+      preparedSession = await prepareSession(user.id)
+    })
+
+    it('allows activating the next question block', async () => {
+      await SessionService.startSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
+    })
+  })
+
   describe('addFeedback', () => {
     let preparedSession
 

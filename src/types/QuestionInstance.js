@@ -4,6 +4,11 @@
 module.exports = () => [QuestionInstance]
 
 const QuestionInstance = `
+  enum QuestionInstance_Status {
+    CLOSED
+    OPEN
+  }
+
   input QuestionInstance_ResponseInput {
     value: String!
   }
@@ -16,6 +21,7 @@ const QuestionInstance = `
   type QuestionInstance {
     id: ID!
     version: Int!
+    status: QuestionInstance_Status!
 
     question: Question!
 

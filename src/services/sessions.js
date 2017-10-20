@@ -156,6 +156,52 @@ const endSession = async ({ id, userId }) => {
   return session
 }
 
+// activate the next question block
+const activateNextBlock = async ({ userId }) => {
+  const user = await UserModel.findById(userId).populate(['activeInstances', 'runningSession'])
+  const { runningSession } = user
+
+  // TODO: check whether the currently active block was the last one => end session
+
+  const nextBlockIndex = runningSession.activeBlock + 1
+  if (nextBlockIndex < runningSession.blocks.length) {
+    // find the next block
+    const nextBlock = runningSession.blocks[nextBlockIndex]
+
+    // update the instances in the new active block to be open
+    await QuestionInstanceModel.update(
+      { _id: { $in: nextBlock.instances } },
+      { status: 'OPEN' },
+      { multi: true },
+    )
+
+    runningSession.blocks[nextBlockIndex].status = 'ACTIVE'
+
+    user.activeInstances = nextBlock.instances
+  }
+
+  runningSession.activeBlock += 1
+
+  if (runningSession.activeBlock > 0) {
+    // find the currently active block
+    const previousBlock = runningSession.blocks[runningSession.activeBlock]
+
+    // update the instances in the currently active block to be closed
+    await QuestionInstanceModel.update(
+      { _id: { $in: previousBlock.instances } },
+      { status: 'CLOSED' },
+      { multi: true },
+    )
+
+    // set the status of the previous block to executed
+    runningSession.blocks[previousBlock].status = 'EXECUTED'
+  }
+
+  await Promise.all([runningSession.save(), user.save()])
+
+  return user.runningSession
+}
+
 // add a new feedback to a session
 const addFeedback = async ({ sessionId, content }) => {
   // TODO: security
@@ -241,4 +287,5 @@ module.exports = {
   addConfusionTS,
   updateSettings,
   SessionStatus,
+  activateNextBlock,
 }

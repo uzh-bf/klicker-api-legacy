@@ -22,7 +22,7 @@ const User = `
     isAAI: Boolean!
     shortname: String!
 
-    activeInstance: QuestionInstance
+    activeInstances: [QuestionInstance]
     runningSession: Session
 
     questions: [Question!]!
