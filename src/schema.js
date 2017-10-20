@@ -6,14 +6,15 @@ const {
   createQuestion,
   questionsByPV,
   questionByPV,
-  questionInstancesByPV,
 } = require('./resolvers/questions')
+const { activeInstance, questionInstancesByPV } = require('./resolvers/questionInstances')
 const {
   addFeedback,
   addConfusionTS,
   allSessions,
   createSession,
   endSession,
+  runningSession,
   sessionByPV,
   sessionsByPV,
   startSession,
@@ -39,6 +40,8 @@ const typeDefs = [
     allQuestions: [Question]!
     allSessions: [Session]!
     allTags: [Tag]!
+    activeInstance: QuestionInstance
+    runningSession: Session
     user: User
   }
 
@@ -54,6 +57,8 @@ const typeDefs = [
     addFeedback(sessionId: ID!, content: String!): Session!
     addConfusionTS(sessionId: ID!, difficulty: Int!, speed: Int!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
+
+    addResponse(sessionId: ID!, response: QuestionInstance_ResponseInput!): String!
   }
 
   type Subscription {
@@ -70,6 +75,8 @@ const resolvers = {
     allQuestions: requireAuth(allQuestions),
     allSessions: requireAuth(allSessions),
     allTags: requireAuth(allTags),
+    activeInstance: requireAuth(activeInstance),
+    runningSession: requireAuth(runningSession),
     user: requireAuth(authUser),
   },
   Mutation: {

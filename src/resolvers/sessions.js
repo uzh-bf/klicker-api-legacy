@@ -7,6 +7,11 @@ const allSessionsQuery = async (parentValue, args, { auth }) => {
   return user.sessions
 }
 
+const runningSessionQuery = async (parentValue, args, { auth }) => {
+  const user = await UserModel.findById(auth.sub).populate('runningSession')
+  return user.runningSession
+}
+
 const sessionByIDQuery = (parentValue, { id }) => SessionModel.findById(id)
 const sessionByPVQuery = parentValue => SessionModel.findById(parentValue.runningSession)
 const sessionsByPVQuery = parentValue => SessionModel.find({ _id: { $in: parentValue.sessions } })
@@ -41,6 +46,7 @@ const updateSessionSettingsMutation = (parentValue, { sessionId, settings }, { a
 module.exports = {
   // queries
   allSessions: allSessionsQuery,
+  runningSession: runningSessionQuery,
   session: sessionByIDQuery,
   sessionByPV: sessionByPVQuery,
   sessionsByPV: sessionsByPVQuery,

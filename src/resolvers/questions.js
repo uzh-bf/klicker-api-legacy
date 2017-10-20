@@ -1,5 +1,5 @@
 const QuestionService = require('../services/questions')
-const { QuestionModel, QuestionInstanceModel, UserModel } = require('../models')
+const { QuestionModel, UserModel } = require('../models')
 
 /* ----- queries ----- */
 const allQuestionsQuery = async (parentValue, args, { auth }) => {
@@ -12,10 +12,6 @@ const questionByPVQuery = parentValue => QuestionModel.findById(parentValue.ques
 const questionsByPVQuery = parentValue =>
   QuestionModel.find({ _id: { $in: parentValue.questions } })
 
-const questionInstanceByIDQuery = (parentValue, { id }) => QuestionInstanceModel.findById(id)
-const questionInstancesByPVQuery = parentValue =>
-  QuestionInstanceModel.find({ _id: { $in: parentValue.instances } })
-
 /* ----- mutations ----- */
 const createQuestionMutation = (parentValue, { question }, { auth }) =>
   QuestionService.createQuestion({ ...question, userId: auth.sub })
@@ -26,8 +22,6 @@ module.exports = {
   question: questionByIDQuery,
   questionByPV: questionByPVQuery,
   questionsByPV: questionsByPVQuery,
-  questionInstance: questionInstanceByIDQuery,
-  questionInstancesByPV: questionInstancesByPVQuery,
 
   // mutations
   createQuestion: createQuestionMutation,
