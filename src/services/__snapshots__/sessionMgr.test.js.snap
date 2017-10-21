@@ -34,8 +34,11 @@ Array [
     QUESTION_INSTANCE
 
     isOpen: true
+    version: 0
 
     responses: []
+
+    results: undefined
   ,
 ]
 `;
@@ -74,8 +77,11 @@ Array [
     QUESTION_INSTANCE
 
     isOpen: false
+    version: 0
 
     responses: []
+
+    results: undefined
   ,
 ]
 `;
@@ -114,8 +120,11 @@ Array [
     QUESTION_INSTANCE
 
     isOpen: false
+    version: 0
 
     responses: []
+
+    results: undefined
   ,
 ]
 `;

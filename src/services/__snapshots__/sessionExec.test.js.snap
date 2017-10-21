@@ -130,7 +130,7 @@ exports[`SessionExecService addFeedback allows adding new feedbacks to a running
     }
 `;
 
-exports[`SessionExecService addResponse allows adding a response to an open question instance  1`] = `
+exports[`SessionExecService addResponse allows adding responses to an open SC instance 1`] = `
 
     SESSION
 
@@ -158,14 +158,48 @@ exports[`SessionExecService addResponse allows adding a response to an open ques
     }
 `;
 
-exports[`SessionExecService addResponse allows adding a response to an open question instance  2`] = `
+exports[`SessionExecService addResponse allows adding responses to an open SC instance 2`] = `
+Array [
+  1,
+  0,
+]
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an open SC instance 3`] = `
+Array [
+  2,
+  1,
+]
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an open SC instance 4`] = `
 
     QUESTION_INSTANCE
 
     isOpen: true
+    version: 0
 
-    responses: [{
-      value: hello world
-    }]
+    responses: [
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: 0
+        text: undefined
+        value: undefined
+      }
+    ,
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: 0,1
+        text: undefined
+        value: undefined
+      }
+    ]
+
+    results: {
+      choices: [2,1]
+      free: []
+    }
   
 `;

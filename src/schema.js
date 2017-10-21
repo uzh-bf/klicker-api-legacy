@@ -4,7 +4,9 @@ const { requireAuth } = require('./services/auth')
 const {
   allQuestions, createQuestion, questionsByPV, questionByPV,
 } = require('./resolvers/questions')
-const { activeInstances, questionInstancesByPV, addResponse } = require('./resolvers/questionInstances')
+const {
+  activeInstances, questionInstancesByPV, addResponse, responsesByPV,
+} = require('./resolvers/questionInstances')
 const {
   addFeedback,
   addConfusionTS,
@@ -106,14 +108,28 @@ const resolvers = {
       return null
     },
   },
-  Session_QuestionBlock: {
-    instances: questionInstancesByPV,
-  },
   QuestionInstance: {
     question: questionByPV,
+    responses: responsesByPV,
+  },
+  QuestionInstance_Results: {
+    __resolveType(obj) {
+      if (obj.free) {
+        return 'FREEQuestionResults'
+      }
+
+      if (obj.choices) {
+        return 'SCQuestionResults'
+      }
+
+      return null
+    },
   },
   Session: {
     user,
+  },
+  Session_QuestionBlock: {
+    instances: questionInstancesByPV,
   },
   Tag: {
     questions: questionsByPV,

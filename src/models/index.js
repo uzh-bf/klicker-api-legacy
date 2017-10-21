@@ -4,7 +4,6 @@ const { QuestionModel, QuestionTypes } = require('./Question')
 const { QuestionBlock, QuestionBlockStatus } = require('./QuestionBlock')
 const { QuestionOptions, FREERestrictionTypes } = require('./QuestionOptions')
 const QuestionVersion = require('./QuestionVersion')
-const Response = require('./Response')
 const QuestionInstanceModel = require('./QuestionInstance')
 const { SessionModel, SessionStatus } = require('./Session')
 const TagModel = require('./Tag')
@@ -21,7 +20,6 @@ module.exports = {
   QuestionOptions,
   FREERestrictionTypes,
   QuestionVersion,
-  Response,
   SessionModel,
   SessionStatus,
   TagModel,

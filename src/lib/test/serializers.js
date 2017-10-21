@@ -66,15 +66,28 @@ const sessionSerializer = {
 }
 
 const questionInstanceSerializer = {
-  test: val => val.id && val.responses,
+  test: val => val.id && val.responses && val.version >= 0,
   print: val => `
     QUESTION_INSTANCE
 
     isOpen: ${val.isOpen}
+    version: ${val.version}
 
-    responses: [${val.responses.map(response => `{
-      value: ${response.value}
-    }`)}]
+    responses: [${val.responses.map(response => `
+      ip: ${response.ip}
+      fingerprint: ${response.fingerprint}
+      value: {
+        choices: ${response.value.choices}
+        text: ${response.value.text}
+        value: ${response.value.value}
+      }
+    `)}]
+
+    results: ${val.results &&
+      `{
+      choices: [${val.results.choices}]
+      free: []
+    }`}
   `,
 }
 

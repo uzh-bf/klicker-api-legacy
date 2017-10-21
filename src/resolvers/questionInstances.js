@@ -14,6 +14,9 @@ const activeInstancesQuery = async (parentValue, args, { auth }) => {
 const questionInstanceByIDQuery = (parentValue, { id }) => QuestionInstanceModel.findById(id)
 const questionInstancesByPVQuery = parentValue => QuestionInstanceModel.find({ _id: { $in: parentValue.instances } })
 
+const responsesByPVQuery = parentValue =>
+  parentValue.responses.map(response => ({ id: response.id, ...response.value, createdAt: response.createdAt }))
+
 /* ----- mutations ----- */
 const addResponseMutation = (parentValue, { instanceId, response }) =>
   // TODO: use redis
@@ -25,6 +28,7 @@ module.exports = {
   activeInstances: activeInstancesQuery,
   questionInstance: questionInstanceByIDQuery,
   questionInstancesByPV: questionInstancesByPVQuery,
+  responsesByPV: responsesByPVQuery,
 
   // mutations
   addResponse: addResponseMutation,

@@ -4,12 +4,18 @@
 module.exports = () => [QuestionInstance]
 
 const QuestionInstance = `
+  union QuestionInstance_Results = SCQuestionResults | FREEQuestionResults
+
   input QuestionInstance_ResponseInput {
-    value: String!
+    choices: [Int!]
+    text: String
+    value: Int
   }
   type QuestionInstance_Response {
     id: ID!
-    value: String!
+    choices: [Int!]
+    text: String
+    value: Int
     createdAt: String!
   }
 
@@ -21,6 +27,7 @@ const QuestionInstance = `
     question: Question!
 
     responses: [QuestionInstance_Response!]!
+    results: QuestionInstance_Results
 
     createdAt: String!
     updatedAt: String!

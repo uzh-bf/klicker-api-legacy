@@ -24,14 +24,10 @@ const setupTestEnv = async ({ email, password, shortname }) => {
 }
 
 // prepare a new session instance
-const prepareSessionFactory = SessionMgrService => userId =>
+const prepareSessionFactory = SessionMgrService => (userId, questions = ['59b1481857f3c34af09a4736']) =>
   SessionMgrService.createSession({
     name: 'testing session',
-    questionBlocks: [
-      {
-        questions: ['59b1481857f3c34af09a4736'],
-      },
-    ],
+    questionBlocks: [{ questions }],
     userId,
   })
 
