@@ -71,14 +71,17 @@ const addResponse = async ({ instanceId, response }) => {
     // if the results have not yet been initialized
     if (!instance.results) {
       instance.results = {
-        choices: new Array(instance.question.versions[instance.version].options.choices.length).fill(0),
+        choices: new Array(instance.question.versions[instance.version].options.choices.length).fill(+0),
       }
     }
 
+    const { choices } = instance.results
     // for each choice given, update the results
     response.choices.forEach((responseIndex) => {
-      instance.results.choices[responseIndex] += 1
+      choices[responseIndex] += 1
     })
+    instance.results.choices = []
+    instance.results.choices.push(...choices)
   }
 
   // push the new response into the array
