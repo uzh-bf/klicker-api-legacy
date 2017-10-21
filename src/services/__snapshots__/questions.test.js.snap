@@ -38,13 +38,13 @@ exports[`QuestionService createQuestion allows creating a valid SC question 1`] 
       Description: blabla
       Instances: []
       Options: {
-        Choices: [
+        Choices: [{
             Correct: false
             Name: option1
-          ,
+          },{
             Correct: true
             Name: option2
-          
+          }
         ]
         Randomized: true
         Restrictions: null

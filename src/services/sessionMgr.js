@@ -188,6 +188,10 @@ const activateNextBlock = async ({ userId }) => {
   const user = await UserModel.findById(userId).populate(['activeInstances', 'runningSession'])
   const { runningSession } = user
 
+  if (!runningSession) {
+    throw new Error('NO_RUNNING_SESSION')
+  }
+
   // if all the blocks have already been activated, simply return the session
   if (runningSession.activeBlock === runningSession.blocks.length) {
     return user.runningSession

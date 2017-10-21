@@ -7,22 +7,25 @@ exports[`SessionMgrService activateNextBlock allows activating the first questio
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: 0
+    ActiveInstances: 1
+
+    Blocks: [{
       Show solutions: false
       Status: ACTIVE
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService activateNextBlock allows activating the first question block 2`] = `
@@ -31,6 +34,8 @@ Array [
     QUESTION_INSTANCE
 
     isOpen: true
+
+    responses: []
   ,
 ]
 `;
@@ -42,22 +47,25 @@ exports[`SessionMgrService activateNextBlock has a valid initial state 1`] = `
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService activateNextBlock has a valid initial state 2`] = `
@@ -66,6 +74,8 @@ Array [
     QUESTION_INSTANCE
 
     isOpen: false
+
+    responses: []
   ,
 ]
 `;
@@ -77,22 +87,25 @@ exports[`SessionMgrService activateNextBlock recognizes that the final block has
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: 1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: EXECUTED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService activateNextBlock recognizes that the final block has been active 2`] = `
@@ -101,6 +114,8 @@ Array [
     QUESTION_INSTANCE
 
     isOpen: false
+
+    responses: []
   ,
 ]
 `;
@@ -112,27 +127,30 @@ exports[`SessionMgrService createSession allows creating a valid session 1`] = `
     Name: hello world
     Status: CREATED
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 2
-    ,
+    },{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService createSession skips over question blocks without questions 1`] = `
@@ -142,27 +160,30 @@ exports[`SessionMgrService createSession skips over question blocks without ques
     Name: session with an empty block
     Status: CREATED
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 2
-    ,
+    },{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService endSession allows ending a running session 1`] = `
@@ -172,22 +193,25 @@ exports[`SessionMgrService endSession allows ending a running session 1`] = `
     Name: testing session
     Status: COMPLETED
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService endSession returns on an already completed session 1`] = `
@@ -197,22 +221,25 @@ exports[`SessionMgrService endSession returns on an already completed session 1`
     Name: testing session
     Status: COMPLETED
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService startSession allows starting a created session 1`] = `
@@ -222,22 +249,25 @@ exports[`SessionMgrService startSession allows starting a created session 1`] = 
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService updateSessionSettings allows changing all settings at once 1`] = `
@@ -247,22 +277,25 @@ exports[`SessionMgrService updateSessionSettings allows changing all settings at
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 1`] = `
@@ -272,22 +305,25 @@ exports[`SessionMgrService updateSessionSettings allows changing each setting se
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: true
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 2`] = `
@@ -297,22 +333,25 @@ exports[`SessionMgrService updateSessionSettings allows changing each setting se
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: true
       FeedbacksActive: true
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 3`] = `
@@ -322,22 +361,25 @@ exports[`SessionMgrService updateSessionSettings allows changing each setting se
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: true
       FeedbacksActive: true
       FeedbacksPublic: true
-    
+    }
 `;
 
 exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 4`] = `
@@ -347,22 +389,25 @@ exports[`SessionMgrService updateSessionSettings allows changing each setting se
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: true
       FeedbacksPublic: true
-    
+    }
 `;
 
 exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 5`] = `
@@ -372,20 +417,23 @@ exports[`SessionMgrService updateSessionSettings allows changing each setting se
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;

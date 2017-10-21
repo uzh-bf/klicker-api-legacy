@@ -7,25 +7,28 @@ exports[`SessionExecService addConfusionTS allows adding new timesteps 1`] = `
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
-    ConfusionTS: [
+    ConfusionTS: [{
       Difficulty: 20
       Speed: 10
-    ]
+    }]
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: true
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionExecService addConfusionTS allows adding new timesteps 2`] = `
@@ -35,28 +38,31 @@ exports[`SessionExecService addConfusionTS allows adding new timesteps 2`] = `
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
-    ConfusionTS: [
+    ConfusionTS: [{
       Difficulty: 20
       Speed: 10
-    ,
+    },{
       Difficulty: 40
       Speed: -10
-    ]
+    }]
 
     Feedbacks: []
 
-    Settings:
+    Settings: {
       ConfusionActive: true
       FeedbacksActive: false
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionExecService addFeedback allows adding new feedbacks to a running session 1`] = `
@@ -66,25 +72,28 @@ exports[`SessionExecService addFeedback allows adding new feedbacks to a running
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
-    Feedbacks: [
+    Feedbacks: [{
       Content: feedback1
       Votes: 0
-    ]
+    }]
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: true
       FeedbacksPublic: false
-    
+    }
 `;
 
 exports[`SessionExecService addFeedback allows adding new feedbacks to a running session 2`] = `
@@ -94,26 +103,69 @@ exports[`SessionExecService addFeedback allows adding new feedbacks to a running
     Name: testing session
     Status: RUNNING
 
-    Blocks: [
+    ActiveBlock: -1
+    ActiveInstances: 0
+
+    Blocks: [{
       Show solutions: false
       Status: PLANNED
       Time limit: -1
       Number of instances: 1
-    ]
+    }]
 
     ConfusionTS: []
 
-    Feedbacks: [
+    Feedbacks: [{
       Content: feedback1
       Votes: 0
-    ,
+    },{
       Content: feedback2
       Votes: 0
-    ]
+    }]
 
-    Settings:
+    Settings: {
       ConfusionActive: false
       FeedbacksActive: true
       FeedbacksPublic: false
-    
+    }
+`;
+
+exports[`SessionExecService addResponse allows adding a response to an open question instance  1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    ActiveBlock: 0
+    ActiveInstances: 1
+
+    Blocks: [{
+      Show solutions: false
+      Status: ACTIVE
+      Time limit: -1
+      Number of instances: 1
+    }]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings: {
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    }
+`;
+
+exports[`SessionExecService addResponse allows adding a response to an open question instance  2`] = `
+
+    QUESTION_INSTANCE
+
+    isOpen: true
+
+    responses: [{
+      value: hello world
+    }]
+  
 `;

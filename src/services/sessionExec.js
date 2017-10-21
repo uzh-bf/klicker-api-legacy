@@ -4,13 +4,23 @@ const { getRunningSession } = require('./sessionMgr')
 
 // add a response to an active question instance
 const addResponse = async ({ instanceId, response }) => {
-  const instance = QuestionInstanceModel.findById(instanceId)
+  // find the specified question instance
+  // only find instances that are open
+  const instance = await QuestionInstanceModel.findOne({ _id: instanceId, isOpen: true })
 
-  if (!instance.isOpen) {
+  // if the instance is closed, don't allow adding any responses
+  if (!instance) {
     throw new Error('INSTANCE_CLOSED')
   }
 
-  return response
+  // push the new response into the array
+  instance.responses.push(response)
+
+  // save the updated instance
+  await instance.save()
+
+  // return the updated instance
+  return instance
 }
 
 // add a new feedback to a session

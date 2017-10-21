@@ -160,6 +160,9 @@ describe('SessionExecService', () => {
 
     beforeAll(async () => {
       preparedSession = await prepareSession(user.id)
+
+      // start the session
+      await SessionMgrService.startSession({ id: preparedSession.id, userId: user.id })
     })
 
     it('prevents adding a response to a closed question instance', () => {
@@ -171,10 +174,11 @@ describe('SessionExecService', () => {
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
+      expect(session).toMatchSnapshot()
 
       // add a response
       const withResponse = await SessionExecService.addResponse({ instanceId: session.activeInstances[0], response })
-      expect(withResponse).toEqual('hello world')
+      expect(withResponse).toMatchSnapshot()
     })
 
     afterAll(async () => {

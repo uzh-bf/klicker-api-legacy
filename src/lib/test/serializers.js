@@ -13,10 +13,10 @@ const questionSerializer = {
       Instances: [${instances}]
       Options: {
         Choices: ${options.choices &&
-          `[${options.choices.map(({ correct, name }) => `
+          `[${options.choices.map(({ correct, name }) => `{
             Correct: ${correct}
             Name: ${name}
-          `)}
+          }`)}
         ]`}
         Randomized: ${options.randomized}
         Restrictions: ${options.restrictions &&
@@ -38,28 +38,31 @@ const sessionSerializer = {
     Name: ${val.name}
     Status: ${val.status}
 
-    Blocks: [${val.blocks.map(block => `
+    ActiveBlock: ${val.activeBlock}
+    ActiveInstances: ${val.activeInstances.length}
+
+    Blocks: [${val.blocks.map(block => `{
       Show solutions: ${block.showSolutions}
       Status: ${block.status}
       Time limit: ${block.timeLimit}
       Number of instances: ${block.instances.length}
-    `)}]
+    }`)}]
 
-    ConfusionTS: [${val.confusionTS.map(TS => `
+    ConfusionTS: [${val.confusionTS.map(TS => `{
       Difficulty: ${TS.difficulty}
       Speed: ${TS.speed}
-    `)}]
+    }`)}]
 
-    Feedbacks: [${val.feedbacks.map(feedback => `
+    Feedbacks: [${val.feedbacks.map(feedback => `{
       Content: ${feedback.content}
       Votes: ${feedback.votes}
-    `)}]
+    }`)}]
 
-    Settings:
+    Settings: {
       ConfusionActive: ${val.settings.isConfusionBarometerActive}
       FeedbacksActive: ${val.settings.isFeedbackChannelActive}
       FeedbacksPublic: ${val.settings.isFeedbackChannelPublic}
-    `,
+    }`,
 }
 
 const questionInstanceSerializer = {
@@ -68,6 +71,10 @@ const questionInstanceSerializer = {
     QUESTION_INSTANCE
 
     isOpen: ${val.isOpen}
+
+    responses: [${val.responses.map(response => `{
+      value: ${response.value}
+    }`)}]
   `,
 }
 
