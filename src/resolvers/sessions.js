@@ -1,4 +1,5 @@
-const SessionService = require('../services/sessions')
+const SessionMgrService = require('../services/sessionMgr')
+const SessionExecService = require('../services/sessionExec')
 const { SessionModel, UserModel } = require('../models')
 
 /* ----- queries ----- */
@@ -18,29 +19,27 @@ const sessionsByPVQuery = parentValue => SessionModel.find({ _id: { $in: parentV
 
 /* ----- mutations ----- */
 const createSessionMutation = (parentValue, { session: { name, blocks } }, { auth }) =>
-  SessionService.createSession({
+  SessionMgrService.createSession({
     name,
     questionBlocks: blocks,
     userId: auth.sub,
   })
 
-const startSessionMutation = (parentValue, { id }, { auth }) =>
-  SessionService.startSession({ id, userId: auth.sub })
+const startSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.startSession({ id, userId: auth.sub })
 
 const activateNextBlockMutation = (parentValue, args, { auth }) =>
-  SessionService.activateNextBlock({ userId: auth.sub })
+  SessionMgrService.activateNextBlock({ userId: auth.sub })
 
-const endSessionMutation = (parentValue, { id }, { auth }) =>
-  SessionService.endSession({ id, userId: auth.sub })
+const endSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.endSession({ id, userId: auth.sub })
 
 const addFeedbackMutation = (parentValue, { sessionId, content }) =>
-  SessionService.addFeedback({ sessionId, content })
+  SessionExecService.addFeedback({ sessionId, content })
 
 const addConfusionTSMutation = (parentValue, { sessionId, difficulty, speed }) =>
-  SessionService.addConfusionTS({ sessionId, difficulty, speed })
+  SessionExecService.addConfusionTS({ sessionId, difficulty, speed })
 
 const updateSessionSettingsMutation = (parentValue, { sessionId, settings }, { auth }) =>
-  SessionService.updateSettings({
+  SessionMgrService.updateSettings({
     sessionId,
     userId: auth.sub,
     settings,

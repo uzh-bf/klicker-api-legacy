@@ -4,7 +4,7 @@ const { requireAuth } = require('./services/auth')
 const {
   allQuestions, createQuestion, questionsByPV, questionByPV,
 } = require('./resolvers/questions')
-const { activeInstances, questionInstancesByPV } = require('./resolvers/questionInstances')
+const { activeInstances, questionInstancesByPV, addResponse } = require('./resolvers/questionInstances')
 const {
   addFeedback,
   addConfusionTS,
@@ -81,6 +81,7 @@ const resolvers = {
   Mutation: {
     addFeedback,
     addConfusionTS,
+    addResponse,
     createQuestion: requireAuth(createQuestion),
     createSession: requireAuth(createSession),
     createUser,

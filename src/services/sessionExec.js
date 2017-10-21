@@ -14,6 +14,8 @@ const addResponse = async ({ instanceId, response }) => {
   }
 
   // push the new response into the array
+  // TODO: redis for everything in here...
+  // TODO: save the IP and fingerprint of the responder and validate
   instance.responses.push(response)
 
   // save the updated instance

@@ -1,3 +1,4 @@
+const SessionExecService = require('../services/sessionExec')
 const { QuestionInstanceModel, UserModel } = require('../models')
 
 /* ----- queries ----- */
@@ -7,11 +8,13 @@ const activeInstancesQuery = async (parentValue, args, { auth }) => {
 }
 
 const questionInstanceByIDQuery = (parentValue, { id }) => QuestionInstanceModel.findById(id)
-const questionInstancesByPVQuery = parentValue =>
-  QuestionInstanceModel.find({ _id: { $in: parentValue.instances } })
+const questionInstancesByPVQuery = parentValue => QuestionInstanceModel.find({ _id: { $in: parentValue.instances } })
 
 /* ----- mutations ----- */
-const addResponseMutation = () => {}
+const addResponseMutation = (parentValue, { instanceId, response }) =>
+  // TODO: use redis
+  // TODO: fingerprinting, IP...
+  SessionExecService.addResponse({ instanceId, response })
 
 module.exports = {
   // queries
