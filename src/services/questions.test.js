@@ -14,6 +14,8 @@ mongoose.Promise = Promise
 expect.addSnapshotSerializer({
   test: val => val.id && val.instances && val.tags && val.title && val.type && val.versions,
   print: val => `
+    QUESTION
+
     Title: ${val.title}
     Type: ${val.type}
 

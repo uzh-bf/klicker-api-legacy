@@ -2,6 +2,8 @@
 
 exports[`QuestionService createQuestion allows creating a valid FREE question 1`] = `
 
+    QUESTION
+
     Title: question without tags
     Type: FREE
 
@@ -24,6 +26,8 @@ exports[`QuestionService createQuestion allows creating a valid FREE question 1`
 `;
 
 exports[`QuestionService createQuestion allows creating a valid SC question 1`] = `
+
+    QUESTION
 
     Title: question without tags
     Type: SC
