@@ -3,8 +3,12 @@ const { QuestionInstanceModel, UserModel } = require('../models')
 
 /* ----- queries ----- */
 const activeInstancesQuery = async (parentValue, args, { auth }) => {
-  const user = await UserModel.findById(auth.sub).populate('activeInstances')
-  return user.activeInstances
+  // starting from the logged in user, populate the currently running session
+  // from the running session, populate its active instances and return them
+  const user = await UserModel.findById(auth.sub).populate([
+    { path: 'runningSession', populate: { path: 'activeInstances' } },
+  ])
+  return user.runningSession.activeInstances
 }
 
 const questionInstanceByIDQuery = (parentValue, { id }) => QuestionInstanceModel.findById(id)

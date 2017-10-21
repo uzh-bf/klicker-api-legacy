@@ -57,7 +57,7 @@ const typeDefs = [
     addConfusionTS(sessionId: ID!, difficulty: Int!, speed: Int!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
 
-    addResponse(instanceId: ID!, response: QuestionInstance_ResponseInput!): String!
+    addResponse(instanceId: ID!, response: QuestionInstance_ResponseInput!): QuestionInstance!
   }
 
   type Subscription {
