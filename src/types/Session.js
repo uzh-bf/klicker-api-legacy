@@ -20,7 +20,7 @@ const Session = `
 
   input SessionInput {
     name: String!
-    blocks: [Session_QuestionBlockInput]!
+    blocks: [Session_QuestionBlockInput!]!
   }
   type Session {
     id: ID!
@@ -31,6 +31,7 @@ const Session = `
     settings: Session_Settings!
     user: User!
 
+    activeInstances: [QuestionInstance!]!
     blocks: [Session_QuestionBlock!]!
     confusionTS: [Session_ConfusionTimestep!]!
     feedbacks: [Session_Feedback!]!

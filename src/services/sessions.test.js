@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 const AuthService = require('./auth')
 const QuestionService = require('./questions')
 const SessionService = require('./sessions')
+const { QuestionInstanceModel } = require('../models')
 const { setupTestEnv } = require('../utils/testHelpers')
 
 mongoose.Promise = Promise
@@ -14,6 +15,8 @@ mongoose.Promise = Promise
 expect.addSnapshotSerializer({
   test: val => val.id && val.blocks && val.name && val.status && val.settings && val.user,
   print: val => `
+    SESSION
+
     Name: ${val.name}
     Status: ${val.status}
 
@@ -39,6 +42,15 @@ expect.addSnapshotSerializer({
       FeedbacksActive: ${val.settings.isFeedbackChannelActive}
       FeedbacksPublic: ${val.settings.isFeedbackChannelPublic}
     `,
+})
+
+expect.addSnapshotSerializer({
+  test: val => val.id && val.responses,
+  print: val => `
+    QUESTION_INSTANCE
+
+    Status: ${val.status}
+  `,
 })
 
 // prepare a new session instance
@@ -411,11 +423,7 @@ describe('SessionService', () => {
           isFeedbackChannelPublic: false,
         },
       })
-      const {
-        isConfusionBarometerActive,
-        isFeedbackChannelActive,
-        isFeedbackChannelPublic,
-      } = session.settings
+      const { isConfusionBarometerActive, isFeedbackChannelActive, isFeedbackChannelPublic } = session.settings
       expect(isConfusionBarometerActive).toBeFalsy()
       expect(isFeedbackChannelActive).toBeFalsy()
       expect(isFeedbackChannelPublic).toBeFalsy()
@@ -423,7 +431,7 @@ describe('SessionService', () => {
     })
 
     afterAll(async () => {
-      await SessionService.stopSession({
+      await SessionService.endSession({
         id: preparedSession.id,
         userId: user.id,
       })
@@ -437,13 +445,58 @@ describe('SessionService', () => {
       preparedSession = await prepareSession(user.id)
     })
 
-    it('allows activating the next question block', async () => {
-      const runningSession = await SessionService.startSession({
+    it('has a valid initial state', async () => {
+      // start a new session
+      const session = await SessionService.startSession({
         id: preparedSession.id,
         userId: user.id,
       })
+      // find all instances that belong to the new session
+      const instances = await QuestionInstanceModel.find({
+        _id: { $in: session.blocks[0].instances },
+      })
 
-      expect(runningSession).toMatchSnapshot()
+      // expect no block to be active yet
+      expect(session.activeBlock).toEqual(-1)
+      // expect the session to currently not have any active instances
+      expect(session.activeInstances).toHaveLength(0)
+      // expect matching snapshots
+      expect(session).toMatchSnapshot()
+      expect(instances).toMatchSnapshot()
+    })
+
+    it('allows activating the first question block', async () => {
+      // activate the next block of the running session
+      const session = await SessionService.activateNextBlock({ userId: user.id })
+      // find all instances that belong to the current session
+      const instances = await QuestionInstanceModel.find({
+        _id: { $in: session.blocks[0].instances },
+      })
+
+      // expect the first block to be active
+      expect(session.activeBlock).toEqual(0)
+      // expect the session to have some active instances
+      expect(session.activeInstances.map(v => v.toString())).toEqual(session.blocks[0].instances.map(v => v.toString()))
+      // expect matching snapshots
+      expect(session).toMatchSnapshot()
+      expect(instances).toMatchSnapshot()
+    })
+
+    it('recognizes that the final block has been active', async () => {
+      // finish the session
+      const session = await SessionService.activateNextBlock({ userId: user.id })
+      // find all instances that belong to the current session
+      const instances = await QuestionInstanceModel.find({
+        _id: { $in: session.blocks[0].instances },
+      })
+
+      // expect the first block to be active
+      expect(session.activeBlock).toEqual(1)
+      // expect the session to have no more active instances
+      expect(session.activeInstances).toHaveLength(0)
+      // expect matching snapshots
+      expect(session).toMatchSnapshot()
+      expect(instances).toMatchSnapshot()
     })
 
     afterAll(async () => {

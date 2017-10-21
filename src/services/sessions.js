@@ -252,17 +252,16 @@ const activateNextBlock = async ({ userId }) => {
     const nextBlock = runningSession.blocks[nextBlockIndex]
 
     // update the instances in the new active block to be open
-    await QuestionInstanceModel.update(
-      { _id: { $in: nextBlock.instances } },
-      { status: 'OPEN' },
-      { multi: true },
-    )
+    await QuestionInstanceModel.update({ _id: { $in: nextBlock.instances } }, { status: 'OPEN' }, { multi: true })
 
     // set the status of the instances in the next block to active
     runningSession.blocks[nextBlockIndex].status = 'ACTIVE'
 
     // set the instances of the next block to be the users active instances
-    user.activeInstances = nextBlock.instances
+    runningSession.activeInstances = nextBlock.instances
+  } else {
+    // if the final block was reached above, reset the users active instances
+    runningSession.activeInstances = []
   }
 
   // increase the index of the currently active block
@@ -274,11 +273,7 @@ const activateNextBlock = async ({ userId }) => {
     const previousBlock = runningSession.blocks[prevBlockIndex]
 
     // update the instances in the currently active block to be closed
-    await QuestionInstanceModel.update(
-      { _id: { $in: previousBlock.instances } },
-      { status: 'CLOSED' },
-      { multi: true },
-    )
+    await QuestionInstanceModel.update({ _id: { $in: previousBlock.instances } }, { status: 'CLOSED' }, { multi: true })
 
     // set the status of the previous block to executed
     runningSession.blocks[prevBlockIndex].status = 'EXECUTED'

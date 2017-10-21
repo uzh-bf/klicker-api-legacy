@@ -1,6 +1,113 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`SessionService activateNextBlock allows activating the first question block 1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    Blocks: [
+      Show solutions: false
+      Status: ACTIVE
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    
+`;
+
+exports[`SessionService activateNextBlock allows activating the first question block 2`] = `
+Array [
+  
+    QUESTION_INSTANCE
+
+    Status: OPEN
+  ,
+]
+`;
+
+exports[`SessionService activateNextBlock has a valid initial state 1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    Blocks: [
+      Show solutions: false
+      Status: PLANNED
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    
+`;
+
+exports[`SessionService activateNextBlock has a valid initial state 2`] = `
+Array [
+  
+    QUESTION_INSTANCE
+
+    Status: CLOSED
+  ,
+]
+`;
+
+exports[`SessionService activateNextBlock recognizes that the final block has been active 1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    Blocks: [
+      Show solutions: false
+      Status: EXECUTED
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    
+`;
+
+exports[`SessionService activateNextBlock recognizes that the final block has been active 2`] = `
+Array [
+  
+    QUESTION_INSTANCE
+
+    Status: CLOSED
+  ,
+]
+`;
+
 exports[`SessionService addConfusionTS allows adding new timesteps 1`] = `
+
+    SESSION
 
     Name: testing session
     Status: RUNNING
@@ -27,6 +134,8 @@ exports[`SessionService addConfusionTS allows adding new timesteps 1`] = `
 `;
 
 exports[`SessionService addConfusionTS allows adding new timesteps 2`] = `
+
+    SESSION
 
     Name: testing session
     Status: RUNNING
@@ -57,6 +166,8 @@ exports[`SessionService addConfusionTS allows adding new timesteps 2`] = `
 
 exports[`SessionService addFeedback allows adding new feedbacks to a running session 1`] = `
 
+    SESSION
+
     Name: testing session
     Status: RUNNING
 
@@ -82,6 +193,8 @@ exports[`SessionService addFeedback allows adding new feedbacks to a running ses
 `;
 
 exports[`SessionService addFeedback allows adding new feedbacks to a running session 2`] = `
+
+    SESSION
 
     Name: testing session
     Status: RUNNING
@@ -112,6 +225,8 @@ exports[`SessionService addFeedback allows adding new feedbacks to a running ses
 
 exports[`SessionService createSession allows creating a valid session 1`] = `
 
+    SESSION
+
     Name: hello world
     Status: CREATED
 
@@ -139,6 +254,8 @@ exports[`SessionService createSession allows creating a valid session 1`] = `
 `;
 
 exports[`SessionService createSession skips over question blocks without questions 1`] = `
+
+    SESSION
 
     Name: session with an empty block
     Status: CREATED
@@ -168,6 +285,8 @@ exports[`SessionService createSession skips over question blocks without questio
 
 exports[`SessionService endSession allows ending a running session 1`] = `
 
+    SESSION
+
     Name: testing session
     Status: COMPLETED
 
@@ -190,6 +309,8 @@ exports[`SessionService endSession allows ending a running session 1`] = `
 `;
 
 exports[`SessionService endSession returns on an already completed session 1`] = `
+
+    SESSION
 
     Name: testing session
     Status: COMPLETED
@@ -214,6 +335,8 @@ exports[`SessionService endSession returns on an already completed session 1`] =
 
 exports[`SessionService startSession allows starting a created session 1`] = `
 
+    SESSION
+
     Name: testing session
     Status: RUNNING
 
@@ -236,6 +359,8 @@ exports[`SessionService startSession allows starting a created session 1`] = `
 `;
 
 exports[`SessionService updateSessionSettings allows changing all settings at once 1`] = `
+
+    SESSION
 
     Name: testing session
     Status: RUNNING
@@ -260,6 +385,8 @@ exports[`SessionService updateSessionSettings allows changing all settings at on
 
 exports[`SessionService updateSessionSettings allows changing each setting seperately 1`] = `
 
+    SESSION
+
     Name: testing session
     Status: RUNNING
 
@@ -282,6 +409,8 @@ exports[`SessionService updateSessionSettings allows changing each setting seper
 `;
 
 exports[`SessionService updateSessionSettings allows changing each setting seperately 2`] = `
+
+    SESSION
 
     Name: testing session
     Status: RUNNING
@@ -306,6 +435,8 @@ exports[`SessionService updateSessionSettings allows changing each setting seper
 
 exports[`SessionService updateSessionSettings allows changing each setting seperately 3`] = `
 
+    SESSION
+
     Name: testing session
     Status: RUNNING
 
@@ -329,6 +460,8 @@ exports[`SessionService updateSessionSettings allows changing each setting seper
 
 exports[`SessionService updateSessionSettings allows changing each setting seperately 4`] = `
 
+    SESSION
+
     Name: testing session
     Status: RUNNING
 
@@ -351,6 +484,8 @@ exports[`SessionService updateSessionSettings allows changing each setting seper
 `;
 
 exports[`SessionService updateSessionSettings allows changing each setting seperately 5`] = `
+
+    SESSION
 
     Name: testing session
     Status: RUNNING

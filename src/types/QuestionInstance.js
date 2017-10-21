@@ -25,7 +25,7 @@ const QuestionInstance = `
 
     question: Question!
 
-    responses: [QuestionInstance_Response]!
+    responses: [QuestionInstance_Response!]!
 
     createdAt: String!
     updatedAt: String!

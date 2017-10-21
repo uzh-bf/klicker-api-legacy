@@ -1,5 +1,6 @@
 {
   // Place your settings in this file to overwrite default and user settings.
   "javascript.format.enable": false,
-  "python.promptToInstallJupyter": false
+  "python.promptToInstallJupyter": false,
+  "jest.enableSnapshotUpdateMessages": true
 }

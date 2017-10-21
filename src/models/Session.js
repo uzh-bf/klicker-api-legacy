@@ -26,7 +26,7 @@ const Session = new mongoose.Schema({
   feedbacks: [Feedback],
 
   activeBlock: { type: Number, default: -1 },
-  activeInstances: { type: ObjectId, ref: 'QuestionInstance' },
+  activeInstances: [{ type: ObjectId, ref: 'QuestionInstance' }],
 
   createdAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() },
