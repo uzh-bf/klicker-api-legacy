@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SessionService activateNextBlock allows activating the first question block 1`] = `
+exports[`SessionMgrService activateNextBlock allows activating the first question block 1`] = `
 
     SESSION
 
@@ -25,17 +25,17 @@ exports[`SessionService activateNextBlock allows activating the first question b
     
 `;
 
-exports[`SessionService activateNextBlock allows activating the first question block 2`] = `
+exports[`SessionMgrService activateNextBlock allows activating the first question block 2`] = `
 Array [
   
     QUESTION_INSTANCE
 
-    Status: OPEN
+    isOpen: true
   ,
 ]
 `;
 
-exports[`SessionService activateNextBlock has a valid initial state 1`] = `
+exports[`SessionMgrService activateNextBlock has a valid initial state 1`] = `
 
     SESSION
 
@@ -60,17 +60,17 @@ exports[`SessionService activateNextBlock has a valid initial state 1`] = `
     
 `;
 
-exports[`SessionService activateNextBlock has a valid initial state 2`] = `
+exports[`SessionMgrService activateNextBlock has a valid initial state 2`] = `
 Array [
   
     QUESTION_INSTANCE
 
-    Status: CLOSED
+    isOpen: false
   ,
 ]
 `;
 
-exports[`SessionService activateNextBlock recognizes that the final block has been active 1`] = `
+exports[`SessionMgrService activateNextBlock recognizes that the final block has been active 1`] = `
 
     SESSION
 
@@ -95,135 +95,17 @@ exports[`SessionService activateNextBlock recognizes that the final block has be
     
 `;
 
-exports[`SessionService activateNextBlock recognizes that the final block has been active 2`] = `
+exports[`SessionMgrService activateNextBlock recognizes that the final block has been active 2`] = `
 Array [
   
     QUESTION_INSTANCE
 
-    Status: CLOSED
+    isOpen: false
   ,
 ]
 `;
 
-exports[`SessionService addConfusionTS allows adding new timesteps 1`] = `
-
-    SESSION
-
-    Name: testing session
-    Status: RUNNING
-
-    Blocks: [
-      Show solutions: false
-      Status: PLANNED
-      Time limit: -1
-      Number of instances: 1
-    ]
-
-    ConfusionTS: [
-      Difficulty: 20
-      Speed: 10
-    ]
-
-    Feedbacks: []
-
-    Settings:
-      ConfusionActive: true
-      FeedbacksActive: false
-      FeedbacksPublic: false
-    
-`;
-
-exports[`SessionService addConfusionTS allows adding new timesteps 2`] = `
-
-    SESSION
-
-    Name: testing session
-    Status: RUNNING
-
-    Blocks: [
-      Show solutions: false
-      Status: PLANNED
-      Time limit: -1
-      Number of instances: 1
-    ]
-
-    ConfusionTS: [
-      Difficulty: 20
-      Speed: 10
-    ,
-      Difficulty: 40
-      Speed: -10
-    ]
-
-    Feedbacks: []
-
-    Settings:
-      ConfusionActive: true
-      FeedbacksActive: false
-      FeedbacksPublic: false
-    
-`;
-
-exports[`SessionService addFeedback allows adding new feedbacks to a running session 1`] = `
-
-    SESSION
-
-    Name: testing session
-    Status: RUNNING
-
-    Blocks: [
-      Show solutions: false
-      Status: PLANNED
-      Time limit: -1
-      Number of instances: 1
-    ]
-
-    ConfusionTS: []
-
-    Feedbacks: [
-      Content: feedback1
-      Votes: 0
-    ]
-
-    Settings:
-      ConfusionActive: false
-      FeedbacksActive: true
-      FeedbacksPublic: false
-    
-`;
-
-exports[`SessionService addFeedback allows adding new feedbacks to a running session 2`] = `
-
-    SESSION
-
-    Name: testing session
-    Status: RUNNING
-
-    Blocks: [
-      Show solutions: false
-      Status: PLANNED
-      Time limit: -1
-      Number of instances: 1
-    ]
-
-    ConfusionTS: []
-
-    Feedbacks: [
-      Content: feedback1
-      Votes: 0
-    ,
-      Content: feedback2
-      Votes: 0
-    ]
-
-    Settings:
-      ConfusionActive: false
-      FeedbacksActive: true
-      FeedbacksPublic: false
-    
-`;
-
-exports[`SessionService createSession allows creating a valid session 1`] = `
+exports[`SessionMgrService createSession allows creating a valid session 1`] = `
 
     SESSION
 
@@ -253,7 +135,7 @@ exports[`SessionService createSession allows creating a valid session 1`] = `
     
 `;
 
-exports[`SessionService createSession skips over question blocks without questions 1`] = `
+exports[`SessionMgrService createSession skips over question blocks without questions 1`] = `
 
     SESSION
 
@@ -283,7 +165,7 @@ exports[`SessionService createSession skips over question blocks without questio
     
 `;
 
-exports[`SessionService endSession allows ending a running session 1`] = `
+exports[`SessionMgrService endSession allows ending a running session 1`] = `
 
     SESSION
 
@@ -308,7 +190,7 @@ exports[`SessionService endSession allows ending a running session 1`] = `
     
 `;
 
-exports[`SessionService endSession returns on an already completed session 1`] = `
+exports[`SessionMgrService endSession returns on an already completed session 1`] = `
 
     SESSION
 
@@ -333,7 +215,7 @@ exports[`SessionService endSession returns on an already completed session 1`] =
     
 `;
 
-exports[`SessionService startSession allows starting a created session 1`] = `
+exports[`SessionMgrService startSession allows starting a created session 1`] = `
 
     SESSION
 
@@ -358,7 +240,7 @@ exports[`SessionService startSession allows starting a created session 1`] = `
     
 `;
 
-exports[`SessionService updateSessionSettings allows changing all settings at once 1`] = `
+exports[`SessionMgrService updateSessionSettings allows changing all settings at once 1`] = `
 
     SESSION
 
@@ -383,7 +265,7 @@ exports[`SessionService updateSessionSettings allows changing all settings at on
     
 `;
 
-exports[`SessionService updateSessionSettings allows changing each setting seperately 1`] = `
+exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 1`] = `
 
     SESSION
 
@@ -408,32 +290,7 @@ exports[`SessionService updateSessionSettings allows changing each setting seper
     
 `;
 
-exports[`SessionService updateSessionSettings allows changing each setting seperately 2`] = `
-
-    SESSION
-
-    Name: testing session
-    Status: RUNNING
-
-    Blocks: [
-      Show solutions: false
-      Status: PLANNED
-      Time limit: -1
-      Number of instances: 1
-    ]
-
-    ConfusionTS: []
-
-    Feedbacks: []
-
-    Settings:
-      ConfusionActive: true
-      FeedbacksActive: true
-      FeedbacksPublic: false
-    
-`;
-
-exports[`SessionService updateSessionSettings allows changing each setting seperately 3`] = `
+exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 2`] = `
 
     SESSION
 
@@ -454,11 +311,11 @@ exports[`SessionService updateSessionSettings allows changing each setting seper
     Settings:
       ConfusionActive: true
       FeedbacksActive: true
-      FeedbacksPublic: true
+      FeedbacksPublic: false
     
 `;
 
-exports[`SessionService updateSessionSettings allows changing each setting seperately 4`] = `
+exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 3`] = `
 
     SESSION
 
@@ -477,13 +334,38 @@ exports[`SessionService updateSessionSettings allows changing each setting seper
     Feedbacks: []
 
     Settings:
-      ConfusionActive: false
+      ConfusionActive: true
       FeedbacksActive: true
       FeedbacksPublic: true
     
 `;
 
-exports[`SessionService updateSessionSettings allows changing each setting seperately 5`] = `
+exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 4`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    Blocks: [
+      Show solutions: false
+      Status: PLANNED
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: false
+      FeedbacksActive: true
+      FeedbacksPublic: true
+    
+`;
+
+exports[`SessionMgrService updateSessionSettings allows changing each setting seperately 5`] = `
 
     SESSION
 

@@ -1,17 +1,24 @@
 const mongoose = require('mongoose')
+const _values = require('lodash/values')
 
 const { ObjectId } = mongoose.Schema.Types
 
-const ConfusionTimestep = require('./ConfusionTimestep')
 const Feedback = require('./Feedback')
-const QuestionBlock = require('./QuestionBlock')
+const ConfusionTimestep = require('./ConfusionTimestep')
+const { QuestionBlock } = require('./QuestionBlock')
+
+const SessionStatus = {
+  CREATED: 'CREATED',
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+}
 
 const Session = new mongoose.Schema({
   name: { type: String, default: Date.now(), index: true },
   status: {
     type: String,
-    enum: ['CREATED', 'RUNNING', 'COMPLETED'],
-    default: 'CREATED',
+    enum: _values(SessionStatus),
+    default: SessionStatus.CREATED,
     index: true,
   },
   settings: {
@@ -32,4 +39,7 @@ const Session = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now() },
 })
 
-module.exports = mongoose.model('Session', Session)
+module.exports = {
+  SessionModel: mongoose.model('Session', Session),
+  SessionStatus,
+}

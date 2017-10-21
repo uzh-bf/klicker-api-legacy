@@ -2,10 +2,7 @@ const { makeExecutableSchema } = require('graphql-tools')
 
 const { requireAuth } = require('./services/auth')
 const {
-  allQuestions,
-  createQuestion,
-  questionsByPV,
-  questionByPV,
+  allQuestions, createQuestion, questionsByPV, questionByPV,
 } = require('./resolvers/questions')
 const { activeInstances, questionInstancesByPV } = require('./resolvers/questionInstances')
 const {
@@ -60,7 +57,7 @@ const typeDefs = [
     addConfusionTS(sessionId: ID!, difficulty: Int!, speed: Int!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
 
-    addResponse(sessionId: ID!, response: QuestionInstance_ResponseInput!): String!
+    addResponse(instanceId: ID!, response: QuestionInstance_ResponseInput!): String!
   }
 
   type Subscription {

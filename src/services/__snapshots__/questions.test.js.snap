@@ -14,7 +14,7 @@ exports[`QuestionService createQuestion allows creating a valid FREE question 1`
       Instances: []
       Options: {
         Choices: null
-        Randomized: false
+        Randomized: undefined
         Restrictions: {
           Max: 100
           Min: 10

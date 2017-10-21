@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SessionExecService addConfusionTS allows adding new timesteps 1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    Blocks: [
+      Show solutions: false
+      Status: PLANNED
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: [
+      Difficulty: 20
+      Speed: 10
+    ]
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: true
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    
+`;
+
+exports[`SessionExecService addConfusionTS allows adding new timesteps 2`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    Blocks: [
+      Show solutions: false
+      Status: PLANNED
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: [
+      Difficulty: 20
+      Speed: 10
+    ,
+      Difficulty: 40
+      Speed: -10
+    ]
+
+    Feedbacks: []
+
+    Settings:
+      ConfusionActive: true
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    
+`;
+
+exports[`SessionExecService addFeedback allows adding new feedbacks to a running session 1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    Blocks: [
+      Show solutions: false
+      Status: PLANNED
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: [
+      Content: feedback1
+      Votes: 0
+    ]
+
+    Settings:
+      ConfusionActive: false
+      FeedbacksActive: true
+      FeedbacksPublic: false
+    
+`;
+
+exports[`SessionExecService addFeedback allows adding new feedbacks to a running session 2`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    Blocks: [
+      Show solutions: false
+      Status: PLANNED
+      Time limit: -1
+      Number of instances: 1
+    ]
+
+    ConfusionTS: []
+
+    Feedbacks: [
+      Content: feedback1
+      Votes: 0
+    ,
+      Content: feedback2
+      Votes: 0
+    ]
+
+    Settings:
+      ConfusionActive: false
+      FeedbacksActive: true
+      FeedbacksPublic: false
+    
+`;
