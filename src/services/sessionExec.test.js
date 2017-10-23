@@ -18,10 +18,14 @@ const prepareSession = prepareSessionFactory(SessionMgrService)
 
 describe('SessionExecService', () => {
   let user
+  let question1
   let question2
+  let questionFREE
 
   beforeAll(async () => {
-    ({ user, question2 } = await initializeDb({
+    ({
+      user, question1, question2, questionFREE,
+    } = await initializeDb({
       mongoose,
       email: 'testSessionExec@bf.uzh.ch',
       shortname: 'sesExc',
@@ -163,22 +167,31 @@ describe('SessionExecService', () => {
     }
     let preparedSession
 
-    beforeAll(async () => {
-      preparedSession = await prepareSession(user.id, [question2.id])
-
-      // start the session
-      await SessionMgrService.startSession({ id: preparedSession.id, userId: user.id })
+    afterEach(async () => {
+      // end the session
+      await SessionMgrService.endSession({
+        id: preparedSession.id,
+        userId: user.id,
+      })
     })
 
-    it('prevents adding a response to a closed question instance', () => {
+    it('prevents adding a response to a closed question instance', async () => {
+      // prepare a session with a SC question
+      preparedSession = await prepareSession(user.id, [question2.id], true)
+
       const promise = SessionExecService.addResponse({
         instanceId: preparedSession.activeInstances[0],
-        response: SCresponse1,
+        response: {
+          choices: [0],
+        },
       })
       expect(promise).rejects.toEqual(new Error('INSTANCE_CLOSED'))
     })
 
     it('allows adding responses to an open SC instance', async () => {
+      // prepare a session with a SC question
+      preparedSession = await prepareSession(user.id, [question2.id], true)
+
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
@@ -199,15 +212,72 @@ describe('SessionExecService', () => {
       expect(instanceWithResponses).toMatchSnapshot()
     })
 
-    it.skip('allows adding responses to an open FREE instance', async () => {
-      // TODO
+    it('allows adding responses to an open FREE (NONE) instance', async () => {
+      // prepare a session with a FREE question
+      preparedSession = await prepareSession(user.id, [questionFREE.id], true)
+
+      // activate the next block of the running session
+      // this opens the instances for responses
+      const session = await SessionMgrService.activateNextBlock({ userId: user.id })
+      expect(session).toMatchSnapshot()
+
+      // add a response
+      const instanceWithResponse = await SessionExecService.addResponse({
+        instanceId: session.activeInstances[0],
+        response: {
+          text: 'SCHWEIZ',
+        },
+      })
+      expect(instanceWithResponse.results.free).toMatchSnapshot()
+
+      await SessionExecService.addResponse({
+        instanceId: session.activeInstances[0],
+        response: {
+          text: 'schwiiz...',
+        },
+      })
+      const instanceWithResponses = await SessionExecService.addResponse({
+        instanceId: session.activeInstances[0],
+        response: {
+          text: 'SCHWEIZ',
+        },
+      })
+      expect(instanceWithResponses.results.free).toMatchSnapshot()
+      expect(instanceWithResponses).toMatchSnapshot()
     })
 
-    afterAll(async () => {
-      await SessionMgrService.endSession({
-        id: preparedSession.id,
-        userId: user.id,
+    it('allows adding responses to an open FREE (RANGE) instance', async () => {
+      // prepare a session with a FREE question
+      preparedSession = await prepareSession(user.id, [question1.id], true)
+
+      // activate the next block of the running session
+      // this opens the instances for responses
+      const session = await SessionMgrService.activateNextBlock({ userId: user.id })
+      expect(session).toMatchSnapshot()
+
+      // add a response
+      const instanceWithResponse = await SessionExecService.addResponse({
+        instanceId: session.activeInstances[0],
+        response: {
+          value: 80,
+        },
       })
+      expect(instanceWithResponse.results.free).toMatchSnapshot()
+
+      await SessionExecService.addResponse({
+        instanceId: session.activeInstances[0],
+        response: {
+          value: 25,
+        },
+      })
+      const instanceWithResponses = await SessionExecService.addResponse({
+        instanceId: session.activeInstances[0],
+        response: {
+          value: 80,
+        },
+      })
+      expect(instanceWithResponses.results.free).toMatchSnapshot()
+      expect(instanceWithResponses).toMatchSnapshot()
     })
   })
 })

@@ -24,12 +24,29 @@ const setupTestEnv = async ({ email, password, shortname }) => {
 }
 
 // prepare a new session instance
-const prepareSessionFactory = SessionMgrService => (userId, questions = ['59b1481857f3c34af09a4736']) =>
-  SessionMgrService.createSession({
+const prepareSessionFactory = SessionMgrService => async (
+  userId,
+  questions = ['59b1481857f3c34af09a4736'],
+  started = false,
+) => {
+  if (started) {
+    const session = await SessionMgrService.createSession({
+      name: 'testing session',
+      questionBlocks: [{ questions }],
+      userId,
+    })
+    return SessionMgrService.startSession({
+      id: session.id,
+      userId,
+    })
+  }
+
+  return SessionMgrService.createSession({
     name: 'testing session',
     questionBlocks: [{ questions }],
     userId,
   })
+}
 
 const initializeDb = async ({
   mongoose, email, shortname, withLogin = false, withQuestions = false,
@@ -71,6 +88,20 @@ const initializeDb = async ({
         tags: ['CDEF'],
         title: 'second question',
         type: 'SC',
+        userId: result.user.id,
+      })
+      result.questionFREE = await QuestionService.createQuestion({
+        description: 'a description',
+        options: {
+          restrictions: {
+            min: null,
+            max: null,
+            type: 'NONE',
+          },
+        },
+        tags: ['AZA', 'BBB'],
+        title: 'unrestricted free question',
+        type: 'FREE',
         userId: result.user.id,
       })
     }

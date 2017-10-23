@@ -130,6 +130,62 @@ exports[`SessionExecService addFeedback allows adding new feedbacks to a running
     }
 `;
 
+exports[`SessionExecService addResponse allows adding responses to an open FREE (NONE) instance 1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    ActiveBlock: 0
+    ActiveInstances: 1
+
+    Blocks: [{
+      Show solutions: false
+      Status: ACTIVE
+      Time limit: -1
+      Number of instances: 1
+    }]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings: {
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    }
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    ActiveBlock: 0
+    ActiveInstances: 1
+
+    Blocks: [{
+      Show solutions: false
+      Status: ACTIVE
+      Time limit: -1
+      Number of instances: 1
+    }]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings: {
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    }
+`;
+
 exports[`SessionExecService addResponse allows adding responses to an open SC instance 1`] = `
 
     SESSION
