@@ -168,19 +168,6 @@ Object {
 `;
 
 exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 3`] = `
-Object {
-  "74c68be04abd1ecca770efada2c06ea5": Object {
-    "count": 1,
-    "text": "schwiiz...",
-  },
-  "c7cd24ea4ea9d3eaab020517ed1babb7": Object {
-    "count": 2,
-    "text": "SCHWEIZ",
-  },
-}
-`;
-
-exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 4`] = `
 
     QUESTION_INSTANCE
 
@@ -258,19 +245,6 @@ Object {
 `;
 
 exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 3`] = `
-Object {
-  "10": Object {
-    "count": 2,
-    "value": 10,
-  },
-  "14": Object {
-    "count": 1,
-    "value": 14,
-  },
-}
-`;
-
-exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 4`] = `
 
     QUESTION_INSTANCE
 

@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const mongoose = require('mongoose')
+const md5 = require('md5')
 
 const SessionMgrService = require('./sessionMgr')
 const SessionExecService = require('./sessionExec')
@@ -247,7 +248,18 @@ describe('SessionExecService', () => {
           text: 'SCHWEIZ',
         },
       })
-      expect(instanceWithResponses.results.free).toMatchSnapshot()
+      const md1 = md5('SCHWEIZ')
+      const md2 = md5('schwiiz...')
+      expect(instanceWithResponses.results.free).toEqual({
+        [md1]: {
+          count: 2,
+          text: 'SCHWEIZ',
+        },
+        [md2]: {
+          count: 1,
+          text: 'schwiiz...',
+        },
+      })
       expect(instanceWithResponses).toMatchSnapshot()
     })
 
@@ -295,7 +307,16 @@ describe('SessionExecService', () => {
           value: 10,
         },
       })
-      expect(instanceWithResponses.results.free).toMatchSnapshot()
+      expect(instanceWithResponses.results.free).toEqual({
+        10: {
+          count: 2,
+          value: 10,
+        },
+        14: {
+          count: 1,
+          value: 14,
+        },
+      })
       expect(instanceWithResponses).toMatchSnapshot()
     })
   })
