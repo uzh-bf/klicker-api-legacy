@@ -78,6 +78,10 @@ const addResponse = async ({ instanceId, response }) => {
 
   // result parsing for SC/MC questions
   if ([QuestionTypes.SC, QuestionTypes.MC].includes(questionType)) {
+    if (!response.choices || !response.choices.length > 0) {
+      throw new Error('INVALID_RESPONSE')
+    }
+
     // if it is the very first response, initialize results
     if (!instance.results) {
       instance.results = {
@@ -93,6 +97,16 @@ const addResponse = async ({ instanceId, response }) => {
     instance.results.choices = []
     instance.results.choices.push(...choices)
   } else if (questionType === QuestionTypes.FREE) {
+    const restrictionType = currentVersion.options.restrictions.type
+
+    if (restrictionType === 'NONE' && !response.text) {
+      throw new Error('INVALID_RESPONSE')
+    }
+
+    if (restrictionType === 'RANGE' && !response.value) {
+      throw new Error('INVALID_RESPONSE')
+    }
+
     // if it is the very first response, initialize results
     if (!instance.results) {
       instance.results = {
@@ -100,7 +114,6 @@ const addResponse = async ({ instanceId, response }) => {
       }
     }
 
-    const restrictionType = currentVersion.options.restrictions.type
     const resultKey = getResultKey(restrictionType, response)
     const valueKey = restrictionType === 'NONE' ? 'text' : 'value'
 
