@@ -24,13 +24,20 @@ const resultsByPVQuery = ({ results }) => {
     return null
   }
 
-  return {
-    choices: results.choices,
-    free: _map(results.free, (result, key) => ({
-      ...result,
-      key,
-    })),
+  if (results.choices) {
+    return results
   }
+
+  if (results.free) {
+    return {
+      free: _map(results.free, (result, key) => ({
+        ...result,
+        key,
+      })),
+    }
+  }
+
+  return null
 }
 
 /* ----- mutations ----- */
