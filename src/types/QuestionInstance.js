@@ -13,7 +13,7 @@ const QuestionInstance = `
   type QuestionInstance_Response {
     id: ID!
     choices: [Int!]
-    value: String!
+    value: String
     createdAt: String!
   }
 
