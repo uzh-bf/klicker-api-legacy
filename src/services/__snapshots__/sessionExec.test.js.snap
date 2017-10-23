@@ -130,7 +130,7 @@ exports[`SessionExecService addFeedback allows adding new feedbacks to a running
     }
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open FREE (NONE) instance 1`] = `
+exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 1`] = `
 
     SESSION
 
@@ -158,7 +158,7 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
     }
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open FREE (NONE) instance 2`] = `
+exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 2`] = `
 Object {
   "c7cd24ea4ea9d3eaab020517ed1babb7": Object {
     "count": 1,
@@ -167,7 +167,7 @@ Object {
 }
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open FREE (NONE) instance 3`] = `
+exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 3`] = `
 Object {
   "74c68be04abd1ecca770efada2c06ea5": Object {
     "count": 1,
@@ -180,7 +180,7 @@ Object {
 }
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open FREE (NONE) instance 4`] = `
+exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 4`] = `
 
     QUESTION_INSTANCE
 
@@ -220,7 +220,7 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
   
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 1`] = `
+exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 1`] = `
 
     SESSION
 
@@ -248,7 +248,7 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
     }
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 2`] = `
+exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 2`] = `
 Object {
   "10": Object {
     "count": 1,
@@ -257,7 +257,7 @@ Object {
 }
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 3`] = `
+exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 3`] = `
 Object {
   "10": Object {
     "count": 2,
@@ -270,7 +270,7 @@ Object {
 }
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 4`] = `
+exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 4`] = `
 
     QUESTION_INSTANCE
 
@@ -310,7 +310,7 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
   
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open SC instance 1`] = `
+exports[`SessionExecService addResponse allows adding responses [SC] 1`] = `
 
     SESSION
 
@@ -338,21 +338,21 @@ exports[`SessionExecService addResponse allows adding responses to an open SC in
     }
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open SC instance 2`] = `
+exports[`SessionExecService addResponse allows adding responses [SC] 2`] = `
 Array [
   1,
   0,
 ]
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open SC instance 3`] = `
+exports[`SessionExecService addResponse allows adding responses [SC] 3`] = `
 Array [
   2,
   1,
 ]
 `;
 
-exports[`SessionExecService addResponse allows adding responses to an open SC instance 4`] = `
+exports[`SessionExecService addResponse allows adding responses [SC] 4`] = `
 
     QUESTION_INSTANCE
 

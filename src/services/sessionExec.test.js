@@ -190,7 +190,7 @@ describe('SessionExecService', () => {
       expect(promise).rejects.toEqual(new Error('INSTANCE_CLOSED'))
     })
 
-    it('allows adding responses to an open SC instance', async () => {
+    it('allows adding responses [SC]', async () => {
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
@@ -211,11 +211,19 @@ describe('SessionExecService', () => {
       expect(instanceWithResponses).toMatchSnapshot()
     })
 
-    it('allows adding responses to an open FREE (NONE) instance', async () => {
+    it('allows adding responses [FREE:NONE]', async () => {
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
       expect(session).toMatchSnapshot()
+
+      // try adding an invalid response
+      expect(SessionExecService.addResponse({
+        instanceId: session.activeInstances[2],
+        response: {
+          xyz: 23,
+        },
+      })).rejects.toEqual(new Error('INVALID_RESPONSE'))
 
       // add a response
       const instanceWithResponse = await SessionExecService.addResponse({
@@ -243,11 +251,27 @@ describe('SessionExecService', () => {
       expect(instanceWithResponses).toMatchSnapshot()
     })
 
-    it('allows adding responses to an open FREE (RANGE) instance', async () => {
+    it('allows adding responses [FREE:RANGE]', async () => {
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
       expect(session).toMatchSnapshot()
+
+      // try adding an invalid response
+      expect(SessionExecService.addResponse({
+        instanceId: session.activeInstances[0],
+        response: {
+          xyz: 'asd',
+        },
+      })).rejects.toEqual(new Error('INVALID_RESPONSE'))
+
+      // try adding a valua that is out-of-range
+      expect(SessionExecService.addResponse({
+        instanceId: session.activeInstances[0],
+        response: {
+          value: 99999,
+        },
+      })).rejects.toEqual(new Error('RESPONSE_OUT_OF_RANGE'))
 
       // add a response
       const instanceWithResponse = await SessionExecService.addResponse({
