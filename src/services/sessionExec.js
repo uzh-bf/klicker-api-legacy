@@ -78,7 +78,7 @@ const addResponse = async ({ instanceId, response }) => {
 
   // result parsing for SC/MC questions
   if ([QuestionTypes.SC, QuestionTypes.MC].includes(questionType)) {
-    // if the results have not yet been initialized
+    // if it is the very first response, initialize results
     if (!instance.results) {
       instance.results = {
         choices: new Array(currentVersion.options.choices.length).fill(+0),
@@ -93,7 +93,7 @@ const addResponse = async ({ instanceId, response }) => {
     instance.results.choices = []
     instance.results.choices.push(...choices)
   } else if (questionType === QuestionTypes.FREE) {
-    // result parsing for FREE questions
+    // if it is the very first response, initialize results
     if (!instance.results) {
       instance.results = {
         free: {},
@@ -104,16 +104,15 @@ const addResponse = async ({ instanceId, response }) => {
     const resultKey = getResultKey(restrictionType, response)
     const valueKey = restrictionType === 'NONE' ? 'text' : 'value'
 
+    // if the respective response value was not given before, add it anew
     if (!instance.results.free[resultKey]) {
       instance.results.free[resultKey] = {
         count: 1,
         [valueKey]: response[valueKey],
       }
     } else {
-      instance.results.free[resultKey] = {
-        ...instance.results.free[resultKey],
-        count: instance.results.free[resultKey].count + 1,
-      }
+      // if the response value already occurred, simply increment count
+      instance.results.free[resultKey].count += 1
     }
   }
 
