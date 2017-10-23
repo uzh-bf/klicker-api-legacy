@@ -167,6 +167,11 @@ describe('SessionExecService', () => {
     }
     let preparedSession
 
+    beforeEach(async () => {
+      // prepare a session with a SC question
+      preparedSession = await prepareSession(user.id, [question1.id, question2.id, questionFREE.id], true)
+    })
+
     afterEach(async () => {
       // end the session
       await SessionMgrService.endSession({
@@ -176,11 +181,8 @@ describe('SessionExecService', () => {
     })
 
     it('prevents adding a response to a closed question instance', async () => {
-      // prepare a session with a SC question
-      preparedSession = await prepareSession(user.id, [question2.id], true)
-
       const promise = SessionExecService.addResponse({
-        instanceId: preparedSession.activeInstances[0],
+        instanceId: preparedSession.activeInstances[1],
         response: {
           choices: [0],
         },
@@ -189,9 +191,6 @@ describe('SessionExecService', () => {
     })
 
     it('allows adding responses to an open SC instance', async () => {
-      // prepare a session with a SC question
-      preparedSession = await prepareSession(user.id, [question2.id], true)
-
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
@@ -199,13 +198,13 @@ describe('SessionExecService', () => {
 
       // add a response
       const instanceWithResponse = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[1],
         response: SCresponse1,
       })
       expect(instanceWithResponse.results.choices).toMatchSnapshot()
 
       const instanceWithResponses = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[1],
         response: SCresponse2,
       })
       expect(instanceWithResponses.results.choices).toMatchSnapshot()
@@ -213,9 +212,6 @@ describe('SessionExecService', () => {
     })
 
     it('allows adding responses to an open FREE (NONE) instance', async () => {
-      // prepare a session with a FREE question
-      preparedSession = await prepareSession(user.id, [questionFREE.id], true)
-
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
@@ -223,7 +219,7 @@ describe('SessionExecService', () => {
 
       // add a response
       const instanceWithResponse = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[2],
         response: {
           text: 'SCHWEIZ',
         },
@@ -232,13 +228,13 @@ describe('SessionExecService', () => {
 
       // add more responses
       await SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[2],
         response: {
           text: 'schwiiz...',
         },
       })
       const instanceWithResponses = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[2],
         response: {
           text: 'SCHWEIZ',
         },
@@ -248,9 +244,6 @@ describe('SessionExecService', () => {
     })
 
     it('allows adding responses to an open FREE (RANGE) instance', async () => {
-      // prepare a session with a FREE question
-      preparedSession = await prepareSession(user.id, [question1.id], true)
-
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
@@ -260,7 +253,7 @@ describe('SessionExecService', () => {
       const instanceWithResponse = await SessionExecService.addResponse({
         instanceId: session.activeInstances[0],
         response: {
-          value: 80,
+          value: 10,
         },
       })
       expect(instanceWithResponse.results.free).toMatchSnapshot()
@@ -269,13 +262,13 @@ describe('SessionExecService', () => {
       await SessionExecService.addResponse({
         instanceId: session.activeInstances[0],
         response: {
-          value: 25,
+          value: 14,
         },
       })
       const instanceWithResponses = await SessionExecService.addResponse({
         instanceId: session.activeInstances[0],
         response: {
-          value: 80,
+          value: 10,
         },
       })
       expect(instanceWithResponses.results.free).toMatchSnapshot()

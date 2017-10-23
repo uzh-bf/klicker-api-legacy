@@ -138,13 +138,13 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
     Status: RUNNING
 
     ActiveBlock: 0
-    ActiveInstances: 1
+    ActiveInstances: 3
 
     Blocks: [{
       Show solutions: false
       Status: ACTIVE
       Time limit: -1
-      Number of instances: 1
+      Number of instances: 3
     }]
 
     ConfusionTS: []
@@ -169,6 +169,10 @@ Object {
 
 exports[`SessionExecService addResponse allows adding responses to an open FREE (NONE) instance 3`] = `
 Object {
+  "74c68be04abd1ecca770efada2c06ea5": Object {
+    "count": 1,
+    "text": "schwiiz...",
+  },
   "c7cd24ea4ea9d3eaab020517ed1babb7": Object {
     "count": 2,
     "text": "SCHWEIZ",
@@ -224,13 +228,13 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
     Status: RUNNING
 
     ActiveBlock: 0
-    ActiveInstances: 1
+    ActiveInstances: 3
 
     Blocks: [{
       Show solutions: false
       Status: ACTIVE
       Time limit: -1
-      Number of instances: 1
+      Number of instances: 3
     }]
 
     ConfusionTS: []
@@ -246,18 +250,22 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
 
 exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 2`] = `
 Object {
-  "80": Object {
+  "10": Object {
     "count": 1,
-    "value": 80,
+    "value": 10,
   },
 }
 `;
 
 exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 3`] = `
 Object {
-  "80": Object {
+  "10": Object {
     "count": 2,
-    "value": 80,
+    "value": 10,
+  },
+  "14": Object {
+    "count": 1,
+    "value": 14,
   },
 }
 `;
@@ -275,7 +283,7 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
       value: {
         choices: undefined
         text: undefined
-        value: 80
+        value: 10
       }
     ,
       ip: some ip
@@ -283,7 +291,7 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
       value: {
         choices: undefined
         text: undefined
-        value: 25
+        value: 14
       }
     ,
       ip: some ip
@@ -291,7 +299,7 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
       value: {
         choices: undefined
         text: undefined
-        value: 80
+        value: 10
       }
     ]
 
@@ -310,13 +318,13 @@ exports[`SessionExecService addResponse allows adding responses to an open SC in
     Status: RUNNING
 
     ActiveBlock: 0
-    ActiveInstances: 1
+    ActiveInstances: 3
 
     Blocks: [{
       Show solutions: false
       Status: ACTIVE
       Time limit: -1
-      Number of instances: 1
+      Number of instances: 3
     }]
 
     ConfusionTS: []
