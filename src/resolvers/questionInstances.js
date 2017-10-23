@@ -24,10 +24,6 @@ const resultsByPVQuery = ({ results }) => {
     return null
   }
 
-  if (results.choices) {
-    return results
-  }
-
   if (results.free) {
     return {
       free: _map(results.free, (result, key) => ({
@@ -35,6 +31,10 @@ const resultsByPVQuery = ({ results }) => {
         key,
       })),
     }
+  }
+
+  if (results.choices) {
+    return results
   }
 
   return null

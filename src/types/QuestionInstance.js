@@ -8,14 +8,12 @@ const QuestionInstance = `
 
   input QuestionInstance_ResponseInput {
     choices: [Int!]
-    text: String
-    value: Int
+    value: String
   }
   type QuestionInstance_Response {
     id: ID!
     choices: [Int!]
-    text: String
-    value: Int
+    value: String!
     createdAt: String!
   }
 

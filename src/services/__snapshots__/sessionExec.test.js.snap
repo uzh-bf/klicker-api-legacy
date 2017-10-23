@@ -162,7 +162,7 @@ exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 2`] 
 Object {
   "c7cd24ea4ea9d3eaab020517ed1babb7": Object {
     "count": 1,
-    "text": "SCHWEIZ",
+    "value": "SCHWEIZ",
   },
 }
 `;
@@ -179,24 +179,24 @@ exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 3`] 
       fingerprint: some fingerprint
       value: {
         choices: undefined
-        text: SCHWEIZ
-        value: undefined
+        text: undefined
+        value: SCHWEIZ
       }
     ,
       ip: some ip
       fingerprint: some fingerprint
       value: {
         choices: undefined
-        text: schwiiz...
-        value: undefined
+        text: undefined
+        value: schwiiz...
       }
     ,
       ip: some ip
       fingerprint: some fingerprint
       value: {
         choices: undefined
-        text: SCHWEIZ
-        value: undefined
+        text: undefined
+        value: SCHWEIZ
       }
     ]
 

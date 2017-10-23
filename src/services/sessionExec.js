@@ -6,7 +6,7 @@ const { getRunningSession } = require('./sessionMgr')
 
 const getResultKey = (restrictionType, response) => {
   if (restrictionType === 'NONE') {
-    return md5(response.text)
+    return md5(response.value)
   }
 
   if (restrictionType === 'RANGE') {
@@ -97,15 +97,11 @@ const addResponse = async ({ instanceId, response }) => {
   } else if (questionType === QuestionTypes.FREE) {
     const { type, min, max } = currentVersion.options.restrictions
 
-    if (type === 'NONE' && !response.text) {
+    if (!response.value) {
       throw new Error('INVALID_RESPONSE')
     }
 
     if (type === 'RANGE') {
-      if (!response.value) {
-        throw new Error('INVALID_RESPONSE')
-      }
-
       if (response.value < min || response.value > max) {
         throw new Error('RESPONSE_OUT_OF_RANGE')
       }
@@ -119,13 +115,12 @@ const addResponse = async ({ instanceId, response }) => {
     }
 
     const resultKey = getResultKey(type, response)
-    const valueKey = type === 'NONE' ? 'text' : 'value'
 
     // if the respective response value was not given before, add it anew
     if (!instance.results.free[resultKey]) {
       instance.results.free[resultKey] = {
         count: 1,
-        [valueKey]: response[valueKey],
+        value: response.value,
       }
     } else {
       // if the response value already occurred, simply increment count

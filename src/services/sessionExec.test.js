@@ -230,7 +230,7 @@ describe('SessionExecService', () => {
       const instanceWithResponse = await SessionExecService.addResponse({
         instanceId: session.activeInstances[2],
         response: {
-          text: 'SCHWEIZ',
+          value: 'SCHWEIZ',
         },
       })
       expect(instanceWithResponse.results.free).toMatchSnapshot()
@@ -239,13 +239,13 @@ describe('SessionExecService', () => {
       await SessionExecService.addResponse({
         instanceId: session.activeInstances[2],
         response: {
-          text: 'schwiiz...',
+          value: 'schwiiz...',
         },
       })
       const instanceWithResponses = await SessionExecService.addResponse({
         instanceId: session.activeInstances[2],
         response: {
-          text: 'SCHWEIZ',
+          value: 'SCHWEIZ',
         },
       })
       const md1 = md5('SCHWEIZ')
@@ -253,11 +253,11 @@ describe('SessionExecService', () => {
       expect(instanceWithResponses.results.free).toEqual({
         [md1]: {
           count: 2,
-          text: 'SCHWEIZ',
+          value: 'SCHWEIZ',
         },
         [md2]: {
           count: 1,
-          text: 'schwiiz...',
+          value: 'schwiiz...',
         },
       })
       expect(instanceWithResponses).toMatchSnapshot()
