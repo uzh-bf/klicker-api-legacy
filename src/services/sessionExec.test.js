@@ -202,13 +202,13 @@ describe('SessionExecService', () => {
         instanceId: session.activeInstances[1],
         response: SCresponse1,
       })
-      expect(instanceWithResponse.results.choices).toMatchSnapshot()
+      expect(instanceWithResponse.toObject().results.choices).toEqual([1, 0])
 
       const instanceWithResponses = await SessionExecService.addResponse({
         instanceId: session.activeInstances[1],
         response: SCresponse2,
       })
-      expect(instanceWithResponses.results.choices).toMatchSnapshot()
+      expect(instanceWithResponses.toObject().results.choices).toEqual([2, 1])
       expect(instanceWithResponses).toMatchSnapshot()
     })
 

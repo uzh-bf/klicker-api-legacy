@@ -313,20 +313,6 @@ exports[`SessionExecService addResponse allows adding responses [SC] 1`] = `
 `;
 
 exports[`SessionExecService addResponse allows adding responses [SC] 2`] = `
-Array [
-  1,
-  0,
-]
-`;
-
-exports[`SessionExecService addResponse allows adding responses [SC] 3`] = `
-Array [
-  2,
-  1,
-]
-`;
-
-exports[`SessionExecService addResponse allows adding responses [SC] 4`] = `
 
     QUESTION_INSTANCE
 

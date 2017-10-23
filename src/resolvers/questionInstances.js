@@ -19,13 +19,19 @@ const questionInstancesByPVQuery = parentValue => QuestionInstanceModel.find({ _
 const responsesByPVQuery = parentValue =>
   parentValue.responses.map(response => ({ id: response.id, ...response.value, createdAt: response.createdAt }))
 
-const resultsByPVQuery = parentValue =>
-  parentValue.results && {
-    free: _map(parentValue.results.free, (result, key) => ({
+const resultsByPVQuery = ({ results }) => {
+  if (!results) {
+    return null
+  }
+
+  return {
+    choices: results.choices,
+    free: _map(results.free, (result, key) => ({
       ...result,
       key,
     })),
   }
+}
 
 /* ----- mutations ----- */
 const addResponseMutation = (parentValue, { instanceId, response }) =>
