@@ -1,3 +1,5 @@
+const _map = require('lodash/map')
+
 const SessionExecService = require('../services/sessionExec')
 const { QuestionInstanceModel, UserModel } = require('../models')
 
@@ -17,6 +19,14 @@ const questionInstancesByPVQuery = parentValue => QuestionInstanceModel.find({ _
 const responsesByPVQuery = parentValue =>
   parentValue.responses.map(response => ({ id: response.id, ...response.value, createdAt: response.createdAt }))
 
+const resultsByPVQuery = parentValue =>
+  parentValue.results && {
+    free: _map(parentValue.results.free, (result, key) => ({
+      ...result,
+      key,
+    })),
+  }
+
 /* ----- mutations ----- */
 const addResponseMutation = (parentValue, { instanceId, response }) =>
   // TODO: use redis
@@ -29,6 +39,7 @@ module.exports = {
   questionInstance: questionInstanceByIDQuery,
   questionInstancesByPV: questionInstancesByPVQuery,
   responsesByPV: responsesByPVQuery,
+  resultsByPV: resultsByPVQuery,
 
   // mutations
   addResponse: addResponseMutation,

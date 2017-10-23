@@ -5,6 +5,7 @@ module.exports = () => [FREEQuestionResults]
 
 const FREEQuestionResults = `
   type FREEQuestionResults_Result {
+    key: String!
     count: Int!
     text: String
     value: Int

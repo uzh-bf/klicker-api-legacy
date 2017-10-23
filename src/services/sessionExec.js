@@ -89,22 +89,26 @@ const addResponse = async ({ instanceId, response }) => {
       }
     }
 
-    const { choices } = instance.results
     // for each choice given, update the results
     response.choices.forEach((responseIndex) => {
-      choices[responseIndex] += 1
+      instance.results.choices[responseIndex] += 1
     })
-    instance.results.choices = []
-    instance.results.choices.push(...choices)
+    instance.markModified('results.choices')
   } else if (questionType === QuestionTypes.FREE) {
-    const restrictionType = currentVersion.options.restrictions.type
+    const { type, min, max } = currentVersion.options.restrictions
 
-    if (restrictionType === 'NONE' && !response.text) {
+    if (type === 'NONE' && !response.text) {
       throw new Error('INVALID_RESPONSE')
     }
 
-    if (restrictionType === 'RANGE' && !response.value) {
-      throw new Error('INVALID_RESPONSE')
+    if (type === 'RANGE') {
+      if (!response.value) {
+        throw new Error('INVALID_RESPONSE')
+      }
+
+      if (response.value < min || response.value > max) {
+        throw new Error('RESPONSE_OUT_OF_RANGE')
+      }
     }
 
     // if it is the very first response, initialize results
@@ -114,8 +118,8 @@ const addResponse = async ({ instanceId, response }) => {
       }
     }
 
-    const resultKey = getResultKey(restrictionType, response)
-    const valueKey = restrictionType === 'NONE' ? 'text' : 'value'
+    const resultKey = getResultKey(type, response)
+    const valueKey = type === 'NONE' ? 'text' : 'value'
 
     // if the respective response value was not given before, add it anew
     if (!instance.results.free[resultKey]) {
@@ -127,6 +131,7 @@ const addResponse = async ({ instanceId, response }) => {
       // if the response value already occurred, simply increment count
       instance.results.free[resultKey].count += 1
     }
+    instance.markModified('results.free')
   }
 
   // push the new response into the array

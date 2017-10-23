@@ -5,7 +5,11 @@ const {
   allQuestions, createQuestion, questionsByPV, questionByPV,
 } = require('./resolvers/questions')
 const {
-  activeInstances, questionInstancesByPV, addResponse, responsesByPV,
+  activeInstances,
+  questionInstancesByPV,
+  addResponse,
+  responsesByPV,
+  resultsByPV,
 } = require('./resolvers/questionInstances')
 const {
   addFeedback,
@@ -111,6 +115,7 @@ const resolvers = {
   QuestionInstance: {
     question: questionByPV,
     responses: responsesByPV,
+    results: resultsByPV,
   },
   QuestionInstance_Results: {
     __resolveType(obj) {
