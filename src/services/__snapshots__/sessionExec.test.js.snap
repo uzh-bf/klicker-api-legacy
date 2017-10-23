@@ -158,6 +158,64 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
     }
 `;
 
+exports[`SessionExecService addResponse allows adding responses to an open FREE (NONE) instance 2`] = `
+Object {
+  "c7cd24ea4ea9d3eaab020517ed1babb7": Object {
+    "count": 1,
+    "text": "SCHWEIZ",
+  },
+}
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an open FREE (NONE) instance 3`] = `
+Object {
+  "c7cd24ea4ea9d3eaab020517ed1babb7": Object {
+    "count": 2,
+    "text": "SCHWEIZ",
+  },
+}
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an open FREE (NONE) instance 4`] = `
+
+    QUESTION_INSTANCE
+
+    isOpen: true
+    version: 0
+
+    responses: [
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: undefined
+        text: SCHWEIZ
+        value: undefined
+      }
+    ,
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: undefined
+        text: schwiiz...
+        value: undefined
+      }
+    ,
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: undefined
+        text: SCHWEIZ
+        value: undefined
+      }
+    ]
+
+    results: {
+      choices: []
+      free: [object Object]
+    }
+  
+`;
+
 exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 1`] = `
 
     SESSION
@@ -184,6 +242,64 @@ exports[`SessionExecService addResponse allows adding responses to an open FREE 
       FeedbacksActive: false
       FeedbacksPublic: false
     }
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 2`] = `
+Object {
+  "80": Object {
+    "count": 1,
+    "value": 80,
+  },
+}
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 3`] = `
+Object {
+  "80": Object {
+    "count": 2,
+    "value": 80,
+  },
+}
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an open FREE (RANGE) instance 4`] = `
+
+    QUESTION_INSTANCE
+
+    isOpen: true
+    version: 0
+
+    responses: [
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: undefined
+        text: undefined
+        value: 80
+      }
+    ,
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: undefined
+        text: undefined
+        value: 25
+      }
+    ,
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: undefined
+        text: undefined
+        value: 80
+      }
+    ]
+
+    results: {
+      choices: []
+      free: [object Object]
+    }
+  
 `;
 
 exports[`SessionExecService addResponse allows adding responses to an open SC instance 1`] = `
@@ -255,7 +371,7 @@ exports[`SessionExecService addResponse allows adding responses to an open SC in
 
     results: {
       choices: [2,1]
-      free: []
+      free: undefined
     }
   
 `;

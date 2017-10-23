@@ -86,7 +86,7 @@ const questionInstanceSerializer = {
     results: ${val.results &&
       `{
       choices: [${val.results.choices}]
-      free: []
+      free: ${val.results.free}
     }`}
   `,
 }

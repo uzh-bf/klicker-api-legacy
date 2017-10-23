@@ -12,7 +12,7 @@ const Response = new mongoose.Schema({
 
 const Results = new mongoose.Schema({
   choices: [{ type: Number }],
-  free: [{ type: Object }],
+  free: { type: Object },
 
   createdAt: { type: Date, default: Date.now() },
 })

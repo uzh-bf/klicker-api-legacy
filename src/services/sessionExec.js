@@ -1,6 +1,20 @@
+const md5 = require('md5')
+
 const { QuestionInstanceModel, QuestionTypes } = require('../models')
 
 const { getRunningSession } = require('./sessionMgr')
+
+const getResultKey = (restrictionType, response) => {
+  if (restrictionType === 'NONE') {
+    return md5(response.text)
+  }
+
+  if (restrictionType === 'RANGE') {
+    return response.value
+  }
+
+  return null
+}
 
 // add a new feedback to a session
 const addFeedback = async ({ sessionId, content }) => {
@@ -60,18 +74,14 @@ const addResponse = async ({ instanceId, response }) => {
   }
 
   const questionType = instance.question.type
-
-  // result parsing for FREE questions
-  if (questionType === QuestionTypes.FREE) {
-    // TODO: init
-  }
+  const currentVersion = instance.question.versions[instance.version]
 
   // result parsing for SC/MC questions
   if ([QuestionTypes.SC, QuestionTypes.MC].includes(questionType)) {
     // if the results have not yet been initialized
     if (!instance.results) {
       instance.results = {
-        choices: new Array(instance.question.versions[instance.version].options.choices.length).fill(+0),
+        choices: new Array(currentVersion.options.choices.length).fill(+0),
       }
     }
 
@@ -82,6 +92,29 @@ const addResponse = async ({ instanceId, response }) => {
     })
     instance.results.choices = []
     instance.results.choices.push(...choices)
+  } else if (questionType === QuestionTypes.FREE) {
+    // result parsing for FREE questions
+    if (!instance.results) {
+      instance.results = {
+        free: {},
+      }
+    }
+
+    const restrictionType = currentVersion.options.restrictions.type
+    const resultKey = getResultKey(restrictionType, response)
+    const valueKey = restrictionType === 'NONE' ? 'text' : 'value'
+
+    if (!instance.results.free[resultKey]) {
+      instance.results.free[resultKey] = {
+        count: 1,
+        [valueKey]: response[valueKey],
+      }
+    } else {
+      instance.results.free[resultKey] = {
+        ...instance.results.free[resultKey],
+        count: instance.results.free[resultKey].count + 1,
+      }
+    }
   }
 
   // push the new response into the array

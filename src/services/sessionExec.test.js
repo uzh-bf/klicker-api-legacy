@@ -230,6 +230,7 @@ describe('SessionExecService', () => {
       })
       expect(instanceWithResponse.results.free).toMatchSnapshot()
 
+      // add more responses
       await SessionExecService.addResponse({
         instanceId: session.activeInstances[0],
         response: {
@@ -264,6 +265,7 @@ describe('SessionExecService', () => {
       })
       expect(instanceWithResponse.results.free).toMatchSnapshot()
 
+      // add more responses
       await SessionExecService.addResponse({
         instanceId: session.activeInstances[0],
         response: {
