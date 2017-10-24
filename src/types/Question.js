@@ -11,6 +11,15 @@ const SCQuestionOptions = require('./questionTypes/SCQuestionOptions')
 const Question = `
   union QuestionOptions = SCQuestionOptions | FREEQuestionOptions
 
+  type Question_Public {
+    id: ID!
+    title: String!
+    type: String!
+    description: String!
+
+    options: QuestionOptions!
+  }
+
   input QuestionInput {
     title: String!
     type: String!
