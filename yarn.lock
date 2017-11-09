@@ -164,6 +164,29 @@ apollo-cache-control@^0.0.x:
   dependencies:
     graphql-extensions "^0.0.x"
 
+apollo-engine-binary-darwin@^0.2017.11-40-g9585bfc6:
+  version "0.2017.11-40-g9585bfc6"
+  resolved "https://registry.yarnpkg.com/apollo-engine-binary-darwin/-/apollo-engine-binary-darwin-0.2017.11-40-g9585bfc6.tgz#ab52f0bd35ab0635e9f5ecbbe9d605db3fab3da6"
+
+apollo-engine-binary-linux@^0.2017.11-40-g9585bfc6:
+  version "0.2017.11-40-g9585bfc6"
+  resolved "https://registry.yarnpkg.com/apollo-engine-binary-linux/-/apollo-engine-binary-linux-0.2017.11-40-g9585bfc6.tgz#3ce39418a30ae8ae8d4d10e359e605ad0efdddae"
+
+apollo-engine-binary-windows@^0.2017.11-40-g9585bfc6:
+  version "0.2017.11-40-g9585bfc6"
+  resolved "https://registry.yarnpkg.com/apollo-engine-binary-windows/-/apollo-engine-binary-windows-0.2017.11-40-g9585bfc6.tgz#26f1dfd90c90b230d97282c04cdc2fbee4b941ae"
+
+apollo-engine@^0.5.3:
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/apollo-engine/-/apollo-engine-0.5.3.tgz#295aeda7b6694e1ddcfb945e00e39221e1496424"
+  dependencies:
+    request "^2.81.0"
+    stream-line-wrapper "^0.1.1"
+  optionalDependencies:
+    apollo-engine-binary-darwin "^0.2017.11-40-g9585bfc6"
+    apollo-engine-binary-linux "^0.2017.11-40-g9585bfc6"
+    apollo-engine-binary-windows "^0.2017.11-40-g9585bfc6"
+
 apollo-server-core@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/apollo-server-core/-/apollo-server-core-1.2.0.tgz#e851c47444991b6f89f88529237076b83e01e8ee"
@@ -280,6 +303,10 @@ async@^2.1.4:
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.0.tgz#61a29abb6fcc026fea77e56d1c6ec53a795951f4"
   dependencies:
     lodash "^4.14.0"
+
+async@~0.2.10:
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/async/-/async-0.2.10.tgz#b6bbe0b0674b9d719708ca38de8c237cb526c3d1"
 
 asynckit@^0.4.0:
   version "0.4.0"
@@ -3627,7 +3654,7 @@ repeating@^2.0.0:
   dependencies:
     is-finite "^1.0.0"
 
-request@^2.74.0, request@^2.79.0:
+request@^2.74.0, request@^2.79.0, request@^2.81.0:
   version "2.83.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.83.0.tgz#ca0b65da02ed62935887808e6f510381034e3356"
   dependencies:
@@ -3956,6 +3983,12 @@ stream-combiner@~0.0.4:
   resolved "https://registry.yarnpkg.com/stream-combiner/-/stream-combiner-0.0.4.tgz#4d5e433c185261dde623ca3f44c586bcf5c4ad14"
   dependencies:
     duplexer "~0.1.1"
+
+stream-line-wrapper@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/stream-line-wrapper/-/stream-line-wrapper-0.1.1.tgz#3e2be1d368c6356f90aeef64786683f3eee3eea7"
+  dependencies:
+    async "~0.2.10"
 
 stream-to-observable@^0.1.0:
   version "0.1.0"
