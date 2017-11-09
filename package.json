@@ -22,12 +22,12 @@
     "lodash": "4.17.4",
     "md5": "2.2.1",
     "mongodb": "2.2.33",
-    "mongoose": "4.13.0",
+    "mongoose": "4.13.1",
     "optics-agent": "1.1.8",
     "subscriptions-transport-ws": "0.9.1"
   },
   "devDependencies": {
-    "babel-eslint": "8.0.1",
+    "babel-eslint": "8.0.2",
     "eslint": "4.10.0",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-plugin-import": "2.8.0",
