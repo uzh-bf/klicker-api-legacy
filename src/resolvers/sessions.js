@@ -26,11 +26,12 @@ const joinSessionQuery = async (parentValue, { shortname }) => {
     id,
     settings,
     activeQuestions: activeInstances.map((instance) => {
-      const { question } = instance
+      const { id: instanceId, question } = instance
       const version = question.versions[instance.version]
 
       return {
         id: question.id,
+        instanceId,
         title: question.title,
         type: question.type,
         description: version.description,

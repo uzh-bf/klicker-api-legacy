@@ -13,6 +13,7 @@ const Question = `
 
   type Question_Public {
     id: ID!
+    instanceId: ID!
     title: String!
     type: String!
     description: String!
