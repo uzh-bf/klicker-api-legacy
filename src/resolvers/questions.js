@@ -6,6 +6,10 @@ const allQuestionsQuery = async (parentValue, args, { auth }) => {
   const user = await UserModel.findById(auth.sub).populate({ path: 'questions' })
   return user.questions
 }
+const questionQuery = async (parentValue, { id }, { auth }) => {
+  const question = await QuestionModel.findOne({ _id: id, user: auth.sub })
+  return question
+}
 
 const questionByIDQuery = (parentValue, { id }) => QuestionModel.findById(id)
 const questionByPVQuery = parentValue => QuestionModel.findById(parentValue.question)
@@ -19,6 +23,7 @@ module.exports = {
   // queries
   allQuestions: allQuestionsQuery,
   question: questionByIDQuery,
+  questionByID: questionQuery,
   questionByPV: questionByPVQuery,
   questionsByPV: questionsByPVQuery,
 
