@@ -101,6 +101,7 @@ const startSession = async ({ id, userId }) => {
 
   // update the session status to RUNNING
   session.status = SessionStatus.RUNNING
+  session.startedAt = Date.now()
 
   const updatedUser = UserModel.findByIdAndUpdate(userId, {
     runningSession: session.id,
@@ -140,6 +141,8 @@ const endSession = async ({ id, userId }) => {
 
   // update the session status to COMPLETED
   session.status = SessionStatus.COMPLETED
+
+  session.finishedAt = Date.now()
 
   // reset the running session id on the user
   const updatedUser = UserModel.findByIdAndUpdate(userId, {

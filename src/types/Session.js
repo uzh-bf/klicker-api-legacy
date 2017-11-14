@@ -47,6 +47,8 @@ const Session = `
 
     createdAt: String!
     updatedAt: String!
+    startedAt: String!
+    finishedAt: String!
   }
 
   input Session_SettingsInput {
