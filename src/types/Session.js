@@ -35,6 +35,7 @@ const Session = `
     id: ID!
     name: String!
     activeBlock: Int!
+    runtime: String
 
     status: Session_Status!
     settings: Session_Settings!

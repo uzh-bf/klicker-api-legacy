@@ -24,6 +24,7 @@ const {
   startSession,
   updateSessionSettings,
   activateNextBlock,
+  runtimeByPV,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -134,6 +135,7 @@ const resolvers = {
   },
   Session: {
     user,
+    runtime: runtimeByPV,
   },
   Session_QuestionBlock: {
     instances: questionInstancesByPV,
