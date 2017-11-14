@@ -107,8 +107,8 @@ server.use(
   graphqlExpress((req, res) => ({
     context: { auth: req.auth, res },
     schema,
-    tracing: true,
-    cacheControl: true,
+    tracing: !!process.env.ENGINE_API_KEY,
+    cacheControl: !!process.env.ENGINE_API_KEY,
   })),
 )
 

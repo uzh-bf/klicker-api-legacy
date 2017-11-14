@@ -69,6 +69,9 @@ const endSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.
 const addFeedbackMutation = (parentValue, { sessionId, content }) =>
   SessionExecService.addFeedback({ sessionId, content })
 
+const deleteFeedbackMutation = (parentValue, { sessionId, feedbackId }, { auth }) =>
+  SessionExecService.deleteFeedback({ sessionId, feedbackId, userId: auth.sub })
+
 const addConfusionTSMutation = (parentValue, { sessionId, difficulty, speed }) =>
   SessionExecService.addConfusionTS({ sessionId, difficulty, speed })
 
@@ -94,6 +97,7 @@ module.exports = {
   activateNextBlock: activateNextBlockMutation,
   startSession: startSessionMutation,
   addFeedback: addFeedbackMutation,
+  deleteFeedback: deleteFeedbackMutation,
   addConfusionTS: addConfusionTSMutation,
   updateSessionSettings: updateSessionSettingsMutation,
   joinSession: joinSessionQuery,
