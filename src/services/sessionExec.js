@@ -48,7 +48,7 @@ const deleteFeedback = async ({ sessionId, feedbackId, userId }) => {
     throw new Error('UNAUTHORIZED')
   }
 
-  session.feedbacks = session.feedbacks.filter(feedback => !feedback.id.equals(feedbackId))
+  session.feedbacks = session.feedbacks.filter(feedback => feedback.id !== feedbackId)
 
   // save the updated session
   await session.save()
