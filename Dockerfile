@@ -1,9 +1,9 @@
 # extend the node alpine base
-FROM node:8@sha256:dab558291fb7292ff352cc63f1cbde23e03b69e1fb9abf96e056d591e8a89570
+FROM node:8-alpine@sha256:f89f73ef56dcfb5c39ed3e7ae69075dc8145a3a6bf2df83b1d840f204cf90c0b
 
 LABEL maintainer="Roland Schlaefli <roland.schlaefli@bf.uzh.ch>"
 LABEL name="klicker-api"
-LABEL version="0.0.1"
+LABEL version="1.0.0-beta.1"
 EXPOSE 3000
 
 # root application directory

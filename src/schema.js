@@ -13,16 +13,19 @@ const {
 } = require('./resolvers/questionInstances')
 const {
   addFeedback,
+  deleteFeedback,
   addConfusionTS,
   allSessions,
   createSession,
   endSession,
+  joinSession,
   runningSession,
   sessionByPV,
   sessionsByPV,
   startSession,
   updateSessionSettings,
   activateNextBlock,
+  runtimeByPV,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -41,22 +44,22 @@ const typeDefs = [
   }
 
   type Query {
+    user: User
+
     allQuestions: [Question]!
     question(id: ID!): Question
 
-    allSessions: [Session]!
-
     allTags: [Tag]!
 
-    activeInstances: [QuestionInstance]
+    allSessions: [Session]!
+    activeInstances: [QuestionInstance]!
     runningSession: Session
-
-    user: User
+    joinSession(shortname: String!): Session_Public
   }
 
   type Mutation {
-    createUser(user: UserInput!): User
-    login(email: String!, password: String!): User
+    createUser(email: String!, password: String!, shortname: String!): User!
+    login(email: String!, password: String!): User!
 
     createQuestion(question: QuestionInput!): Question!
 
@@ -65,14 +68,11 @@ const typeDefs = [
     activateNextBlock: Session!
     endSession(id: ID!): Session!
     addFeedback(sessionId: ID!, content: String!): Session!
+    deleteFeedback(sessionId: ID!, feedbackId: ID!): Session!
     addConfusionTS(sessionId: ID!, difficulty: Int!, speed: Int!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
 
     addResponse(instanceId: ID!, response: QuestionInstance_ResponseInput!): QuestionInstance!
-  }
-
-  type Subscription {
-    getResults(id: ID): QuestionInstance
   }
 `,
   ...allTypes,
@@ -87,11 +87,13 @@ const resolvers = {
     allSessions: requireAuth(allSessions),
     allTags: requireAuth(allTags),
     activeInstances: requireAuth(activeInstances),
+    joinSession,
     runningSession: requireAuth(runningSession),
     user: requireAuth(authUser),
   },
   Mutation: {
     addFeedback,
+    deleteFeedback: requireAuth(deleteFeedback),
     addConfusionTS,
     addResponse,
     createQuestion: requireAuth(createQuestion),
@@ -138,6 +140,7 @@ const resolvers = {
   },
   Session: {
     user,
+    runtime: runtimeByPV,
   },
   Session_QuestionBlock: {
     instances: questionInstancesByPV,

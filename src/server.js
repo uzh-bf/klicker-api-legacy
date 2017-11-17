@@ -10,14 +10,16 @@ const expressJWT = require('express-jwt')
 const mongoose = require('mongoose')
 const compression = require('compression')
 const helmet = require('helmet')
+const _invert = require('lodash/invert')
 const { graphqlExpress } = require('apollo-server-express')
 
 const schema = require('./schema')
 const AuthService = require('./services/auth')
+const queryMap = require('./queryMap.json')
 
 mongoose.Promise = Promise
 
-// const dev = process.env.NODE_ENV !== 'production'
+const dev = process.env.NODE_ENV !== 'production'
 
 // require important environment variables to be present
 // otherwise exit the application
@@ -77,6 +79,15 @@ let middleware = [
   bodyParser.json(),
 ]
 
+if (!dev) {
+  // persisted query middleware
+  middleware.push((req, res, next) => {
+    const invertedMap = _invert(queryMap)
+    req.body.query = invertedMap[req.body.id]
+    next()
+  })
+}
+
 // setup Apollo Engine (GraphQL API metrics)
 let apolloEngine = !!process.env.ENGINE_API_KEY
 if (apolloEngine) {
@@ -96,8 +107,8 @@ server.use(
   graphqlExpress((req, res) => ({
     context: { auth: req.auth, res },
     schema,
-    tracing: true,
-    cacheControl: true,
+    tracing: !!process.env.ENGINE_API_KEY,
+    cacheControl: !!process.env.ENGINE_API_KEY,
   })),
 )
 

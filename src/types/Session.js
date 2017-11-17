@@ -18,6 +18,15 @@ const Session = `
     EXECUTED
   }
 
+  type Session_Public {
+    id: ID!
+
+    settings: Session_Settings!
+
+    activeQuestions: [Question_Public]!
+    feedbacks: [Session_Feedback!]
+  }
+
   input SessionInput {
     name: String!
     blocks: [Session_QuestionBlockInput!]!
@@ -26,6 +35,7 @@ const Session = `
     id: ID!
     name: String!
     activeBlock: Int!
+    runtime: String
 
     status: Session_Status!
     settings: Session_Settings!
@@ -38,6 +48,8 @@ const Session = `
 
     createdAt: String!
     updatedAt: String!
+    startedAt: String!
+    finishedAt: String!
   }
 
   input Session_SettingsInput {
