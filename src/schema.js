@@ -2,7 +2,7 @@ const { makeExecutableSchema } = require('graphql-tools')
 
 const { requireAuth } = require('./services/auth')
 const {
-  allQuestions, createQuestion, questionByID, questionsByPV, questionByPV,
+  allQuestions, createQuestion, questionsByPV, questionByPV, question,
 } = require('./resolvers/questions')
 const {
   activeInstances,
@@ -20,13 +20,13 @@ const {
   endSession,
   joinSession,
   runningSession,
-  sessionByID,
   sessionByPV,
   sessionsByPV,
   startSession,
   updateSessionSettings,
   activateNextBlock,
   runtimeByPV,
+  session,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -45,37 +45,30 @@ const typeDefs = [
   }
 
   type Query {
-    user: User
-
-    allQuestions: [Question]!
-    question(id: ID!): Question
-
-    allTags: [Tag]!
-
-    allSessions: [Session]!
-    session(id: ID!): Session
-
     activeInstances: [QuestionInstance]!
-    runningSession: Session
+    allQuestions: [Question]!
+    allSessions: [Session]!
+    allTags: [Tag]!
     joinSession(shortname: String!): Session_Public
+    question(id: ID!): Question
+    runningSession: Session
+    session(id: ID!): Session
+    user: User
   }
 
   type Mutation {
-    createUser(email: String!, password: String!, shortname: String!): User!
-    login(email: String!, password: String!): User!
-
-    createQuestion(question: QuestionInput!): Question!
-
-    createSession(session: SessionInput!): Session!
-    startSession(id: ID!): Session!
     activateNextBlock: Session!
-    endSession(id: ID!): Session!
-    addFeedback(sessionId: ID!, content: String!): Session!
-    deleteFeedback(sessionId: ID!, feedbackId: ID!): Session!
     addConfusionTS(sessionId: ID!, difficulty: Int!, speed: Int!): Session!
-    updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
-
+    addFeedback(sessionId: ID!, content: String!): Session!
     addResponse(instanceId: ID!, response: QuestionInstance_ResponseInput!): QuestionInstance!
+    createQuestion(question: QuestionInput!): Question!
+    createSession(session: SessionInput!): Session!
+    createUser(email: String!, password: String!, shortname: String!): User!
+    deleteFeedback(sessionId: ID!, feedbackId: ID!): Session!
+    endSession(id: ID!): Session!
+    login(email: String!, password: String!): User!
+    startSession(id: ID!): Session!
+    updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
   }
 `,
   ...allTypes,
@@ -86,13 +79,13 @@ const typeDefs = [
 const resolvers = {
   Query: {
     allQuestions: requireAuth(allQuestions),
-    question: requireAuth(questionByID),
     allSessions: requireAuth(allSessions),
     allTags: requireAuth(allTags),
     activeInstances: requireAuth(activeInstances),
     joinSession,
+    question: requireAuth(question),
     runningSession: requireAuth(runningSession),
-    session: requireAuth(sessionByID),
+    session: requireAuth(session),
     user: requireAuth(authUser),
   },
   Mutation: {
