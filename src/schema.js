@@ -20,6 +20,7 @@ const {
   endSession,
   joinSession,
   runningSession,
+  sessionByID,
   sessionByPV,
   sessionsByPV,
   startSession,
@@ -51,6 +52,8 @@ const typeDefs = [
     allTags: [Tag]!
 
     allSessions: [Session]!
+    session(id: ID!): Session
+
     activeInstances: [QuestionInstance]!
     runningSession: Session
     joinSession(shortname: String!): Session_Public
@@ -87,6 +90,7 @@ const resolvers = {
     activeInstances: requireAuth(activeInstances),
     joinSession,
     runningSession: requireAuth(runningSession),
+    session: requireAuth(sessionByID),
     user: requireAuth(authUser),
   },
   Mutation: {
