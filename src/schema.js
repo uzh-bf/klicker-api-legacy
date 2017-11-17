@@ -2,7 +2,7 @@ const { makeExecutableSchema } = require('graphql-tools')
 
 const { requireAuth } = require('./services/auth')
 const {
-  allQuestions, createQuestion, questionsByPV, questionByPV,
+  allQuestions, createQuestion, questionByID, questionsByPV, questionByPV,
 } = require('./resolvers/questions')
 const {
   activeInstances,
@@ -48,6 +48,7 @@ const typeDefs = [
     user: User
 
     allQuestions: [Question]!
+    question(id: ID!): Question
 
     allTags: [Tag]!
 
@@ -85,6 +86,7 @@ const typeDefs = [
 const resolvers = {
   Query: {
     allQuestions: requireAuth(allQuestions),
+    question: requireAuth(questionByID),
     allSessions: requireAuth(allSessions),
     allTags: requireAuth(allTags),
     activeInstances: requireAuth(activeInstances),
