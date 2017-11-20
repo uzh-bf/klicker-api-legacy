@@ -1,5 +1,5 @@
 const {
-  QuestionModel, QuestionTypes, TagModel, UserModel,
+  QuestionModel, QuestionGroups, TagModel, UserModel,
 } = require('../models')
 
 // create a new question
@@ -47,8 +47,8 @@ const createQuestion = async ({
         options: {
           // reduce options to only the necessary properties for the respective type
           ...options,
-          choices: [QuestionTypes.SC, QuestionTypes.MC].includes(type) ? options.choices : null,
-          restrictions: type === QuestionTypes.FREE ? options.restrictions : null,
+          choices: QuestionGroups.CHOICES.includes(type) ? options.choices : null,
+          restrictions: QuestionGroups.FREE.includes(type) ? options.restrictions : null,
         },
         solution: {},
       },

@@ -9,6 +9,12 @@ const QuestionTypes = {
   SC: 'SC',
   MC: 'MC',
   FREE: 'FREE',
+  'FREE:RANGE': 'FREE:RANGE',
+}
+
+const QuestionGroups = {
+  CHOICES: [QuestionTypes.SC, QuestionTypes.MC],
+  FREE: [QuestionTypes.FREE, QuestionTypes['FREE:RANGE']],
 }
 
 const Question = new mongoose.Schema({
@@ -26,5 +32,6 @@ const Question = new mongoose.Schema({
 
 module.exports = {
   QuestionModel: mongoose.model('Question', Question),
+  QuestionGroups,
   QuestionTypes,
 }

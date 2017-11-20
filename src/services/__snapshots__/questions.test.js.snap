@@ -14,11 +14,32 @@ exports[`QuestionService createQuestion allows creating a valid FREE question 1`
       Instances: []
       Options: {
         Choices: null
+        Randomized: true
+        Restrictions: undefined
+      }
+    ]
+  
+`;
+
+exports[`QuestionService createQuestion allows creating a valid FREE:RANGE question 1`] = `
+
+    QUESTION
+
+    Title: question without tags
+    Type: FREE:RANGE
+
+    Instances: []
+    Tags: [,]
+    Versions: [
+      Description: blabla
+      Instances: []
+      Options: {
+        Choices: null
         Randomized: undefined
         Restrictions: {
           Max: 100
           Min: 10
-          Type: RANGE
+          Type: undefined
         }
       }
     ]
@@ -26,6 +47,34 @@ exports[`QuestionService createQuestion allows creating a valid FREE question 1`
 `;
 
 exports[`QuestionService createQuestion allows creating a valid SC question 1`] = `
+
+    QUESTION
+
+    Title: question without tags
+    Type: SC
+
+    Instances: []
+    Tags: [,]
+    Versions: [
+      Description: blabla
+      Instances: []
+      Options: {
+        Choices: [{
+            Correct: false
+            Name: option1
+          },{
+            Correct: true
+            Name: option2
+          }
+        ]
+        Randomized: true
+        Restrictions: null
+      }
+    ]
+  
+`;
+
+exports[`QuestionService createQuestion allows creating a valid SC question 2`] = `
 
     QUESTION
 

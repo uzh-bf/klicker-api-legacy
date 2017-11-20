@@ -20,11 +20,7 @@ const responsesByPVQuery = parentValue =>
   parentValue.responses.map(response => ({ id: response.id, ...response.value, createdAt: response.createdAt }))
 
 const resultsByPVQuery = ({ results }) => {
-  if (!results) {
-    return null
-  }
-
-  if (results.free) {
+  if (results && results.free) {
     return {
       free: _map(results.free, (result, key) => ({
         ...result,
@@ -33,7 +29,7 @@ const resultsByPVQuery = ({ results }) => {
     }
   }
 
-  if (results.choices) {
+  if (results && results.choices) {
     return results
   }
 
