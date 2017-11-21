@@ -58,7 +58,9 @@ describe('Integration', () => {
             title: 'Test FREE',
             description: 'This is a simple FREE question.',
             type: 'FREE',
-            options: {},
+            options: {
+              restrictions: {},
+            },
             tags: ['TestTag'],
           },
         })
