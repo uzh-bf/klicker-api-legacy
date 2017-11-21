@@ -9,12 +9,12 @@ const QuestionTypes = {
   SC: 'SC',
   MC: 'MC',
   FREE: 'FREE',
-  'FREE:RANGE': 'FREE:RANGE',
+  FREE_RANGE: 'FREE_RANGE',
 }
 
 const QuestionGroups = {
   CHOICES: [QuestionTypes.SC, QuestionTypes.MC],
-  FREE: [QuestionTypes.FREE, QuestionTypes['FREE:RANGE']],
+  FREE: [QuestionTypes.FREE, QuestionTypes.FREE_RANGE],
 }
 
 const Question = new mongoose.Schema({
