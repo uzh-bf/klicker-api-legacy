@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Integration Login works with valid credentials 1`] = `
+Object {
+  "email": "testIntegration@bf.uzh.ch",
+  "runningSession": null,
+  "shortname": "integr",
+}
+`;
+
+exports[`Integration Question Creation works for FREE_RANGE questions 1`] = `
+Object {
+  "id": "5a1406922ceb112818e48e9c",
+  "tags": Array [
+    Object {
+      "id": "5a1406922ceb112818e48e99",
+      "name": "TestTag",
+    },
+  ],
+  "title": "Test FREE_RANGE",
+  "type": "FREE_RANGE",
+  "versions": Array [
+    Object {
+      "createdAt": "Tue Nov 21 2017 11:57:21 GMT+0100 (W. Europe Standard Time)",
+      "description": "This is a simple FREE_RANGE question.",
+      "id": "5a1406922ceb112818e48e9d",
+      "options": Object {
+        "restrictions": Object {
+          "max": 10,
+          "min": 0,
+        },
+      },
+    },
+  ],
+}
+`;
