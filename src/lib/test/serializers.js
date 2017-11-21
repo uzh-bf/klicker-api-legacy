@@ -23,7 +23,6 @@ const questionSerializer = {
           `{
           Max: ${options.restrictions.max}
           Min: ${options.restrictions.min}
-          Type: ${options.restrictions.type}
         }`}
       }
     `)}]
