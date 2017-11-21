@@ -1,6 +1,6 @@
-const {
-  QuestionModel, QuestionGroups, TagModel, UserModel,
-} = require('../models')
+const { QuestionModel, TagModel, UserModel } = require('../models')
+
+const { QuestionGroups } = require('../constants')
 
 // create a new question
 const createQuestion = async ({
