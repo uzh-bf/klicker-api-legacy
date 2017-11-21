@@ -3,7 +3,7 @@ const _values = require('lodash/values')
 
 const { ObjectId } = mongoose.Schema.Types
 
-const QuestionBlockStatus = require('../constants')
+const { QuestionBlockStatus } = require('../constants')
 
 module.exports = {
   QuestionBlock: new mongoose.Schema({
