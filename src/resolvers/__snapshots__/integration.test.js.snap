@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`integration login works 1`] = `
+Object {
+  "login": Object {
+    "email": "testIntegration@bf.uzh.ch",
+    "shortname": "integr",
+  },
+}
+`;
