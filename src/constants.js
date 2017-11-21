@@ -1,23 +1,30 @@
-export const QuestionTypes = {
+const QuestionTypes = {
   SC: 'SC',
   MC: 'MC',
   FREE: 'FREE',
   FREE_RANGE: 'FREE_RANGE',
 }
 
-export const QuestionGroups = {
+const QuestionGroups = {
   CHOICES: [QuestionTypes.SC, QuestionTypes.MC],
   FREE: [QuestionTypes.FREE, QuestionTypes.FREE_RANGE],
 }
 
-export const QuestionBlockStatus = {
+const QuestionBlockStatus = {
   PLANNED: 'PLANNED',
   ACTIVE: 'ACTIVE',
   EXECUTED: 'EXECUTED',
 }
 
-export const SessionStatus = {
+const SessionStatus = {
   CREATED: 'CREATED',
   RUNNING: 'RUNNING',
   COMPLETED: 'COMPLETED',
+}
+
+module.exports = {
+  QuestionTypes,
+  QuestionGroups,
+  QuestionBlockStatus,
+  SessionStatus,
 }
