@@ -10,6 +10,7 @@ const expressJWT = require('express-jwt')
 const mongoose = require('mongoose')
 const compression = require('compression')
 const helmet = require('helmet')
+const morgan = require('morgan')
 const _invert = require('lodash/invert')
 const { graphqlExpress } = require('apollo-server-express')
 
@@ -17,16 +18,14 @@ const schema = require('./schema')
 const AuthService = require('./services/auth')
 const queryMap = require('./queryMap.json')
 
-mongoose.Promise = Promise
-
-const dev = process.env.NODE_ENV !== 'production'
+const { exceptTest } = require('./lib/utils')
 
 // require important environment variables to be present
 // otherwise exit the application
 const appSettings = ['APP_DOMAIN', 'PORT', 'APP_SECRET', 'MONGO_URL', 'ORIGIN']
 appSettings.forEach((envVar) => {
   if (!process.env[envVar]) {
-    console.warn(`> Error: Please pass ${envVar} as an environment variable.`)
+    exceptTest(() => console.warn(`> Error: Please pass ${envVar} as an environment variable.`))
     process.exit(1)
   }
 })
@@ -34,18 +33,27 @@ appSettings.forEach((envVar) => {
 // connect to mongodb
 // use username and password authentication if passed in the environment
 // otherwise assume that no authentication needed (e.g. docker)
+const mongoConfig = {
+  keepAlive: true,
+  reconnectTries: 10,
+  useMongoClient: true,
+  promiseLibrary: global.Promise,
+}
 if (process.env.MONGO_USER && process.env.MONGO_PASSWORD) {
-  mongoose.connect(`mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URL}`)
+  mongoose.connect(
+    `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URL}`,
+    mongoConfig,
+  )
 } else {
-  mongoose.connect(`mongodb://${process.env.MONGO_URL}`)
+  mongoose.connect(`mongodb://${process.env.MONGO_URL}`, mongoConfig)
 }
 
 mongoose.connection
   .once('open', () => {
-    console.log('> Connection to MongoDB established.')
+    exceptTest(() => console.log('> Connection to MongoDB established.'))
   })
   .on('error', (error) => {
-    console.warn('> Warning: ', error)
+    exceptTest(() => console.warn('> Warning: ', error))
   })
 
 // initialize an express server
@@ -81,13 +89,18 @@ let middleware = [
   bodyParser.json(),
 ]
 
-if (!dev) {
-  // persisted query middleware
+// add the persisted query middleware in production
+if (process.env.NODE_ENV === 'production') {
   middleware.push((req, res, next) => {
     const invertedMap = _invert(queryMap)
     req.body.query = invertedMap[req.body.id]
     next()
   })
+}
+
+// activate morgan logging in dev and prod, but not in tests
+if (process.env.NODE_ENV !== 'test') {
+  middleware.push(morgan('combined'))
 }
 
 // setup Apollo Engine (GraphQL API metrics)

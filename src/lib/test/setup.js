@@ -53,6 +53,7 @@ const initializeDb = async ({
 }) => {
   await mongoose.connect(`mongodb://${process.env.MONGO_URL}`, {
     keepAlive: true,
+    promiseLibrary: global.Promise,
     reconnectTries: 10,
     useMongoClient: true,
   })
