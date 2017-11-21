@@ -1,11 +1,9 @@
 const md5 = require('md5')
 
 const { QuestionInstanceModel, UserModel } = require('../models')
-const { QuestionTypes } = require('../constants')
+const { QuestionGroups, QuestionTypes } = require('../constants')
 
 const { getRunningSession } = require('./sessionMgr')
-
-const getResultKey = (restrictionType, response) => md5(response.value)
 
 // add a new feedback to a session
 const addFeedback = async ({ sessionId, content }) => {
@@ -86,15 +84,21 @@ const addResponse = async ({ instanceId, response }) => {
   const currentVersion = instance.question.versions[instance.version]
 
   // result parsing for SC/MC questions
-  if ([QuestionTypes.SC, QuestionTypes.MC].includes(questionType)) {
+  if (QuestionGroups.CHOICES.includes(questionType)) {
+    // if the response doesn't contain any valid choices, throw
     if (!response.choices || !response.choices.length > 0) {
       throw new Error('INVALID_RESPONSE')
+    }
+
+    // if the response contains multiple choices for an MC question
+    if (questionType === QuestionTypes.SC && response.choices.length > 1) {
+      throw new Error('TOO_MANY_CHOICES')
     }
 
     // if it is the very first response, initialize results
     if (!instance.results) {
       instance.results = {
-        choices: new Array(currentVersion.options.choices.length).fill(+0),
+        choices: new Array(currentVersion.options[questionType].choices.length).fill(+0),
       }
     }
 
@@ -103,17 +107,17 @@ const addResponse = async ({ instanceId, response }) => {
       instance.results.choices[responseIndex] += 1
     })
     instance.markModified('results.choices')
-  } else if (questionType === QuestionTypes.FREE) {
-    const { type, min, max } = currentVersion.options.restrictions
-
+  } else if (QuestionGroups.FREE.includes(questionType)) {
     if (!response.value) {
       throw new Error('INVALID_RESPONSE')
     }
 
-    if (type === 'RANGE') {
-      if (response.value < min || response.value > max) {
-        throw new Error('RESPONSE_OUT_OF_RANGE')
-      }
+    if (
+      questionType === QuestionTypes.FREE_RANGE &&
+      (response.value < currentVersion.options.FREE_RANGE.restrictions.min ||
+        response.value > currentVersion.options.FREE_RANGE.restrictions.max)
+    ) {
+      throw new Error('RESPONSE_OUT_OF_RANGE')
     }
 
     // if it is the very first response, initialize results
@@ -123,7 +127,8 @@ const addResponse = async ({ instanceId, response }) => {
       }
     }
 
-    const resultKey = getResultKey(type, response)
+    // hash the response value to get a unique identifier
+    const resultKey = md5(response.value)
 
     // if the respective response value was not given before, add it anew
     if (!instance.results.free[resultKey]) {

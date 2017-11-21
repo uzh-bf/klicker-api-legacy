@@ -8,6 +8,8 @@ const SessionExecService = require('./sessionExec')
 const { initializeDb, prepareSessionFactory } = require('../lib/test/setup')
 const { sessionSerializer, questionInstanceSerializer } = require('../lib/test/serializers')
 
+const { QuestionTypes } = require('../constants')
+
 mongoose.Promise = Promise
 
 // define how jest should serialize objects into snapshots
@@ -19,14 +21,10 @@ const prepareSession = prepareSessionFactory(SessionMgrService)
 
 describe('SessionExecService', () => {
   let user
-  let question1
-  let question2
-  let questionFREE
+  let questions
 
   beforeAll(async () => {
-    ({
-      user, question1, question2, questionFREE,
-    } = await initializeDb({
+    ({ user, questions } = await initializeDb({
       mongoose,
       email: 'testSessionExec@bf.uzh.ch',
       shortname: 'sesExc',
@@ -164,17 +162,20 @@ describe('SessionExecService', () => {
   })
 
   describe('addResponse', () => {
-    const SCresponse1 = {
-      choices: [0],
-    }
-    const SCresponse2 = {
-      choices: [0, 1],
-    }
     let preparedSession
 
     beforeEach(async () => {
       // prepare a session with a SC question
-      preparedSession = await prepareSession(user.id, [question1.id, question2.id, questionFREE.id], true)
+      preparedSession = await prepareSession(
+        user.id,
+        [
+          questions[QuestionTypes.SC].id,
+          questions[QuestionTypes.MC].id,
+          questions[QuestionTypes.FREE].id,
+          questions[QuestionTypes.FREE_RANGE].id,
+        ],
+        true,
+      )
     })
 
     afterEach(async () => {
@@ -195,7 +196,9 @@ describe('SessionExecService', () => {
       expect(promise).rejects.toEqual(new Error('INSTANCE_CLOSED'))
     })
 
-    it('allows adding responses [SC]', async () => {
+    it('allows adding responses to a SC question', async () => {
+      const activeInstance = 0
+
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
@@ -203,20 +206,70 @@ describe('SessionExecService', () => {
 
       // add a response
       const instanceWithResponse = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[1],
-        response: SCresponse1,
+        instanceId: session.activeInstances[activeInstance],
+        response: {
+          choices: [0],
+        },
       })
-      expect(instanceWithResponse.toObject().results.choices).toEqual([1, 0])
+      expect(instanceWithResponse.toObject().results.choices).toEqual([1, 0, 0])
 
       const instanceWithResponses = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[1],
-        response: SCresponse2,
+        instanceId: session.activeInstances[activeInstance],
+        response: {
+          choices: [1],
+        },
       })
-      expect(instanceWithResponses.toObject().results.choices).toEqual([2, 1])
+      expect(instanceWithResponses.toObject().results.choices).toEqual([1, 1, 0])
+      expect(instanceWithResponses).toMatchSnapshot()
+
+      const instanceWithResponses2 = await SessionExecService.addResponse({
+        instanceId: session.activeInstances[activeInstance],
+        response: {
+          choices: [1],
+        },
+      })
+      expect(instanceWithResponses2.toObject().results.choices).toEqual([1, 2, 0])
+      expect(instanceWithResponses2).toMatchSnapshot()
+
+      const tooManyChoices = SessionExecService.addResponse({
+        instanceId: session.activeInstances[activeInstance],
+        response: {
+          choices: [0, 1, 2],
+        },
+      })
+      expect(tooManyChoices).rejects.toEqual(new Error('TOO_MANY_CHOICES'))
+    })
+
+    it('allows adding responses to an MC question', async () => {
+      const activeInstance = 1
+
+      // activate the next block of the running session
+      // this opens the instances for responses
+      const session = await SessionMgrService.activateNextBlock({ userId: user.id })
+      expect(session).toMatchSnapshot()
+
+      // add a response
+      const instanceWithResponse = await SessionExecService.addResponse({
+        instanceId: session.activeInstances[activeInstance],
+        response: {
+          choices: [0],
+        },
+      })
+      expect(instanceWithResponse.toObject().results.choices).toEqual([1, 0, 0])
+
+      const instanceWithResponses = await SessionExecService.addResponse({
+        instanceId: session.activeInstances[activeInstance],
+        response: {
+          choices: [0, 1, 2],
+        },
+      })
+      expect(instanceWithResponses.toObject().results.choices).toEqual([2, 1, 1])
       expect(instanceWithResponses).toMatchSnapshot()
     })
 
-    it('allows adding responses [FREE:NONE]', async () => {
+    it('allows adding responses to a FREE question', async () => {
+      const activeInstance = 2
+
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
@@ -224,7 +277,7 @@ describe('SessionExecService', () => {
 
       // try adding an invalid response
       expect(SessionExecService.addResponse({
-        instanceId: session.activeInstances[2],
+        instanceId: session.activeInstances[activeInstance],
         response: {
           xyz: 23,
         },
@@ -232,7 +285,7 @@ describe('SessionExecService', () => {
 
       // add a response
       const instanceWithResponse = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[2],
+        instanceId: session.activeInstances[activeInstance],
         response: {
           value: 'SCHWEIZ',
         },
@@ -241,13 +294,13 @@ describe('SessionExecService', () => {
 
       // add more responses
       await SessionExecService.addResponse({
-        instanceId: session.activeInstances[2],
+        instanceId: session.activeInstances[activeInstance],
         response: {
           value: 'schwiiz...',
         },
       })
       const instanceWithResponses = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[2],
+        instanceId: session.activeInstances[activeInstance],
         response: {
           value: 'SCHWEIZ',
         },
@@ -267,7 +320,9 @@ describe('SessionExecService', () => {
       expect(instanceWithResponses).toMatchSnapshot()
     })
 
-    it('allows adding responses [FREE:RANGE]', async () => {
+    it('allows adding responses to a FREE_RANGE question', async () => {
+      const activeInstance = 3
+
       // activate the next block of the running session
       // this opens the instances for responses
       const session = await SessionMgrService.activateNextBlock({ userId: user.id })
@@ -275,7 +330,7 @@ describe('SessionExecService', () => {
 
       // try adding an invalid response
       expect(SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[activeInstance],
         response: {
           xyz: 'asd',
         },
@@ -283,7 +338,7 @@ describe('SessionExecService', () => {
 
       // try adding a valua that is out-of-range
       expect(SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[activeInstance],
         response: {
           value: 99999,
         },
@@ -291,7 +346,7 @@ describe('SessionExecService', () => {
 
       // add a response
       const instanceWithResponse = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[activeInstance],
         response: {
           value: 10,
         },
@@ -300,13 +355,13 @@ describe('SessionExecService', () => {
 
       // add more responses
       await SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[activeInstance],
         response: {
           value: 14,
         },
       })
       const instanceWithResponses = await SessionExecService.addResponse({
-        instanceId: session.activeInstances[0],
+        instanceId: session.activeInstances[activeInstance],
         response: {
           value: 10,
         },

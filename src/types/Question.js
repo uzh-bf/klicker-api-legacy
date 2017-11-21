@@ -18,6 +18,12 @@ const Question = `
     FREE_RANGE
   }
 
+  type Question_Options {
+    SC: SCQuestionOptions
+    MC: SCQuestionOptions
+    FREE_RANGE: FREEQuestionOptions
+  }
+
   type Question_Public {
     id: ID!
     instanceId: ID!
@@ -25,7 +31,7 @@ const Question = `
     type: Question_Type!
     description: String!
 
-    options: QuestionOptions!
+    options: Question_Options!
   }
 
   input QuestionInput {
@@ -61,7 +67,7 @@ const Question = `
     id: ID!
     description: String!
 
-    options: QuestionOptions!
+    options: Question_Options!
 
     instances: [QuestionInstance!]!
 

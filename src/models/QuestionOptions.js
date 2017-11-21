@@ -11,19 +11,19 @@ const ChoiceOptions = new mongoose.Schema({
   randomized: { type: Boolean, default: false },
 })
 
-// for FREE questions, define optional restrictions
+// for FREE_RANGE questions, define optional restrictions
 const Restrictions = new mongoose.Schema({
   min: { type: Number },
   max: { type: Number },
 })
+const RangeRestrictions = new mongoose.Schema({
+  restrictions: { type: Restrictions, required: true },
+})
 
 module.exports = {
   QuestionOptions: new mongoose.Schema({
-    choices: [{ type: Choice }],
-    randomized: { type: Boolean, default: false },
-    restrictions: { type: Restrictions },
     SC: { type: ChoiceOptions },
     MC: { type: ChoiceOptions },
-    FREE_RANGE: { type: Restrictions },
+    FREE_RANGE: { type: RangeRestrictions },
   }),
 }

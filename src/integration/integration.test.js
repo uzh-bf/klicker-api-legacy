@@ -45,8 +45,53 @@ describe('Integration', () => {
   })
 
   describe('Question Creation', () => {
-    it.skip('works for SC questions', async () => {})
-    it.skip('works for MC questions', async () => {})
+    it('works for SC questions', async () => {
+      const response = await request(server)
+        .post('/graphql')
+        .set('Cookie', authCookie)
+        .send({
+          query: CreateQuestionMutation,
+          variables: {
+            title: 'Test SC',
+            description: 'This is a simple SC question.',
+            type: 'SC',
+            options: {
+              choices: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
+              randomized: false,
+            },
+            tags: ['TestTag'],
+          },
+        })
+
+      // ensure that there were no errors with the graphql request
+      expect(response.body.errors).toBeUndefined()
+    })
+
+    it('works for MC questions', async () => {
+      const response = await request(server)
+        .post('/graphql')
+        .set('Cookie', authCookie)
+        .send({
+          query: CreateQuestionMutation,
+          variables: {
+            title: 'Test MC',
+            description: 'This is a simple MC question.',
+            type: 'MC',
+            options: {
+              choices: [
+                { correct: false, name: 'option1' },
+                { correct: true, name: 'option2' },
+                { correct: true, name: 'option3' },
+              ],
+              randomized: false,
+            },
+            tags: ['TestTag'],
+          },
+        })
+
+      // ensure that there were no errors with the graphql request
+      expect(response.body.errors).toBeUndefined()
+    })
 
     it('works for FREE questions', async () => {
       const response = await request(server)
@@ -58,9 +103,7 @@ describe('Integration', () => {
             title: 'Test FREE',
             description: 'This is a simple FREE question.',
             type: 'FREE',
-            options: {
-              restrictions: {},
-            },
+            options: {},
             tags: ['TestTag'],
           },
         })

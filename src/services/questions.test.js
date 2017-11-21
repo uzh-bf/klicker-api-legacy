@@ -73,6 +73,7 @@ describe('QuestionService', () => {
         ...question,
         userId: user.id,
         type: 'FREE',
+        options: {},
       })
 
       expect(newQuestion.versions.length).toEqual(1)

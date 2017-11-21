@@ -143,7 +143,7 @@ exports[`SessionExecService addFeedback allows adding new feedbacks to a running
     }
 `;
 
-exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 1`] = `
+exports[`SessionExecService addResponse allows adding responses to a FREE question 1`] = `
 
     SESSION
 
@@ -151,13 +151,13 @@ exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 1`] 
     Status: RUNNING
 
     ActiveBlock: 0
-    ActiveInstances: 3
+    ActiveInstances: 4
 
     Blocks: [{
       Show solutions: false
       Status: ACTIVE
       Time limit: -1
-      Number of instances: 3
+      Number of instances: 4
     }]
 
     ConfusionTS: []
@@ -171,7 +171,7 @@ exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 1`] 
     }
 `;
 
-exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 2`] = `
+exports[`SessionExecService addResponse allows adding responses to a FREE question 2`] = `
 Object {
   "c7cd24ea4ea9d3eaab020517ed1babb7": Object {
     "count": 1,
@@ -180,7 +180,7 @@ Object {
 }
 `;
 
-exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 3`] = `
+exports[`SessionExecService addResponse allows adding responses to a FREE question 3`] = `
 
     QUESTION_INSTANCE
 
@@ -220,7 +220,7 @@ exports[`SessionExecService addResponse allows adding responses [FREE:NONE] 3`] 
   
 `;
 
-exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 1`] = `
+exports[`SessionExecService addResponse allows adding responses to a FREE_RANGE question 1`] = `
 
     SESSION
 
@@ -228,13 +228,13 @@ exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 1`]
     Status: RUNNING
 
     ActiveBlock: 0
-    ActiveInstances: 3
+    ActiveInstances: 4
 
     Blocks: [{
       Show solutions: false
       Status: ACTIVE
       Time limit: -1
-      Number of instances: 3
+      Number of instances: 4
     }]
 
     ConfusionTS: []
@@ -248,7 +248,7 @@ exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 1`]
     }
 `;
 
-exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 2`] = `
+exports[`SessionExecService addResponse allows adding responses to a FREE_RANGE question 2`] = `
 Object {
   "25daad3d9e60b45043a70c4ab7d3b1c6": Object {
     "count": 1,
@@ -257,7 +257,7 @@ Object {
 }
 `;
 
-exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 3`] = `
+exports[`SessionExecService addResponse allows adding responses to a FREE_RANGE question 3`] = `
 
     QUESTION_INSTANCE
 
@@ -297,7 +297,7 @@ exports[`SessionExecService addResponse allows adding responses [FREE:RANGE] 3`]
   
 `;
 
-exports[`SessionExecService addResponse allows adding responses [SC] 1`] = `
+exports[`SessionExecService addResponse allows adding responses to a SC question 1`] = `
 
     SESSION
 
@@ -305,13 +305,13 @@ exports[`SessionExecService addResponse allows adding responses [SC] 1`] = `
     Status: RUNNING
 
     ActiveBlock: 0
-    ActiveInstances: 3
+    ActiveInstances: 4
 
     Blocks: [{
       Show solutions: false
       Status: ACTIVE
       Time limit: -1
-      Number of instances: 3
+      Number of instances: 4
     }]
 
     ConfusionTS: []
@@ -325,7 +325,7 @@ exports[`SessionExecService addResponse allows adding responses [SC] 1`] = `
     }
 `;
 
-exports[`SessionExecService addResponse allows adding responses [SC] 2`] = `
+exports[`SessionExecService addResponse allows adding responses to a SC question 2`] = `
 
     QUESTION_INSTANCE
 
@@ -344,14 +344,114 @@ exports[`SessionExecService addResponse allows adding responses [SC] 2`] = `
       ip: some ip
       fingerprint: some fingerprint
       value: {
-        choices: 0,1
+        choices: 1
         text: undefined
         value: undefined
       }
     ]
 
     results: {
-      choices: [2,1]
+      choices: [1,1,0]
+      free: undefined
+    }
+  
+`;
+
+exports[`SessionExecService addResponse allows adding responses to a SC question 3`] = `
+
+    QUESTION_INSTANCE
+
+    isOpen: true
+    version: 0
+
+    responses: [
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: 0
+        text: undefined
+        value: undefined
+      }
+    ,
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: 1
+        text: undefined
+        value: undefined
+      }
+    ,
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: 1
+        text: undefined
+        value: undefined
+      }
+    ]
+
+    results: {
+      choices: [1,2,0]
+      free: undefined
+    }
+  
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an MC question 1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    ActiveBlock: 0
+    ActiveInstances: 4
+
+    Blocks: [{
+      Show solutions: false
+      Status: ACTIVE
+      Time limit: -1
+      Number of instances: 4
+    }]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Settings: {
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+    }
+`;
+
+exports[`SessionExecService addResponse allows adding responses to an MC question 2`] = `
+
+    QUESTION_INSTANCE
+
+    isOpen: true
+    version: 0
+
+    responses: [
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: 0
+        text: undefined
+        value: undefined
+      }
+    ,
+      ip: some ip
+      fingerprint: some fingerprint
+      value: {
+        choices: 0,1,2
+        text: undefined
+        value: undefined
+      }
+    ]
+
+    results: {
+      choices: [2,1,1]
       free: undefined
     }
   

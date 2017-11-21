@@ -122,18 +122,25 @@ const JoinSessionQuery = `
         description
         type
         options {
-          ... on FREEQuestionOptions {
+          FREE_RANGE {
             restrictions {
               min
               max
-              type
             }
           }
-          ... on SCQuestionOptions {
+          SC {
             choices {
               correct
               name
             }
+            randomized
+          }
+          MC {
+            choices {
+              correct
+              name
+            }
+            randomized
           }
         }
       }
@@ -165,18 +172,25 @@ const SessionEvaluationQuery = `
             versions {
               description
               options {
-                ... on SCQuestionOptions {
+                FREE_RANGE {
+                  restrictions {
+                    min
+                    max
+                  }
+                }
+                SC {
                   choices {
                     correct
                     name
                   }
+                  randomized
                 }
-                ... on FREEQuestionOptions {
-                  restrictions {
-                    min
-                    max
-                    type
+                MC {
+                  choices {
+                    correct
+                    name
                   }
+                  randomized
                 }
               }
             }
