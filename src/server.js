@@ -26,7 +26,7 @@ const dev = process.env.NODE_ENV !== 'production'
 const appSettings = ['APP_DOMAIN', 'PORT', 'APP_SECRET', 'MONGO_URL', 'ORIGIN']
 appSettings.forEach((envVar) => {
   if (!process.env[envVar]) {
-    console.warn(`> Error: Please pass the ${envVar} as an environment variable.`)
+    console.warn(`> Error: Please pass ${envVar} as an environment variable.`)
     process.exit(1)
   }
 })
@@ -51,11 +51,13 @@ mongoose.connection
 // initialize an express server
 const server = express()
 
+// setup middleware stack
 let middleware = [
   // enable gzip compression
   compression(),
   // secure the server with helmet
   helmet({
+    // TODO: activate security settings with environment vars
     hsts: false,
   }),
   // setup CORS
