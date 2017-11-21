@@ -197,10 +197,10 @@ const SessionEvaluationQuery = `
           }
           results {
             ... on SCQuestionResults {
-              choices
+              CHOICES
             }
             ... on FREEQuestionResults {
-              free {
+              FREE {
                 count
                 key
                 value

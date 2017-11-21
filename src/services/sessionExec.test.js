@@ -211,7 +211,7 @@ describe('SessionExecService', () => {
           choices: [0],
         },
       })
-      expect(instanceWithResponse.toObject().results.choices).toEqual([1, 0, 0])
+      expect(instanceWithResponse.toObject().results.CHOICES).toEqual([1, 0, 0])
 
       const instanceWithResponses = await SessionExecService.addResponse({
         instanceId: session.activeInstances[activeInstance],
@@ -219,7 +219,7 @@ describe('SessionExecService', () => {
           choices: [1],
         },
       })
-      expect(instanceWithResponses.toObject().results.choices).toEqual([1, 1, 0])
+      expect(instanceWithResponses.toObject().results.CHOICES).toEqual([1, 1, 0])
       expect(instanceWithResponses).toMatchSnapshot()
 
       const instanceWithResponses2 = await SessionExecService.addResponse({
@@ -228,7 +228,7 @@ describe('SessionExecService', () => {
           choices: [1],
         },
       })
-      expect(instanceWithResponses2.toObject().results.choices).toEqual([1, 2, 0])
+      expect(instanceWithResponses2.toObject().results.CHOICES).toEqual([1, 2, 0])
       expect(instanceWithResponses2).toMatchSnapshot()
 
       const tooManyChoices = SessionExecService.addResponse({
@@ -255,7 +255,7 @@ describe('SessionExecService', () => {
           choices: [0],
         },
       })
-      expect(instanceWithResponse.toObject().results.choices).toEqual([1, 0, 0])
+      expect(instanceWithResponse.toObject().results.CHOICES).toEqual([1, 0, 0])
 
       const instanceWithResponses = await SessionExecService.addResponse({
         instanceId: session.activeInstances[activeInstance],
@@ -263,7 +263,7 @@ describe('SessionExecService', () => {
           choices: [0, 1, 2],
         },
       })
-      expect(instanceWithResponses.toObject().results.choices).toEqual([2, 1, 1])
+      expect(instanceWithResponses.toObject().results.CHOICES).toEqual([2, 1, 1])
       expect(instanceWithResponses).toMatchSnapshot()
     })
 
@@ -290,7 +290,7 @@ describe('SessionExecService', () => {
           value: 'SCHWEIZ',
         },
       })
-      expect(instanceWithResponse.results.free).toMatchSnapshot()
+      expect(instanceWithResponse.results.FREE).toMatchSnapshot()
 
       // add more responses
       await SessionExecService.addResponse({
@@ -307,7 +307,7 @@ describe('SessionExecService', () => {
       })
       const md1 = md5('SCHWEIZ')
       const md2 = md5('schwiiz...')
-      expect(instanceWithResponses.results.free).toEqual({
+      expect(instanceWithResponses.results.FREE).toEqual({
         [md1]: {
           count: 2,
           value: 'SCHWEIZ',
@@ -351,7 +351,7 @@ describe('SessionExecService', () => {
           value: 10,
         },
       })
-      expect(instanceWithResponse.results.free).toMatchSnapshot()
+      expect(instanceWithResponse.results.FREE).toMatchSnapshot()
 
       // add more responses
       await SessionExecService.addResponse({
@@ -366,7 +366,7 @@ describe('SessionExecService', () => {
           value: 10,
         },
       })
-      expect(instanceWithResponses.results.free).toMatchSnapshot({
+      expect(instanceWithResponses.results.FREE).toMatchSnapshot({
         '25daad3d9e60b45043a70c4ab7d3b1c6': {
           count: 2,
           value: 10,

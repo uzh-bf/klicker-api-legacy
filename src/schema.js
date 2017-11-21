@@ -121,11 +121,11 @@ const resolvers = {
   },
   QuestionInstance_Results: {
     __resolveType(obj) {
-      if (obj.free) {
+      if (obj.FREE) {
         return 'FREEQuestionResults'
       }
 
-      if (obj.choices) {
+      if (obj.CHOICES) {
         return 'SCQuestionResults'
       }
 

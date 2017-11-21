@@ -98,15 +98,15 @@ const addResponse = async ({ instanceId, response }) => {
     // if it is the very first response, initialize results
     if (!instance.results) {
       instance.results = {
-        choices: new Array(currentVersion.options[questionType].choices.length).fill(+0),
+        CHOICES: new Array(currentVersion.options[questionType].choices.length).fill(+0),
       }
     }
 
     // for each choice given, update the results
     response.choices.forEach((responseIndex) => {
-      instance.results.choices[responseIndex] += 1
+      instance.results.CHOICES[responseIndex] += 1
     })
-    instance.markModified('results.choices')
+    instance.markModified('results.CHOICES')
   } else if (QuestionGroups.FREE.includes(questionType)) {
     if (!response.value) {
       throw new Error('INVALID_RESPONSE')
@@ -123,7 +123,7 @@ const addResponse = async ({ instanceId, response }) => {
     // if it is the very first response, initialize results
     if (!instance.results) {
       instance.results = {
-        free: {},
+        FREE: {},
       }
     }
 
@@ -131,16 +131,16 @@ const addResponse = async ({ instanceId, response }) => {
     const resultKey = md5(response.value)
 
     // if the respective response value was not given before, add it anew
-    if (!instance.results.free[resultKey]) {
-      instance.results.free[resultKey] = {
+    if (!instance.results.FREE[resultKey]) {
+      instance.results.FREE[resultKey] = {
         count: 1,
         value: response.value,
       }
     } else {
       // if the response value already occurred, simply increment count
-      instance.results.free[resultKey].count += 1
+      instance.results.FREE[resultKey].count += 1
     }
-    instance.markModified('results.free')
+    instance.markModified('results.FREE')
   }
 
   // push the new response into the array

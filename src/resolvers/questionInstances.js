@@ -11,17 +11,15 @@ const responsesByPVQuery = parentValue =>
   parentValue.responses.map(({ id, value, createdAt }) => ({ id, ...value, createdAt }))
 
 const resultsByPVQuery = ({ results }) => {
-  if (results && results.free) {
+  if (results && results.FREE) {
     return {
-      free: _map(results.free, (result, key) => ({ ...result, key })),
+      FREE: _map(results.FREE, (result, key) => ({ ...result, key })),
     }
   }
 
-  if (results && results.choices) {
-    const { choices, randomized } = results
+  if (results && results.CHOICES) {
     return {
-      choices,
-      randomized,
+      CHOICES: results.CHOICES,
     }
   }
 
