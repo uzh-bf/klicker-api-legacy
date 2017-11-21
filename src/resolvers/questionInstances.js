@@ -8,20 +8,21 @@ const questionInstanceByIDQuery = (parentValue, { id }) => QuestionInstanceModel
 const questionInstancesByPVQuery = parentValue => QuestionInstanceModel.find({ _id: { $in: parentValue.instances } })
 
 const responsesByPVQuery = parentValue =>
-  parentValue.responses.map(response => ({ id: response.id, ...response.value, createdAt: response.createdAt }))
+  parentValue.responses.map(({ id, value, createdAt }) => ({ id, ...value, createdAt }))
 
 const resultsByPVQuery = ({ results }) => {
   if (results && results.free) {
     return {
-      free: _map(results.free, (result, key) => ({
-        ...result,
-        key,
-      })),
+      free: _map(results.free, (result, key) => ({ ...result, key })),
     }
   }
 
   if (results && results.choices) {
-    return results
+    const { choices, randomized } = results
+    return {
+      choices,
+      randomized,
+    }
   }
 
   return null

@@ -1,6 +1,7 @@
 const md5 = require('md5')
 
-const { QuestionInstanceModel, QuestionTypes } = require('../models')
+const { QuestionInstanceModel, UserModel } = require('../models')
+const { QuestionTypes } = require('../constants')
 
 const { getRunningSession } = require('./sessionMgr')
 
@@ -153,10 +154,51 @@ const addResponse = async ({ instanceId, response }) => {
   return instance
 }
 
+const joinSession = async ({ shortname }) => {
+  // TODO: add test
+  // find the user with the given shortname
+  const user = await UserModel.findOne({ shortname }).populate([
+    {
+      path: 'runningSession',
+      populate: {
+        path: 'activeInstances',
+        populate: {
+          path: 'question',
+        },
+      },
+    },
+  ])
+
+  const {
+    id, activeInstances, settings, feedbacks,
+  } = user.runningSession
+
+  return {
+    id,
+    settings,
+    // map active instances to be in the correct format
+    activeQuestions: activeInstances.map((instance) => {
+      const { id: instanceId, question } = instance
+      const version = question.versions[instance.version]
+
+      return {
+        id: question.id,
+        instanceId,
+        title: question.title,
+        type: question.type,
+        description: version.description,
+        options: version.options,
+      }
+    }),
+    feedbacks: settings.isFeedbackChannelActive && settings.isFeedbackChannelPublic ? feedbacks : null,
+  }
+}
+
 module.exports = {
   getRunningSession,
   addResponse,
   addConfusionTS,
   addFeedback,
   deleteFeedback,
+  joinSession,
 }

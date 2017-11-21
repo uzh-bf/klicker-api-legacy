@@ -38,5 +38,4 @@ const Session = new mongoose.Schema({
 
 module.exports = {
   SessionModel: mongoose.model('Session', Session),
-  SessionStatus,
 }
