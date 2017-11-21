@@ -4,12 +4,14 @@ const _pick = require('lodash/pick')
 
 const server = require('../app')
 const { initializeDb } = require('../lib/test/setup')
-const { LoginMutation, CreateQuestionMutation } = require('./mutations')
+const { LoginMutation, CreateQuestionMutation, CreateSessionMutation } = require('./mutations')
+const { QuestionTypes } = require('../constants')
 
 process.env.NODE_ENV = 'test'
 
 describe('Integration', () => {
   let authCookie
+  const questions = {}
 
   beforeAll(async () => {
     await initializeDb({ mongoose, email: 'testIntegration@bf.uzh.ch', shortname: 'integr' })
@@ -65,6 +67,8 @@ describe('Integration', () => {
 
       // ensure that there were no errors with the graphql request
       expect(response.body.errors).toBeUndefined()
+
+      questions[QuestionTypes.SC] = response.body.data.createQuestion.id
     })
 
     it('works for MC questions', async () => {
@@ -91,6 +95,8 @@ describe('Integration', () => {
 
       // ensure that there were no errors with the graphql request
       expect(response.body.errors).toBeUndefined()
+
+      questions[QuestionTypes.MC] = response.body.data.createQuestion.id
     })
 
     it('works for FREE questions', async () => {
@@ -110,6 +116,8 @@ describe('Integration', () => {
 
       // ensure that there were no errors with the graphql request
       expect(response.body.errors).toBeUndefined()
+
+      questions[QuestionTypes.FREE] = response.body.data.createQuestion.id
     })
 
     it('works for FREE_RANGE questions', async () => {
@@ -134,6 +142,35 @@ describe('Integration', () => {
 
       // ensure that there were no errors with the graphql request
       expect(response.body.errors).toBeUndefined()
+
+      questions[QuestionTypes.FREE_RANGE] = response.body.data.createQuestion.id
     })
+  })
+
+  describe('Session Creation', () => {
+    it('works', async () => {
+      const response = await request(server)
+        .post('/graphql')
+        .set('Cookie', authCookie)
+        .send({
+          query: CreateSessionMutation,
+          variables: {
+            name: 'Session Name',
+            blocks: [
+              { questions: [questions[QuestionTypes.SC], questions[QuestionTypes.MC]] },
+              { questions: [questions[QuestionTypes.FREE]] },
+              { questions: [questions[QuestionTypes.FREE_RANGE]] },
+            ],
+          },
+        })
+
+      // ensure that there were no errors with the graphql request
+      expect(response.body.errors).toBeUndefined()
+    })
+  })
+
+  describe('Session Execution', () => {
+    it.skip('allows starting sessions', async () => {})
+    it.skip('allows completing sessions', async () => {})
   })
 })
