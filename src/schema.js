@@ -103,11 +103,11 @@ const resolvers = {
   },
   QuestionOptions: {
     __resolveType(obj) {
-      if (obj.restrictions) {
+      if (obj.FREE_RANGE) {
         return 'FREEQuestionOptions'
       }
 
-      if (obj.choices) {
+      if (obj.SC || obj.MC) {
         return 'SCQuestionOptions'
       }
 

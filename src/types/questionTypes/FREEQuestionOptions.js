@@ -5,7 +5,7 @@ module.exports = () => [FREEQuestionOptions]
 
 const FREEQuestionOptions = `
   type FREEQuestionOptions {
-    restrictions: FREEQuestionOptions_Restrictions!
+    restrictions: FREEQuestionOptions_Restrictions
   }
 
   input FREEQuestionOptions_RestrictionsInput {
