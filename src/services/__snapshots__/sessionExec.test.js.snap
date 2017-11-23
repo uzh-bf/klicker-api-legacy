@@ -214,8 +214,8 @@ exports[`SessionExecService addResponse allows adding responses to a FREE questi
     ]
 
     results: {
-      choices: []
-      free: [object Object]
+      CHOICES: []
+      FREE: [object Object]
     }
   
 `;
@@ -291,8 +291,8 @@ exports[`SessionExecService addResponse allows adding responses to a FREE_RANGE 
     ]
 
     results: {
-      choices: []
-      free: [object Object]
+      CHOICES: []
+      FREE: [object Object]
     }
   
 `;
@@ -351,8 +351,8 @@ exports[`SessionExecService addResponse allows adding responses to a SC question
     ]
 
     results: {
-      choices: [1,1,0]
-      free: undefined
+      CHOICES: [1,1,0]
+      FREE: undefined
     }
   
 `;
@@ -391,8 +391,8 @@ exports[`SessionExecService addResponse allows adding responses to a SC question
     ]
 
     results: {
-      choices: [1,2,0]
-      free: undefined
+      CHOICES: [1,2,0]
+      FREE: undefined
     }
   
 `;
@@ -451,8 +451,8 @@ exports[`SessionExecService addResponse allows adding responses to an MC questio
     ]
 
     results: {
-      choices: [2,1,1]
-      free: undefined
+      CHOICES: [2,1,1]
+      FREE: undefined
     }
   
 `;

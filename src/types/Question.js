@@ -31,7 +31,7 @@ const Question = `
     type: Question_Type!
     description: String!
 
-    options: Question_Options!
+    options: Question_Options
   }
 
   input QuestionInput {
@@ -67,7 +67,7 @@ const Question = `
     id: ID!
     description: String!
 
-    options: Question_Options!
+    options: Question_Options
 
     instances: [QuestionInstance!]!
 

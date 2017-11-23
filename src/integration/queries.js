@@ -1,3 +1,8 @@
+const mapFeedbacks = ({ content, votes }) => `
+  content: ${content}
+  votes: ${votes}
+`
+
 const TagListQuery = `
   query TagList {
     tags: allTags {
@@ -93,6 +98,30 @@ const RunningSessionQuery = `
     }
   }
 `
+const RunningSessionSerializer = {
+  test: ({ runningSession }) => !!runningSession,
+  print: ({
+    runningSession: {
+      confusionTS, feedbacks, blocks, settings,
+    },
+  }) => `
+    runningSession {
+      confusionTS: ${confusionTS}
+      feedbacks: ${feedbacks.map(mapFeedbacks)}
+      blocks: ${blocks.map(({ status, instances }) => `
+        status: ${status}
+        instances: ${instances.map(({ isOpen, question }) => `
+          isOpen: ${isOpen}
+          question {
+            title: ${question.title}
+            type: ${question.type}
+          }
+        `)}
+      `)}
+      settings: ${settings}
+    }
+  `,
+}
 
 const AccountSummaryQuery = `
   query AccountSummary {
@@ -152,6 +181,23 @@ const JoinSessionQuery = `
     }
   }
 `
+const JoinSessionSerializer = {
+  test: ({ joinSession }) => !!joinSession,
+  print: ({ joinSession: { settings, activeQuestions, feedbacks } }) => `
+    joinSession {
+      settings: ${settings}
+      activeQuestions: ${activeQuestions.map(({
+    title, description, type, options,
+  }) => `
+        title: ${title}
+        description: ${description}
+        type: ${type}
+        options: ${options}
+      `)}
+      feedbacks: ${feedbacks.map(mapFeedbacks)}
+    }
+  `,
+}
 
 const SessionEvaluationQuery = `
   query EvaluateSession($sessionId: ID!) {
@@ -217,6 +263,33 @@ const SessionEvaluationQuery = `
     }
   }
 `
+const SessionEvaluationSerializer = {
+  test: ({ session }) => !!session,
+  print: ({ session: { status, blocks } }) => `
+    evaluateSession {
+      status: ${status}
+      blocks: ${blocks.map(({ status: status2, instances }) => `
+        status: ${status2}
+        instances: ${instances.map(({
+    isOpen, version, question, results, responses,
+  }) => `
+          isOpen: ${isOpen}
+          version: ${version}
+          question {
+            title: ${question.title}
+            type: ${question.type}
+            versions: ${question.versions.map(({ description, options }) => `
+              description: ${description}
+              options: ${options}
+            `)}
+          }
+          results: ${results}
+          responses: ${responses.map(response => response.value)}
+        `)}
+      `)}
+    }
+  `,
+}
 
 module.exports = {
   TagListQuery,
@@ -226,4 +299,5 @@ module.exports = {
   AccountSummaryQuery,
   JoinSessionQuery,
   SessionEvaluationQuery,
+  serializers: [RunningSessionSerializer, JoinSessionSerializer, SessionEvaluationSerializer],
 }
