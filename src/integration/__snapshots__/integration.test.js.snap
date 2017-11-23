@@ -101,7 +101,19 @@ exports[`Integration Session Creation works 1`] = `
 exports[`Integration Session Execution allows adding confusion timesteps 1`] = `
 
     addConfusionTS {
-      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
+      confusionTS: 
+        difficulty: 2
+        speed: 4
+      ,
+        difficulty: -2
+        speed: 9
+      ,
+        difficulty: -5
+        speed: 3
+      ,
+        difficulty: 5
+        speed: 10
+      
     }
   
 `;
@@ -306,7 +318,19 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can evaluate the first question block 1`] = `
 
     runningSession {
-      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
+      confusionTS: 
+        difficulty: 2
+        speed: 4
+      ,
+        difficulty: -2
+        speed: 9
+      ,
+        difficulty: -5
+        speed: 3
+      ,
+        difficulty: 5
+        speed: 10
+      
       feedbacks: 
         content: my test feedback
         votes: 0
@@ -429,7 +453,19 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can evaluate the second question block 1`] = `
 
     runningSession {
-      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
+      confusionTS: 
+        difficulty: 2
+        speed: 4
+      ,
+        difficulty: -2
+        speed: 9
+      ,
+        difficulty: -5
+        speed: 3
+      ,
+        difficulty: 5
+        speed: 10
+      
       feedbacks: 
         content: my test feedback
         votes: 0
@@ -552,7 +588,19 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can evaluate the third question block 1`] = `
 
     runningSession {
-      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
+      confusionTS: 
+        difficulty: 2
+        speed: 4
+      ,
+        difficulty: -2
+        speed: 9
+      ,
+        difficulty: -5
+        speed: 3
+      ,
+        difficulty: 5
+        speed: 10
+      
       feedbacks: 
         content: my test feedback
         votes: 0
@@ -675,7 +723,19 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can join the session initially 1`] = `
 
     runningSession {
-      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
+      confusionTS: 
+        difficulty: 2
+        speed: 4
+      ,
+        difficulty: -2
+        speed: 9
+      ,
+        difficulty: -5
+        speed: 3
+      ,
+        difficulty: 5
+        speed: 10
+      
       feedbacks: 
         content: my test feedback
         votes: 0

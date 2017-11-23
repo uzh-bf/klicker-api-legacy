@@ -101,7 +101,10 @@ const RunningSessionSerializer = {
     },
   }) => `
     runningSession {
-      confusionTS: ${JSON.stringify(confusionTS)}
+      confusionTS: ${confusionTS.map(({ difficulty, speed }) => `
+        difficulty: ${difficulty}
+        speed: ${speed}
+      `)}
       feedbacks: ${feedbacks.map(({ content, votes }) => `
         content: ${content}
         votes: ${votes}

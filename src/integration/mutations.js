@@ -246,7 +246,10 @@ const AddConfusionTSSerializer = {
   test: ({ addConfusionTS }) => !!addConfusionTS,
   print: ({ addConfusionTS: { confusionTS } }) => `
     addConfusionTS {
-      confusionTS: ${JSON.stringify(confusionTS)}
+      confusionTS: ${confusionTS.map(({ difficulty, speed }) => `
+        difficulty: ${difficulty}
+        speed: ${speed}
+      `)}
     }
   `,
 }
