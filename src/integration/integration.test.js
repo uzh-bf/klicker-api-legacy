@@ -40,8 +40,9 @@ describe('Integration', () => {
     await initializeDb({ mongoose, email: 'testIntegration@bf.uzh.ch', shortname: 'integr' })
   })
 
-  afterAll((done) => {
-    mongoose.disconnect(done)
+  afterAll(async () => {
+    await mongoose.disconnect()
+    await server.close()
     authCookie = null
   })
 
