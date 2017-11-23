@@ -1,8 +1,3 @@
-const mapFeedbacks = ({ content, votes }) => `
-  content: ${content}
-  votes: ${votes}
-`
-
 const TagListQuery = `
   query TagList {
     tags: allTags {
@@ -106,8 +101,11 @@ const RunningSessionSerializer = {
     },
   }) => `
     runningSession {
-      confusionTS: ${confusionTS}
-      feedbacks: ${feedbacks.map(mapFeedbacks)}
+      confusionTS: ${JSON.stringify(confusionTS)}
+      feedbacks: ${feedbacks.map(({ content, votes }) => `
+        content: ${content}
+        votes: ${votes}
+      `)}
       blocks: ${blocks.map(({ status, instances }) => `
         status: ${status}
         instances: ${instances.map(({ isOpen, question }) => `
@@ -118,7 +116,7 @@ const RunningSessionSerializer = {
           }
         `)}
       `)}
-      settings: ${settings}
+      settings: ${JSON.stringify(settings)}
     }
   `,
 }
@@ -185,16 +183,19 @@ const JoinSessionSerializer = {
   test: ({ joinSession }) => !!joinSession,
   print: ({ joinSession: { settings, activeQuestions, feedbacks } }) => `
     joinSession {
-      settings: ${settings}
+      settings: ${JSON.stringify(settings)}
       activeQuestions: ${activeQuestions.map(({
     title, description, type, options,
   }) => `
         title: ${title}
         description: ${description}
         type: ${type}
-        options: ${options}
+        options: ${JSON.stringify(options)}
       `)}
-      feedbacks: ${feedbacks.map(mapFeedbacks)}
+      feedbacks: ${feedbacks.map(({ content, votes }) => `
+        content: ${content}
+        votes: ${votes}
+      `)}
     }
   `,
 }
@@ -280,10 +281,10 @@ const SessionEvaluationSerializer = {
             type: ${question.type}
             versions: ${question.versions.map(({ description, options }) => `
               description: ${description}
-              options: ${options}
+              options: ${JSON.stringify(options)}
             `)}
           }
-          results: ${results}
+          results: ${JSON.stringify(results)}
           responses: ${responses.map(response => response.value)}
         `)}
       `)}

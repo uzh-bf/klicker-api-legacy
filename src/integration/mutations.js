@@ -1,8 +1,3 @@
-const mapFeedbacks = ({ content, votes }) => `
-  content: ${content}
-  votes: ${votes}
-`
-
 const RegistrationMutation = `
   mutation CreateUser($email: String!, $password: String!, $shortname: String!) {
     createUser(email: $email, password: $password, shortname: $shortname) {
@@ -40,7 +35,7 @@ const LoginSerializer = {
     login {
       email: ${email}
       shortname: ${shortname}
-      runningSession: ${runningSession}
+      runningSession: ${!!runningSession}
     }
   `,
 }
@@ -112,7 +107,7 @@ const CreateQuestionSerializer = {
       tags: ${tags.map(tag => tag.name)}
       versions: ${versions.map(({ description, options }) => `
         description: ${description}
-        options: ${options}
+        options: ${JSON.stringify(options)}
       `)}
     }
   `,
@@ -168,7 +163,7 @@ const CreateSessionSerializer = {
           type: ${question.type}
         `)}
       `)}
-      settings: ${settings}
+      settings: ${JSON.stringify(settings)}
     }
   `,
 }
@@ -214,7 +209,10 @@ const AddFeedbackSerializer = {
   test: ({ addFeedback }) => !!addFeedback,
   print: ({ addFeedback: { feedbacks } }) => `
     addFeedback {
-      feedbacks: ${feedbacks.map(mapFeedbacks)}
+      feedbacks: ${feedbacks.map(({ content, votes }) => `
+        content: ${content}
+        votes: ${votes}
+      `)}
     }
   `,
 }
@@ -248,7 +246,7 @@ const AddConfusionTSSerializer = {
   test: ({ addConfusionTS }) => !!addConfusionTS,
   print: ({ addConfusionTS: { confusionTS } }) => `
     addConfusionTS {
-      confusionTS: ${confusionTS}
+      confusionTS: ${JSON.stringify(confusionTS)}
     }
   `,
 }
@@ -269,7 +267,7 @@ const UpdateSessionSettingsSerializer = {
   test: ({ updateSessionSettings }) => !!updateSessionSettings,
   print: ({ updateSessionSettings: { settings } }) => `
     updateSessionSettings {
-      settings: ${settings}
+      settings: ${JSON.stringify(settings)}
     }
   `,
 }

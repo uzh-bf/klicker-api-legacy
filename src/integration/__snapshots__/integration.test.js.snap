@@ -5,7 +5,7 @@ exports[`Integration Login works with valid credentials 1`] = `
     login {
       email: testIntegration@bf.uzh.ch
       shortname: integr
-      runningSession: null
+      runningSession: false
     }
   
 `;
@@ -18,7 +18,7 @@ exports[`Integration Question Creation works for FREE questions 1`] = `
       tags: TestTag
       versions: 
         description: This is a simple FREE question.
-        options: [object Object]
+        options: {"SC":null,"MC":null,"FREE_RANGE":null}
       
     }
   
@@ -32,7 +32,7 @@ exports[`Integration Question Creation works for FREE_RANGE questions 1`] = `
       tags: TestTag
       versions: 
         description: This is a simple FREE_RANGE question.
-        options: [object Object]
+        options: {"SC":null,"MC":null,"FREE_RANGE":{"restrictions":{"min":0,"max":10}}}
       
     }
   
@@ -46,7 +46,7 @@ exports[`Integration Question Creation works for MC questions 1`] = `
       tags: TestTag
       versions: 
         description: This is a simple MC question.
-        options: [object Object]
+        options: {"SC":null,"MC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"},{"correct":true,"name":"option3"}],"randomized":false},"FREE_RANGE":null}
       
     }
   
@@ -60,7 +60,7 @@ exports[`Integration Question Creation works for SC questions 1`] = `
       tags: TestTag
       versions: 
         description: This is a simple SC question.
-        options: [object Object]
+        options: {"SC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"}],"randomized":false},"MC":null,"FREE_RANGE":null}
       
     }
   
@@ -93,7 +93,7 @@ exports[`Integration Session Creation works 1`] = `
           type: FREE_RANGE
         
       
-      settings: [object Object]
+      settings: {"isConfusionBarometerActive":false,"isFeedbackChannelActive":false,"isFeedbackChannelPublic":false}
     }
   
 `;
@@ -101,7 +101,7 @@ exports[`Integration Session Creation works 1`] = `
 exports[`Integration Session Execution allows adding confusion timesteps 1`] = `
 
     addConfusionTS {
-      confusionTS: [object Object],[object Object],[object Object],[object Object]
+      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
     }
   
 `;
@@ -110,15 +110,15 @@ exports[`Integration Session Execution allows adding feedbacks 1`] = `
 
     addFeedback {
       feedbacks: 
-  content: my test feedback
-  votes: 0
-,
-  content: good lecture
-  votes: 0
-,
-  content: my test feedback
-  votes: 0
-
+        content: my test feedback
+        votes: 0
+      ,
+        content: good lecture
+        votes: 0
+      ,
+        content: my test feedback
+        votes: 0
+      
     }
   
 `;
@@ -145,10 +145,10 @@ exports[`Integration Session Execution allows evaluating sessions after completi
             type: SC
             versions: 
               description: This is a simple SC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"}],"randomized":false},"MC":null}
             
           }
-          results: [object Object]
+          results: {"CHOICES":[1,0]}
           responses: 
         ,
           isOpen: false
@@ -158,10 +158,10 @@ exports[`Integration Session Execution allows evaluating sessions after completi
             type: MC
             versions: 
               description: This is a simple MC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":null,"MC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"},{"correct":true,"name":"option3"}],"randomized":false}}
             
           }
-          results: [object Object]
+          results: {"CHOICES":[1,1,0]}
           responses: 
         
       ,
@@ -177,7 +177,7 @@ exports[`Integration Session Execution allows evaluating sessions after completi
               options: null
             
           }
-          results: [object Object]
+          results: {"FREE":[{"count":1,"key":"5eb63bbbe01eeed093cb22bb8f5acdc3","value":"hello world"}]}
           responses: hello world
         
       ,
@@ -190,10 +190,10 @@ exports[`Integration Session Execution allows evaluating sessions after completi
             type: FREE_RANGE
             versions: 
               description: This is a simple FREE_RANGE question.
-              options: [object Object]
+              options: {"FREE_RANGE":{"restrictions":{"min":0,"max":10}},"SC":null,"MC":null}
             
           }
-          results: [object Object]
+          results: {"FREE":[{"count":1,"key":"a87ff679a2f3e71d9181a67b7542122c","value":"4"}]}
           responses: 4
         
       
@@ -306,17 +306,17 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can evaluate the first question block 1`] = `
 
     runningSession {
-      confusionTS: [object Object],[object Object],[object Object],[object Object]
+      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
       feedbacks: 
-  content: my test feedback
-  votes: 0
-,
-  content: good lecture
-  votes: 0
-,
-  content: my test feedback
-  votes: 0
-
+        content: my test feedback
+        votes: 0
+      ,
+        content: good lecture
+        votes: 0
+      ,
+        content: my test feedback
+        votes: 0
+      
       blocks: 
         status: ACTIVE
         instances: 
@@ -351,7 +351,7 @@ exports[`Integration Session Execution allows running the full session flow (res
           }
         
       
-      settings: [object Object]
+      settings: {"isConfusionBarometerActive":true,"isFeedbackChannelActive":true,"isFeedbackChannelPublic":true}
     }
   
 `;
@@ -370,10 +370,10 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: SC
             versions: 
               description: This is a simple SC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"}],"randomized":false},"MC":null}
             
           }
-          results: [object Object]
+          results: {"CHOICES":[1,0]}
           responses: 
         ,
           isOpen: true
@@ -383,10 +383,10 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: MC
             versions: 
               description: This is a simple MC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":null,"MC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"},{"correct":true,"name":"option3"}],"randomized":false}}
             
           }
-          results: [object Object]
+          results: {"CHOICES":[1,1,0]}
           responses: 
         
       ,
@@ -415,7 +415,7 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: FREE_RANGE
             versions: 
               description: This is a simple FREE_RANGE question.
-              options: [object Object]
+              options: {"FREE_RANGE":{"restrictions":{"min":0,"max":10}},"SC":null,"MC":null}
             
           }
           results: null
@@ -429,17 +429,17 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can evaluate the second question block 1`] = `
 
     runningSession {
-      confusionTS: [object Object],[object Object],[object Object],[object Object]
+      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
       feedbacks: 
-  content: my test feedback
-  votes: 0
-,
-  content: good lecture
-  votes: 0
-,
-  content: my test feedback
-  votes: 0
-
+        content: my test feedback
+        votes: 0
+      ,
+        content: good lecture
+        votes: 0
+      ,
+        content: my test feedback
+        votes: 0
+      
       blocks: 
         status: EXECUTED
         instances: 
@@ -474,7 +474,7 @@ exports[`Integration Session Execution allows running the full session flow (res
           }
         
       
-      settings: [object Object]
+      settings: {"isConfusionBarometerActive":true,"isFeedbackChannelActive":true,"isFeedbackChannelPublic":true}
     }
   
 `;
@@ -493,10 +493,10 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: SC
             versions: 
               description: This is a simple SC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"}],"randomized":false},"MC":null}
             
           }
-          results: [object Object]
+          results: {"CHOICES":[1,0]}
           responses: 
         ,
           isOpen: false
@@ -506,10 +506,10 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: MC
             versions: 
               description: This is a simple MC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":null,"MC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"},{"correct":true,"name":"option3"}],"randomized":false}}
             
           }
-          results: [object Object]
+          results: {"CHOICES":[1,1,0]}
           responses: 
         
       ,
@@ -525,7 +525,7 @@ exports[`Integration Session Execution allows running the full session flow (res
               options: null
             
           }
-          results: [object Object]
+          results: {"FREE":[{"count":1,"key":"5eb63bbbe01eeed093cb22bb8f5acdc3","value":"hello world"}]}
           responses: hello world
         
       ,
@@ -538,7 +538,7 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: FREE_RANGE
             versions: 
               description: This is a simple FREE_RANGE question.
-              options: [object Object]
+              options: {"FREE_RANGE":{"restrictions":{"min":0,"max":10}},"SC":null,"MC":null}
             
           }
           results: null
@@ -552,17 +552,17 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can evaluate the third question block 1`] = `
 
     runningSession {
-      confusionTS: [object Object],[object Object],[object Object],[object Object]
+      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
       feedbacks: 
-  content: my test feedback
-  votes: 0
-,
-  content: good lecture
-  votes: 0
-,
-  content: my test feedback
-  votes: 0
-
+        content: my test feedback
+        votes: 0
+      ,
+        content: good lecture
+        votes: 0
+      ,
+        content: my test feedback
+        votes: 0
+      
       blocks: 
         status: EXECUTED
         instances: 
@@ -597,7 +597,7 @@ exports[`Integration Session Execution allows running the full session flow (res
           }
         
       
-      settings: [object Object]
+      settings: {"isConfusionBarometerActive":true,"isFeedbackChannelActive":true,"isFeedbackChannelPublic":true}
     }
   
 `;
@@ -616,10 +616,10 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: SC
             versions: 
               description: This is a simple SC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"}],"randomized":false},"MC":null}
             
           }
-          results: [object Object]
+          results: {"CHOICES":[1,0]}
           responses: 
         ,
           isOpen: false
@@ -629,10 +629,10 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: MC
             versions: 
               description: This is a simple MC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":null,"MC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"},{"correct":true,"name":"option3"}],"randomized":false}}
             
           }
-          results: [object Object]
+          results: {"CHOICES":[1,1,0]}
           responses: 
         
       ,
@@ -648,7 +648,7 @@ exports[`Integration Session Execution allows running the full session flow (res
               options: null
             
           }
-          results: [object Object]
+          results: {"FREE":[{"count":1,"key":"5eb63bbbe01eeed093cb22bb8f5acdc3","value":"hello world"}]}
           responses: hello world
         
       ,
@@ -661,10 +661,10 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: FREE_RANGE
             versions: 
               description: This is a simple FREE_RANGE question.
-              options: [object Object]
+              options: {"FREE_RANGE":{"restrictions":{"min":0,"max":10}},"SC":null,"MC":null}
             
           }
-          results: [object Object]
+          results: {"FREE":[{"count":1,"key":"a87ff679a2f3e71d9181a67b7542122c","value":"4"}]}
           responses: 4
         
       
@@ -675,17 +675,17 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can join the session initially 1`] = `
 
     runningSession {
-      confusionTS: [object Object],[object Object],[object Object],[object Object]
+      confusionTS: [{"difficulty":2,"speed":4,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-2,"speed":9,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":-5,"speed":3,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"},{"difficulty":5,"speed":10,"createdAt":"Thu Nov 23 2017 15:50:29 GMT+0100 (Mitteleuropäische Zeit)"}]
       feedbacks: 
-  content: my test feedback
-  votes: 0
-,
-  content: good lecture
-  votes: 0
-,
-  content: my test feedback
-  votes: 0
-
+        content: my test feedback
+        votes: 0
+      ,
+        content: good lecture
+        votes: 0
+      ,
+        content: my test feedback
+        votes: 0
+      
       blocks: 
         status: PLANNED
         instances: 
@@ -720,7 +720,7 @@ exports[`Integration Session Execution allows running the full session flow (res
           }
         
       
-      settings: [object Object]
+      settings: {"isConfusionBarometerActive":true,"isFeedbackChannelActive":true,"isFeedbackChannelPublic":true}
     }
   
 `;
@@ -739,7 +739,7 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: SC
             versions: 
               description: This is a simple SC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"}],"randomized":false},"MC":null}
             
           }
           results: null
@@ -752,7 +752,7 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: MC
             versions: 
               description: This is a simple MC question.
-              options: [object Object]
+              options: {"FREE_RANGE":null,"SC":null,"MC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"},{"correct":true,"name":"option3"}],"randomized":false}}
             
           }
           results: null
@@ -784,7 +784,7 @@ exports[`Integration Session Execution allows running the full session flow (res
             type: FREE_RANGE
             versions: 
               description: This is a simple FREE_RANGE question.
-              options: [object Object]
+              options: {"FREE_RANGE":{"restrictions":{"min":0,"max":10}},"SC":null,"MC":null}
             
           }
           results: null
@@ -798,28 +798,28 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) PARTICIPANT: can join the session initially 1`] = `
 
     joinSession {
-      settings: [object Object]
+      settings: {"isFeedbackChannelActive":true,"isFeedbackChannelPublic":true,"isConfusionBarometerActive":true}
       activeQuestions: 
         title: Test SC
         description: This is a simple SC question.
         type: SC
-        options: [object Object]
+        options: {"FREE_RANGE":null,"SC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"}],"randomized":false},"MC":null}
       ,
         title: Test MC
         description: This is a simple MC question.
         type: MC
-        options: [object Object]
+        options: {"FREE_RANGE":null,"SC":null,"MC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"},{"correct":true,"name":"option3"}],"randomized":false}}
       
       feedbacks: 
-  content: my test feedback
-  votes: 0
-,
-  content: good lecture
-  votes: 0
-,
-  content: my test feedback
-  votes: 0
-
+        content: my test feedback
+        votes: 0
+      ,
+        content: good lecture
+        votes: 0
+      ,
+        content: my test feedback
+        votes: 0
+      
     }
   
 `;
@@ -827,7 +827,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) PARTICIPANT: can update the joined session for the second block 1`] = `
 
     joinSession {
-      settings: [object Object]
+      settings: {"isFeedbackChannelActive":true,"isFeedbackChannelPublic":true,"isConfusionBarometerActive":true}
       activeQuestions: 
         title: Test FREE
         description: This is a simple FREE question.
@@ -835,15 +835,15 @@ exports[`Integration Session Execution allows running the full session flow (res
         options: null
       
       feedbacks: 
-  content: my test feedback
-  votes: 0
-,
-  content: good lecture
-  votes: 0
-,
-  content: my test feedback
-  votes: 0
-
+        content: my test feedback
+        votes: 0
+      ,
+        content: good lecture
+        votes: 0
+      ,
+        content: my test feedback
+        votes: 0
+      
     }
   
 `;
@@ -851,23 +851,23 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) PARTICIPANT: can update the joined session for the third block 1`] = `
 
     joinSession {
-      settings: [object Object]
+      settings: {"isFeedbackChannelActive":true,"isFeedbackChannelPublic":true,"isConfusionBarometerActive":true}
       activeQuestions: 
         title: Test FREE_RANGE
         description: This is a simple FREE_RANGE question.
         type: FREE_RANGE
-        options: [object Object]
+        options: {"FREE_RANGE":{"restrictions":{"min":0,"max":10}},"SC":null,"MC":null}
       
       feedbacks: 
-  content: my test feedback
-  votes: 0
-,
-  content: good lecture
-  votes: 0
-,
-  content: my test feedback
-  votes: 0
-
+        content: my test feedback
+        votes: 0
+      ,
+        content: good lecture
+        votes: 0
+      ,
+        content: my test feedback
+        votes: 0
+      
     }
   
 `;
@@ -883,7 +883,7 @@ exports[`Integration Session Execution allows starting sessions 1`] = `
 exports[`Integration Session Execution allows updating session settings 1`] = `
 
     updateSessionSettings {
-      settings: [object Object]
+      settings: {"isConfusionBarometerActive":true,"isFeedbackChannelActive":true,"isFeedbackChannelPublic":true}
     }
   
 `;
