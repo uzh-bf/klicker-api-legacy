@@ -253,15 +253,31 @@ describe('Integration', () => {
       const instanceIds = {}
 
       it('LECTURER: can join the session initially', async () => {
-        const runningSession = ensureNoErrors(await sendQuery({ query: queries.RunningSessionQuery }, authCookie))
+        const runningSession = ensureNoErrors(await sendQuery(
+          {
+            query: queries.RunningSessionQuery,
+          },
+          authCookie,
+        ))
         expect(runningSession).toMatchSnapshot()
 
-        const evaluateSession = ensureNoErrors(await sendQuery({ query: queries.SessionEvaluationQuery, variables: { sessionId } }, authCookie))
+        const evaluateSession = ensureNoErrors(await sendQuery(
+          {
+            query: queries.SessionEvaluationQuery,
+            variables: { sessionId },
+          },
+          authCookie,
+        ))
         expect(evaluateSession).toMatchSnapshot()
       })
 
       it('LECTURER: can activate the first question block', async () => {
-        const data = ensureNoErrors(await sendQuery({ query: mutations.ActivateNextBlockMutation }, authCookie))
+        const data = ensureNoErrors(await sendQuery(
+          {
+            query: mutations.ActivateNextBlockMutation,
+          },
+          authCookie,
+        ))
 
         expect(data).toMatchSnapshot()
       })
@@ -303,15 +319,31 @@ describe('Integration', () => {
       })
 
       it('LECTURER: can evaluate the first question block', async () => {
-        const runningSession = ensureNoErrors(await sendQuery({ query: queries.RunningSessionQuery }, authCookie))
+        const runningSession = ensureNoErrors(await sendQuery(
+          {
+            query: queries.RunningSessionQuery,
+          },
+          authCookie,
+        ))
         expect(runningSession).toMatchSnapshot()
 
-        const evaluateSession = ensureNoErrors(await sendQuery({ query: queries.SessionEvaluationQuery, variables: { sessionId } }, authCookie))
+        const evaluateSession = ensureNoErrors(await sendQuery(
+          {
+            query: queries.SessionEvaluationQuery,
+            variables: { sessionId },
+          },
+          authCookie,
+        ))
         expect(evaluateSession).toMatchSnapshot()
       })
 
       it('LECTURER: can close the first question block', async () => {
-        const data = ensureNoErrors(await sendQuery({ query: mutations.ActivateNextBlockMutation }, authCookie))
+        const data = ensureNoErrors(await sendQuery(
+          {
+            query: mutations.ActivateNextBlockMutation,
+          },
+          authCookie,
+        ))
 
         expect(data).toMatchSnapshot()
       })
@@ -319,7 +351,12 @@ describe('Integration', () => {
       // TODO: assertions
 
       it('LECTURER: can activate the second question block', async () => {
-        const data = ensureNoErrors(await sendQuery({ query: mutations.ActivateNextBlockMutation }, authCookie))
+        const data = ensureNoErrors(await sendQuery(
+          {
+            query: mutations.ActivateNextBlockMutation,
+          },
+          authCookie,
+        ))
 
         expect(data).toMatchSnapshot()
       })
@@ -346,15 +383,31 @@ describe('Integration', () => {
       })
 
       it('LECTURER: can evaluate the second question block', async () => {
-        const runningSession = ensureNoErrors(await sendQuery({ query: queries.RunningSessionQuery }, authCookie))
+        const runningSession = ensureNoErrors(await sendQuery(
+          {
+            query: queries.RunningSessionQuery,
+          },
+          authCookie,
+        ))
         expect(runningSession).toMatchSnapshot()
 
-        const evaluateSession = ensureNoErrors(await sendQuery({ query: queries.SessionEvaluationQuery, variables: { sessionId } }, authCookie))
+        const evaluateSession = ensureNoErrors(await sendQuery(
+          {
+            query: queries.SessionEvaluationQuery,
+            variables: { sessionId },
+          },
+          authCookie,
+        ))
         expect(evaluateSession).toMatchSnapshot()
       })
 
       it('LECTURER: can close the second question block', async () => {
-        const data = ensureNoErrors(await sendQuery({ query: mutations.ActivateNextBlockMutation }, authCookie))
+        const data = ensureNoErrors(await sendQuery(
+          {
+            query: mutations.ActivateNextBlockMutation,
+          },
+          authCookie,
+        ))
 
         expect(data).toMatchSnapshot()
       })
@@ -362,7 +415,12 @@ describe('Integration', () => {
       // TODO: assertions
 
       it('LECTURER: can activate the third question block', async () => {
-        const data = ensureNoErrors(await sendQuery({ query: mutations.ActivateNextBlockMutation }, authCookie))
+        const data = ensureNoErrors(await sendQuery(
+          {
+            query: mutations.ActivateNextBlockMutation,
+          },
+          authCookie,
+        ))
 
         expect(data).toMatchSnapshot()
       })
@@ -388,15 +446,31 @@ describe('Integration', () => {
         }))
       })
       it('LECTURER: can evaluate the third question block', async () => {
-        const runningSession = ensureNoErrors(await sendQuery({ query: queries.RunningSessionQuery }, authCookie))
+        const runningSession = ensureNoErrors(await sendQuery(
+          {
+            query: queries.RunningSessionQuery,
+          },
+          authCookie,
+        ))
         expect(runningSession).toMatchSnapshot()
 
-        const evaluateSession = ensureNoErrors(await sendQuery({ query: queries.SessionEvaluationQuery, variables: { sessionId } }, authCookie))
+        const evaluateSession = ensureNoErrors(await sendQuery(
+          {
+            query: queries.SessionEvaluationQuery,
+            variables: { sessionId },
+          },
+          authCookie,
+        ))
         expect(evaluateSession).toMatchSnapshot()
       })
 
       it('LECTURER: can close the third question block', async () => {
-        const data = ensureNoErrors(await sendQuery({ query: mutations.ActivateNextBlockMutation }, authCookie))
+        const data = ensureNoErrors(await sendQuery(
+          {
+            query: mutations.ActivateNextBlockMutation,
+          },
+          authCookie,
+        ))
 
         expect(data).toMatchSnapshot()
       })
@@ -415,7 +489,13 @@ describe('Integration', () => {
     })
 
     it('allows evaluating sessions after completion', async () => {
-      const evaluateSession = ensureNoErrors(await sendQuery({ query: queries.SessionEvaluationQuery, variables: { sessionId } }, authCookie))
+      const evaluateSession = ensureNoErrors(await sendQuery(
+        {
+          query: queries.SessionEvaluationQuery,
+          variables: { sessionId },
+        },
+        authCookie,
+      ))
 
       expect(evaluateSession).toMatchSnapshot()
     })
