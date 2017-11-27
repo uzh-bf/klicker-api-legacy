@@ -84,8 +84,8 @@ if (process.env.APP_RATE_LIMITING) {
     delayAfter: 100, // start delaying responses after 100 requests
     delayMs: 250, // delay responses by 250ms * (numResponses - delayAfter)
     keyGenerator: req => `${req.auth ? req.auth.sub : req.ip}`,
-    onLimitReacher: req =>
-      exceptTest(() => console.error(`Rate-Limited a Request from ${req.ip} ${req.auth.sub || 'anon'}!`)),
+    onLimitReached: req =>
+      exceptTest(() => console.error(`> Rate-Limited a Request from ${req.ip} ${req.auth.sub || 'anon'}!`)),
   }
 
   // if redis is available, use it to centrally store rate limiting dataconst
