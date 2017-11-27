@@ -69,6 +69,12 @@ if (process.env.NODE_ENV === 'production' && process.env.ENGINE_API_KEY) {
 // initialize an express server
 const server = express()
 
+// if the server is behind a proxy, set the PROXY env
+// this will make express trust the X-Forwarded headers
+if (process.env.PROXY) {
+  server.enable('trust proxy')
+}
+
 // setup rate limiting
 const redis = getRedis(1)
 const limiterSettings = {
