@@ -80,9 +80,10 @@ if (process.env.APP_RATE_LIMITING) {
   // basic rate limiting configuration
   const limiterSettings = {
     windowMs: 5 * 60 * 1000, // in a 5 minute window
-    max: 100, // limit to 100 requests
-    delayAfter: 90, // start delaying responses after 90 requests
+    max: 150, // limit to 150 requests
+    delayAfter: 100, // start delaying responses after 100 requests
     delayMs: 250, // delay responses by 250ms * (numResponses - delayAfter)
+    keyGenerator: req => `${req.auth.sub || req.ip}`,
   }
 
   // if redis is available, use it to centrally store rate limiting dataconst
@@ -107,6 +108,8 @@ if (process.env.APP_RATE_LIMITING) {
 
 // setup middleware stack
 const middleware = [
+  // enable gzip compression
+  compression(),
   // secure the server with helmet
   helmet({
     // TODO: activate security settings with environment vars
@@ -120,9 +123,6 @@ const middleware = [
     origin: process.env.ORIGIN,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   }),
-  limiter,
-  // enable gzip compression
-  compression(),
   // enable cookie parsing
   cookieParser(),
   // setup JWT authentication
@@ -132,6 +132,7 @@ const middleware = [
     secret: process.env.APP_SECRET,
     getToken: AuthService.getToken,
   }),
+  limiter,
   // parse json contents
   bodyParser.json(),
 ]
