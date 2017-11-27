@@ -60,11 +60,12 @@ let redis
 if (process.env.REDIS_URL) {
   const Redis = require('ioredis')
   redis = Redis(`redis://${process.env.REDIS_URL}`)
+  console.log('> Connected to redis')
 }
 
 // setup Apollo Engine (GraphQL API metrics)
 let apolloEngine
-if (process.env.ENGINE_API_KEY) {
+if (process.env.NODE_ENV === 'production' && process.env.ENGINE_API_KEY) {
   const { Engine } = require('apollo-engine')
   apolloEngine = new Engine({ engineConfig: { apiKey: process.env.ENGINE_API_KEY } })
   apolloEngine.start()
@@ -104,20 +105,20 @@ const middleware = [
 ]
 
 if (process.env.NODE_ENV === 'production') {
+  // add the morgan logging middleware in production
+  middleware.push(morgan('combined'))
+
   // add the persisted query middleware in production
   middleware.push((req, res, next) => {
     const invertedMap = _invert(queryMap)
     req.body.query = invertedMap[req.body.id]
     next()
   })
+}
 
-  // add the morgan logging middleware in production
-  middleware.push(morgan('combined'))
-
-  // if apollo engine is enabled, add the middleware to the production stack
-  if (apolloEngine) {
-    middleware.push(apolloEngine.expressMiddleware())
-  }
+// if apollo engine is enabled, add the middleware to the production stack
+if (apolloEngine) {
+  middleware.push(apolloEngine.expressMiddleware())
 }
 
 // expose the GraphQL API endpoint
