@@ -32,12 +32,14 @@ const createSessionMutation = (parentValue, { session: { name, blocks } }, { aut
     userId: auth.sub,
   })
 
-const startSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.startSession({ id, userId: auth.sub })
+const startSessionMutation = (parentValue, { id }, { auth }) =>
+  SessionMgrService.startSession({ id, userId: auth.sub, shortname: auth.shortname })
 
 const activateNextBlockMutation = (parentValue, args, { auth }) =>
-  SessionMgrService.activateNextBlock({ userId: auth.sub })
+  SessionMgrService.activateNextBlock({ userId: auth.sub, shortname: auth.shortname })
 
-const endSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.endSession({ id, userId: auth.sub })
+const endSessionMutation = (parentValue, { id }, { auth }) =>
+  SessionMgrService.endSession({ id, userId: auth.sub, shortname: auth.shortname })
 
 const addFeedbackMutation = (parentValue, { sessionId, content }) =>
   SessionExecService.addFeedback({ sessionId, content })
@@ -53,6 +55,7 @@ const updateSessionSettingsMutation = (parentValue, { sessionId, settings }, { a
     sessionId,
     userId: auth.sub,
     settings,
+    shortname: auth.shortname,
   })
 
 module.exports = {
