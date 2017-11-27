@@ -69,37 +69,40 @@ if (process.env.NODE_ENV === 'production' && process.env.ENGINE_API_KEY) {
 // initialize an express server
 const server = express()
 
-// if the server is behind a proxy, set the PROXY env
-// this will make express trust the X-Forwarded headers
-if (process.env.PROXY) {
+// if the server is behind a proxy, set the APP_PROXY env to true
+// this will make express trust the X-* proxy headers and set corresponding req.ip
+if (process.env.APP_PROXY) {
   server.enable('trust proxy')
 }
 
-// setup rate limiting
-const redis = getRedis(1)
-const limiterSettings = {
-  windowMs: 5 * 60 * 1000, // in a 5 minute window
-  max: 100, // limit to 100 requests
-  delayAfter: 90, // start delaying responses after 90 requests
-  delayMs: 250, // delay responses by 250ms * (numResponses - delayAfter)
-}
-// if redis is available, use it to centrally store rate limiting data
 let limiter
-if (redis) {
-  const RedisStore = require('rate-limit-redis')
-  limiter = new RateLimit({
-    ...limiterSettings,
-    store:
-      redis &&
-      new RedisStore({
-        client: redis,
-        expiry: 5 * 60,
-        prefix: 'rl-api:',
-      }),
-  })
-} else {
-  // if redis is not available, setup basic rate limiting with in-memory store
-  limiter = new RateLimit(limiterSettings)
+if (process.env.APP_RATE_LIMITING) {
+  // basic rate limiting configuration
+  const limiterSettings = {
+    windowMs: 5 * 60 * 1000, // in a 5 minute window
+    max: 100, // limit to 100 requests
+    delayAfter: 90, // start delaying responses after 90 requests
+    delayMs: 250, // delay responses by 250ms * (numResponses - delayAfter)
+  }
+
+  // if redis is available, use it to centrally store rate limiting dataconst
+  const redis = getRedis(1)
+  if (redis) {
+    const RedisStore = require('rate-limit-redis')
+    limiter = new RateLimit({
+      ...limiterSettings,
+      store:
+        redis &&
+        new RedisStore({
+          client: redis,
+          expiry: 5 * 60,
+          prefix: 'rl-api:',
+        }),
+    })
+  } else {
+    // if redis is not available, setup basic rate limiting with in-memory store
+    limiter = new RateLimit(limiterSettings)
+  }
 }
 
 // setup middleware stack
