@@ -12,12 +12,13 @@ const compression = require('compression')
 const helmet = require('helmet')
 const morgan = require('morgan')
 const _invert = require('lodash/invert')
+const RateLimit = require('express-rate-limit')
 const { graphqlExpress } = require('apollo-server-express')
 
 const schema = require('./schema')
 const AuthService = require('./services/auth')
 const queryMap = require('./queryMap.json')
-
+const { getRedis } = require('./redis')
 const { exceptTest } = require('./lib/utils')
 
 // require important environment variables to be present
@@ -68,10 +69,34 @@ if (process.env.NODE_ENV === 'production' && process.env.ENGINE_API_KEY) {
 // initialize an express server
 const server = express()
 
+// setup rate limiting
+const redis = getRedis()
+const limiterSettings = {
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  delayMs: 0, // disable delaying - full speed until the max limit is reached
+}
+// if redis is available, use it to centrally store rate limiting data
+let limiter
+if (redis) {
+  const RedisStore = require('rate-limit-redis')
+  limiter = new RateLimit({
+    ...limiterSettings,
+    store:
+      redis &&
+      new RedisStore({
+        client: redis,
+        expiry: 15 * 60 * 1000,
+        prefix: 'rl-api:',
+      }),
+  })
+} else {
+  // if redis is not available, setup basic rate limiting with in-memory store
+  limiter = new RateLimit(limiterSettings)
+}
+
 // setup middleware stack
 const middleware = [
-  // enable gzip compression
-  compression(),
   // secure the server with helmet
   helmet({
     // TODO: activate security settings with environment vars
@@ -85,6 +110,9 @@ const middleware = [
     origin: process.env.ORIGIN,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   }),
+  limiter,
+  // enable gzip compression
+  compression(),
   // enable cookie parsing
   cookieParser(),
   // setup JWT authentication
