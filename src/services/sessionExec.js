@@ -6,14 +6,14 @@ const { QuestionGroups, QuestionTypes } = require('../constants')
 const { getRedis } = require('../redis')
 const { getRunningSession } = require('./sessionMgr')
 
-const redis = getRedis()
+// initialize redis if available
+const redis = getRedis(2)
 
 // add a new feedback to a session
 const addFeedback = async ({
   ip, fp, sessionId, content,
 }) => {
   // TODO: security
-  // TODO: rate limiting
   // TODO: ...
 
   const session = await getRunningSession(sessionId)
@@ -56,7 +56,6 @@ const addConfusionTS = async ({
   ip, fp, sessionId, difficulty, speed,
 }) => {
   // TODO: security
-  // TODO: rate limiting
   // TODO: ...
 
   const session = await getRunningSession(sessionId)
@@ -87,6 +86,13 @@ const addResponse = async ({
   // if the instance is closed, don't allow adding any responses
   if (!instance) {
     throw new Error('INSTANCE_CLOSED')
+  }
+
+  if (redis) {
+    // TODO: if redis is available, check if any matching response (ip or fp) is already in the database.
+    // if so, throw an error
+    // results should still be written to the database? but responses will not be saved seperately!
+    // or only write results to db every 5 or 10 responses and use redis as calculation platform?
   }
 
   const questionType = instance.question.type
@@ -160,6 +166,11 @@ const addResponse = async ({
     fingerprint: 'some fingerprint',
     value: response,
   })
+
+  if (redis) {
+    // TODO: if redis is available, save the response under the key of the corresponding instance
+    redis.rpush(`${instanceId}:responses`, JSON.stringify({ ip, fp, response }))
+  }
 
   // save the updated instance
   await instance.save()

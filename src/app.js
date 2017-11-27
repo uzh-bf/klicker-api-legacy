@@ -164,7 +164,7 @@ server.use(
   ...middleware,
   // delegate to the GraphQL API
   graphqlExpress((req, res) => ({
-    context: { auth: req.auth, res },
+    context: { auth: req.auth, ip: req.ip, res },
     schema,
     tracing: !!process.env.ENGINE_API_KEY,
     cacheControl: !!process.env.ENGINE_API_KEY,
