@@ -72,9 +72,10 @@ const server = express()
 // setup rate limiting
 const redis = getRedis()
 const limiterSettings = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  delayMs: 0, // disable delaying - full speed until the max limit is reached
+  windowMs: 15 * 60 * 1000, // in a 15 minute window
+  max: 300, // limit to 250 requests per 15 minute window
+  delayAfter: 250, // start delaying responses after 250 requests
+  delayMs: 250, // delay responses by 250ms * (numResponses - delayAfter)
 }
 // if redis is available, use it to centrally store rate limiting data
 let limiter
@@ -86,7 +87,7 @@ if (redis) {
       redis &&
       new RedisStore({
         client: redis,
-        expiry: 15 * 60 * 1000,
+        expiry: 15 * 60,
         prefix: 'rl-api:',
       }),
   })
