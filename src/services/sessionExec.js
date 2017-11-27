@@ -3,10 +3,15 @@ const md5 = require('md5')
 const { QuestionInstanceModel, UserModel } = require('../models')
 const { QuestionGroups, QuestionTypes } = require('../constants')
 
+const { getRedis } = require('../redis')
 const { getRunningSession } = require('./sessionMgr')
 
+const redis = getRedis()
+
 // add a new feedback to a session
-const addFeedback = async ({ sessionId, content }) => {
+const addFeedback = async ({
+  ip, fp, sessionId, content,
+}) => {
   // TODO: security
   // TODO: rate limiting
   // TODO: ...
@@ -47,7 +52,9 @@ const deleteFeedback = async ({ sessionId, feedbackId, userId }) => {
 }
 
 // add a new confusion timestep to the session
-const addConfusionTS = async ({ sessionId, difficulty, speed }) => {
+const addConfusionTS = async ({
+  ip, fp, sessionId, difficulty, speed,
+}) => {
   // TODO: security
   // TODO: rate limiting
   // TODO: ...
@@ -70,7 +77,9 @@ const addConfusionTS = async ({ sessionId, difficulty, speed }) => {
 }
 
 // add a response to an active question instance
-const addResponse = async ({ instanceId, response }) => {
+const addResponse = async ({
+  ip, fp, instanceId, response,
+}) => {
   // find the specified question instance
   // only find instances that are open
   const instance = await QuestionInstanceModel.findOne({ _id: instanceId, isOpen: true }).populate('question')
