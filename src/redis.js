@@ -15,7 +15,7 @@ const getRedis = (db = 0) => {
 
   // otherwise initialize a new redis client for the respective url and database
   if (process.env.REDIS_URL) {
-    console.log('> Connected to redis')
+    console.log(`> Connected to redis (db ${db})`)
 
     const newClient = new Redis(`redis://${process.env.REDIS_URL}/${db}`)
     clients.set(db, newClient)

@@ -80,10 +80,12 @@ if (process.env.APP_RATE_LIMITING) {
   // basic rate limiting configuration
   const limiterSettings = {
     windowMs: 5 * 60 * 1000, // in a 5 minute window
-    max: 150, // limit to 150 requests
+    max: 200, // limit to 150 requests
     delayAfter: 100, // start delaying responses after 100 requests
     delayMs: 250, // delay responses by 250ms * (numResponses - delayAfter)
-    keyGenerator: req => `${req.auth.sub || req.ip}`,
+    keyGenerator: req => `${req.auth ? req.auth.sub : req.ip}`,
+    onLimitReacher: req =>
+      exceptTest(() => console.error(`Rate-Limited a Request from ${req.ip} ${req.auth.sub || 'anon'}!`)),
   }
 
   // if redis is available, use it to centrally store rate limiting dataconst
