@@ -62,11 +62,19 @@ if (process.env.REDIS_URL) {
   redis = Redis(`redis://${process.env.REDIS_URL}`)
 }
 
+// setup Apollo Engine (GraphQL API metrics)
+let apolloEngine
+if (process.env.ENGINE_API_KEY) {
+  const { Engine } = require('apollo-engine')
+  apolloEngine = new Engine({ engineConfig: { apiKey: process.env.ENGINE_API_KEY } })
+  apolloEngine.start()
+}
+
 // initialize an express server
 const server = express()
 
 // setup middleware stack
-let middleware = [
+const middleware = [
   // enable gzip compression
   compression(),
   // secure the server with helmet
@@ -95,29 +103,21 @@ let middleware = [
   bodyParser.json(),
 ]
 
-// add the persisted query middleware in production
 if (process.env.NODE_ENV === 'production') {
+  // add the persisted query middleware in production
   middleware.push((req, res, next) => {
     const invertedMap = _invert(queryMap)
     req.body.query = invertedMap[req.body.id]
     next()
   })
-}
 
-// activate morgan logging in dev and prod, but not in tests
-if (process.env.NODE_ENV !== 'test') {
+  // add the morgan logging middleware in production
   middleware.push(morgan('combined'))
-}
 
-// setup Apollo Engine (GraphQL API metrics)
-let apolloEngine = !!process.env.ENGINE_API_KEY
-if (apolloEngine) {
-  const { Engine } = require('apollo-engine')
-  apolloEngine = new Engine({ engineConfig: { apiKey: process.env.ENGINE_API_KEY } })
-  apolloEngine.start()
-
-  // if apollo engine is enabled, add the middleware to the stack
-  middleware = [apolloEngine.expressMiddleware(), ...middleware]
+  // if apollo engine is enabled, add the middleware to the production stack
+  if (apolloEngine) {
+    middleware.push(apolloEngine.expressMiddleware())
+  }
 }
 
 // expose the GraphQL API endpoint
