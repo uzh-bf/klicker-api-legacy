@@ -1,6 +1,6 @@
 const Redis = require('ioredis')
 
-const clients = Map()
+const clients = new Map()
 const getRedis = (db = 0) => {
   // don't return an instance of redis in test environments or if a url is not set
   if (!process.env.REDIS_URL || process.env.NODE_ENV === 'test') {
