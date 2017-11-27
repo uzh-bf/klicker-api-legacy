@@ -1,6 +1,17 @@
 const { QuestionInstanceModel, SessionModel, UserModel } = require('../models')
-
+const { getRedis } = require('../redis')
 const { SessionStatus, QuestionBlockStatus } = require('../constants')
+
+const redis = getRedis()
+
+// if redis is in use, unlink the cached /join/:shortname pages
+const cleanCache = (shortname) => {
+  const key = `/join/${shortname}`
+
+  console.log(`Cleaning up cache for ${key}`)
+
+  return redis.unlink([`${key}:de`, `${key}:en`])
+}
 
 const getRunningSession = async (sessionId) => {
   const session = await SessionModel.findById(sessionId)
@@ -73,7 +84,7 @@ const createSession = async ({ name, questionBlocks, userId }) => {
 }
 
 // start an existing session
-const startSession = async ({ id, userId }) => {
+const startSession = async ({ id, userId, shortname }) => {
   // TODO: hydrate caches?
   // TODO: ...
   const user = await UserModel.findById(userId)
@@ -103,21 +114,25 @@ const startSession = async ({ id, userId }) => {
   session.status = SessionStatus.RUNNING
   session.startedAt = Date.now()
 
-  const updatedUser = UserModel.findByIdAndUpdate(userId, {
+  const updatedUser = await UserModel.findByIdAndUpdate(userId, {
     runningSession: session.id,
     $currentDate: { updatedAt: true },
   })
 
-  // TODO: $currentDate
-  const savedSession = session.save()
+  const promises = [session.save(), updatedUser]
 
-  await Promise.all([updatedUser, savedSession])
+  // if redis is in use, cleanup the page cache
+  if (redis) {
+    promises.push(cleanCache(shortname))
+  }
+
+  await Promise.all(promises)
 
   return session
 }
 
 // end (complete) an existing session
-const endSession = async ({ id, userId }) => {
+const endSession = async ({ id, userId, shortname }) => {
   // TODO: date compression? data aggregation?
   // TODO: cleanup caches?
   // TODO: ...
@@ -150,13 +165,22 @@ const endSession = async ({ id, userId }) => {
     $currentDate: { updatedAt: true },
   })
 
-  await Promise.all([updatedUser, session.save()])
+  const promises = [session.save(), updatedUser]
+
+  // if redis is in use, cleanup the page cache
+  if (redis) {
+    promises.push(cleanCache(shortname))
+  }
+
+  await Promise.all(promises)
 
   return session
 }
 
 // update session settings
-const updateSettings = async ({ sessionId, userId, settings }) => {
+const updateSettings = async ({
+  sessionId, userId, settings, shortname,
+}) => {
   // TODO: security
   // TODO: ...
 
@@ -179,6 +203,11 @@ const updateSettings = async ({ sessionId, userId, settings }) => {
     session.settings.isFeedbackChannelPublic = false
   }
 
+  // if redis is in use, cleanup the page cache
+  if (redis) {
+    await cleanCache(shortname)
+  }
+
   // save the updated session
   await session.save()
 
@@ -187,7 +216,7 @@ const updateSettings = async ({ sessionId, userId, settings }) => {
 }
 
 // activate the next question block
-const activateNextBlock = async ({ userId }) => {
+const activateNextBlock = async ({ userId, shortname }) => {
   const user = await UserModel.findById(userId).populate(['activeInstances', 'runningSession'])
   const { runningSession } = user
 
@@ -240,8 +269,14 @@ const activateNextBlock = async ({ userId }) => {
     runningSession.activeInstances = []
   }
 
-  // save the updates for the running session and the user
-  await Promise.all([runningSession.save(), user.save()])
+  const promises = [runningSession.save(), user.save()]
+
+  // if redis is in use, cleanup the page cache
+  if (redis) {
+    promises.push(cleanCache(shortname))
+  }
+
+  await Promise.all(promises)
 
   return user.runningSession
 }
