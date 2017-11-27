@@ -1,4 +1,4 @@
-const server = require('./app')
+const { server } = require('./app')
 
 server.listen(process.env.PORT, (err) => {
   if (err) throw err

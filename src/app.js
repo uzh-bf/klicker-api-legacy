@@ -56,6 +56,12 @@ mongoose.connection
     exceptTest(() => console.warn('> Warning: ', error))
   })
 
+let redis
+if (process.env.REDIS_URL) {
+  const Redis = require('ioredis')
+  redis = Redis(`redis://${process.env.REDIS_URL}`)
+}
+
 // initialize an express server
 const server = express()
 
@@ -127,4 +133,7 @@ server.use(
   })),
 )
 
-module.exports = server
+module.exports = {
+  redis,
+  server,
+}
