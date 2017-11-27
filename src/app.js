@@ -79,10 +79,11 @@ let limiter
 if (process.env.APP_RATE_LIMITING) {
   // basic rate limiting configuration
   const limiterSettings = {
+    // TODO: skipping for admins or similar?
     windowMs: 5 * 60 * 1000, // in a 5 minute window
-    max: 200, // limit to 150 requests
+    max: 200, // limit to 200 requests
     delayAfter: 100, // start delaying responses after 100 requests
-    delayMs: 250, // delay responses by 250ms * (numResponses - delayAfter)
+    delayMs: 100, // delay responses by 250ms * (numResponses - delayAfter)
     keyGenerator: req => `${req.auth ? req.auth.sub : req.ip}`,
     onLimitReached: req =>
       exceptTest(() => console.error(`> Rate-Limited a Request from ${req.ip} ${req.auth.sub || 'anon'}!`)),
@@ -134,6 +135,7 @@ const middleware = [
     secret: process.env.APP_SECRET,
     getToken: AuthService.getToken,
   }),
+  // include the rate limiter
   limiter,
   // parse json contents
   bodyParser.json(),
