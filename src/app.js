@@ -70,11 +70,11 @@ if (process.env.NODE_ENV === 'production' && process.env.ENGINE_API_KEY) {
 const server = express()
 
 // setup rate limiting
-const redis = getRedis()
+const redis = getRedis(1)
 const limiterSettings = {
-  windowMs: 15 * 60 * 1000, // in a 15 minute window
-  max: 300, // limit to 250 requests per 15 minute window
-  delayAfter: 250, // start delaying responses after 250 requests
+  windowMs: 5 * 60 * 1000, // in a 5 minute window
+  max: 100, // limit to 100 requests
+  delayAfter: 90, // start delaying responses after 90 requests
   delayMs: 250, // delay responses by 250ms * (numResponses - delayAfter)
 }
 // if redis is available, use it to centrally store rate limiting data
@@ -87,7 +87,7 @@ if (redis) {
       redis &&
       new RedisStore({
         client: redis,
-        expiry: 15 * 60,
+        expiry: 5 * 60,
         prefix: 'rl-api:',
       }),
   })
