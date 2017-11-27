@@ -33,11 +33,12 @@ appSettings.forEach((envVar) => {
 // connect to mongodb
 // use username and password authentication if passed in the environment
 // otherwise assume that no authentication needed (e.g. docker)
+mongoose.Promise = Promise
 const mongoConfig = {
   keepAlive: true,
   reconnectTries: 10,
   useMongoClient: true,
-  promiseLibrary: global.Promise,
+  promiseLibrary: Promise,
 }
 if (process.env.MONGO_USER && process.env.MONGO_PASSWORD) {
   mongoose.connect(
@@ -55,13 +56,6 @@ mongoose.connection
   .on('error', (error) => {
     exceptTest(() => console.warn('> Warning: ', error))
   })
-
-let redis
-if (process.env.REDIS_URL) {
-  const Redis = require('ioredis')
-  redis = Redis(`redis://${process.env.REDIS_URL}`)
-  console.log('> Connected to redis')
-}
 
 // setup Apollo Engine (GraphQL API metrics)
 let apolloEngine
@@ -134,7 +128,4 @@ server.use(
   })),
 )
 
-module.exports = {
-  redis,
-  server,
-}
+module.exports = server

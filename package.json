@@ -48,8 +48,8 @@
   "scripts": {
     "precommit": "lint-staged",
     "prepush": "yarn run test --onlyChanged",
-    "dev": "nodemon -w \"src/**/*.js\" -w .env -w package.json -w yarn.lock src/server.js",
-    "dev:inspect": "nodemon -w \"src/**/*.js\" -w .env -w package.json -w yarn.lock --inspect src/server.js",
+    "dev": "nodemon --delay 1000ms -w \"src/**/*.js\" -w .env -w package.json -w yarn.lock src/server.js",
+    "dev:inspect": "nodemon 1000ms -w \"src/**/*.js\" -w .env -w package.json -w yarn.lock --inspect src/server.js",
     "format": "prettier-eslint --single-quote --no-semi --write \"src/**/*.js\"",
     "format:ci": "prettier-eslint --single-quote --no-semi --list-different \"src/**/*.js\"",
     "lint": "eslint \"src/**/*.js\"",
