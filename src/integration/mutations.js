@@ -195,7 +195,7 @@ const StartAndEndSessionSerializer = {
 
 const AddFeedbackMutation = `
   mutation AddFeedback($fp: ID, $sessionId: ID!, $content: String!) {
-    addFeedback(fp: $fp, id: $sessionId: $sessionId, content: $content) {
+    addFeedback(fp: $fp, sessionId: $sessionId, content: $content) {
       id
       feedbacks {
         id

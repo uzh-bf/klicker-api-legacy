@@ -248,6 +248,7 @@ const SessionEvaluationQuery = `
           results {
             ... on SCQuestionResults {
               CHOICES
+              totalParticipants
             }
             ... on FREEQuestionResults {
               FREE {
@@ -255,6 +256,7 @@ const SessionEvaluationQuery = `
                 key
                 value
               }
+              totalParticipants
             }
           }
           responses {

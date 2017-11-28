@@ -247,7 +247,7 @@ const activateNextBlock = async ({ userId, shortname }) => {
       const nextBlock = runningSession.blocks[nextBlockIndex]
 
       // update the instances in the new active block to be open
-      // await QuestionInstanceModel.update({ _id: { $in: nextBlock.instances } }, { isOpen: true }, { multi: true })
+      await QuestionInstanceModel.update({ _id: { $in: nextBlock.instances } }, { isOpen: true }, { multi: true })
 
       // set the status of the instances in the next block to active
       runningSession.blocks[nextBlockIndex].status = QuestionBlockStatus.ACTIVE
@@ -261,7 +261,7 @@ const activateNextBlock = async ({ userId, shortname }) => {
       const previousBlock = runningSession.blocks[prevBlockIndex]
 
       // update the instances in the currently active block to be closed
-      // await QuestionInstanceModel.update({ _id: { $in: previousBlock.instances } }, { isOpen: false }, { multi: true })
+      await QuestionInstanceModel.update({ _id: { $in: previousBlock.instances } }, { isOpen: false }, { multi: true })
 
       runningSession.activeInstances = []
 
@@ -279,7 +279,9 @@ const activateNextBlock = async ({ userId, shortname }) => {
         logDebug(() => console.log('[redis] Cleaning up participant data for instances:', keys))
 
         // unlink the keys from the redis store
-        promises.push(redis.unlink(keys))
+        const unlinkKeys = await redis.unlink(keys)
+        console.log(unlinkKeys)
+        // promises.push(unlinkKeys)
       }
     }
   } else {
