@@ -75,40 +75,6 @@ if (process.env.APP_PROXY) {
   server.enable('trust proxy')
 }
 
-let limiter
-if (process.env.APP_RATE_LIMITING) {
-  // basic rate limiting configuration
-  const limiterSettings = {
-    // TODO: skipping for admins or similar?
-    windowMs: 5 * 60 * 1000, // in a 5 minute window
-    max: 200, // limit to 200 requests
-    delayAfter: 100, // start delaying responses after 100 requests
-    delayMs: 100, // delay responses by 250ms * (numResponses - delayAfter)
-    keyGenerator: req => `${req.auth ? req.auth.sub : req.ip}`,
-    onLimitReached: req =>
-      exceptTest(() => console.error(`> Rate-Limited a Request from ${req.ip} ${req.auth.sub || 'anon'}!`)),
-  }
-
-  // if redis is available, use it to centrally store rate limiting dataconst
-  const redis = getRedis(1)
-  if (redis) {
-    const RedisStore = require('rate-limit-redis')
-    limiter = new RateLimit({
-      ...limiterSettings,
-      store:
-        redis &&
-        new RedisStore({
-          client: redis,
-          expiry: 5 * 60,
-          prefix: 'rl-api:',
-        }),
-    })
-  } else {
-    // if redis is not available, setup basic rate limiting with in-memory store
-    limiter = new RateLimit(limiterSettings)
-  }
-}
-
 // setup middleware stack
 const middleware = [
   // enable gzip compression
@@ -135,11 +101,46 @@ const middleware = [
     secret: process.env.APP_SECRET,
     getToken: AuthService.getToken,
   }),
-  // include the rate limiter
-  limiter,
-  // parse json contents
-  bodyParser.json(),
 ]
+
+if (process.env.APP_RATE_LIMITING) {
+  // basic rate limiting configuration
+  const limiterSettings = {
+    // TODO: skipping for admins or similar?
+    windowMs: 5 * 60 * 1000, // in a 5 minute window
+    max: 200, // limit to 200 requests
+    delayAfter: 100, // start delaying responses after 100 requests
+    delayMs: 100, // delay responses by 250ms * (numResponses - delayAfter)
+    keyGenerator: req => `${req.auth ? req.auth.sub : req.ip}`,
+    onLimitReached: req =>
+      exceptTest(() => console.error(`> Rate-Limited a Request from ${req.ip} ${req.auth.sub || 'anon'}!`)),
+  }
+
+  // if redis is available, use it to centrally store rate limiting dataconst
+  const redis = getRedis(1)
+  let limiter
+  if (redis) {
+    const RedisStore = require('rate-limit-redis')
+    limiter = new RateLimit({
+      ...limiterSettings,
+      store:
+        redis &&
+        new RedisStore({
+          client: redis,
+          expiry: 5 * 60,
+          prefix: 'rl-api:',
+        }),
+    })
+  } else {
+    // if redis is not available, setup basic rate limiting with in-memory store
+    limiter = new RateLimit(limiterSettings)
+  }
+
+  middleware.push(limiter)
+}
+
+// parse json contents
+middleware.push(bodyParser.json())
 
 if (process.env.NODE_ENV === 'production') {
   // add the morgan logging middleware in production
