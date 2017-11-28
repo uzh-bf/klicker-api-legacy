@@ -79,6 +79,24 @@ const addConfusionTS = async ({
 const addResponse = async ({
   ip, fp, instanceId, response,
 }) => {
+  // if redis is available, check if any matching response (ip or fp) is already in the database.
+  // if so, throw an error
+  if (redis) {
+    // results should still be written to the database? but responses will not be saved seperately!
+    // or only write results to db every 5 or 10 responses and use redis as calculation platform?
+
+    // if redis is available, save the ip, fp and response under the key of the corresponding instance
+    const ipAdded = await redis.sadd(`${instanceId}:ip`, ip)
+    const fpAdded = await redis.sadd(`${instanceId}:fp`, fp)
+
+    if (ipAdded && fpAdded) {
+      // add the response to the redis database
+      redis.rpush(`${instanceId}:responses`, JSON.stringify({ response }))
+    } else {
+      throw new Error('ALREADY_RESPONDED')
+    }
+  }
+
   // find the specified question instance
   // only find instances that are open
   const instance = await QuestionInstanceModel.findOne({ _id: instanceId, isOpen: true }).populate('question')
@@ -86,13 +104,6 @@ const addResponse = async ({
   // if the instance is closed, don't allow adding any responses
   if (!instance) {
     throw new Error('INSTANCE_CLOSED')
-  }
-
-  if (redis) {
-    // TODO: if redis is available, check if any matching response (ip or fp) is already in the database.
-    // if so, throw an error
-    // results should still be written to the database? but responses will not be saved seperately!
-    // or only write results to db every 5 or 10 responses and use redis as calculation platform?
   }
 
   const questionType = instance.question.type
@@ -166,11 +177,6 @@ const addResponse = async ({
     fingerprint: 'some fingerprint',
     value: response,
   })
-
-  if (redis) {
-    // TODO: if redis is available, save the response under the key of the corresponding instance
-    redis.rpush(`${instanceId}:responses`, JSON.stringify({ ip, fp, response }))
-  }
 
   // save the updated instance
   await instance.save()

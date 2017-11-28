@@ -15,11 +15,15 @@ const getRedis = (db = 0) => {
 
   // otherwise initialize a new redis client for the respective url and database
   if (process.env.REDIS_URL) {
-    console.log(`> Connected to redis (db ${db})`)
+    try {
+      const newClient = new Redis(`redis://${process.env.REDIS_URL}/${db}`)
+      clients.set(db, newClient)
 
-    const newClient = new Redis(`redis://${process.env.REDIS_URL}/${db}`)
-    clients.set(db, newClient)
-    return newClient
+      console.log(`[redis] Connected to db ${db}`)
+      return newClient
+    } catch ({ message }) {
+      console.error(`[redis] Failed to connect: ${message}`)
+    }
   }
 
   return null

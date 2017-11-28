@@ -1,6 +1,7 @@
 const { QuestionInstanceModel, SessionModel, UserModel } = require('../models')
 const { getRedis } = require('../redis')
 const { SessionStatus, QuestionBlockStatus } = require('../constants')
+const { logDebug } = require('../lib/utils')
 
 const redis = getRedis()
 
@@ -8,7 +9,7 @@ const redis = getRedis()
 const cleanCache = (shortname) => {
   const key = `/join/${shortname}`
 
-  console.log(`Cleaning up cache for ${key}`)
+  logDebug(() => console.log(`[redis] Cleaning up SSR cache for ${key}`))
 
   return redis.unlink([`${key}:de`, `${key}:en`])
 }
@@ -229,6 +230,9 @@ const activateNextBlock = async ({ userId, shortname }) => {
     return user.runningSession
   }
 
+  // prepare an array for promises to be executed
+  const promises = []
+
   const prevBlockIndex = runningSession.activeBlock
   const nextBlockIndex = runningSession.activeBlock + 1
 
@@ -243,7 +247,7 @@ const activateNextBlock = async ({ userId, shortname }) => {
       const nextBlock = runningSession.blocks[nextBlockIndex]
 
       // update the instances in the new active block to be open
-      await QuestionInstanceModel.update({ _id: { $in: nextBlock.instances } }, { isOpen: true }, { multi: true })
+      // await QuestionInstanceModel.update({ _id: { $in: nextBlock.instances } }, { isOpen: true }, { multi: true })
 
       // set the status of the instances in the next block to active
       runningSession.blocks[nextBlockIndex].status = QuestionBlockStatus.ACTIVE
@@ -257,19 +261,33 @@ const activateNextBlock = async ({ userId, shortname }) => {
       const previousBlock = runningSession.blocks[prevBlockIndex]
 
       // update the instances in the currently active block to be closed
-      await QuestionInstanceModel.update({ _id: { $in: previousBlock.instances } }, { isOpen: false }, { multi: true })
+      // await QuestionInstanceModel.update({ _id: { $in: previousBlock.instances } }, { isOpen: false }, { multi: true })
 
       runningSession.activeInstances = []
 
       // set the status of the previous block to executed
       runningSession.blocks[prevBlockIndex].status = QuestionBlockStatus.EXECUTED
+
+      // if redis is available, cleanup the instance data from the previous block
+      if (redis) {
+        // calculate the keys to be unlinked
+        const keys = previousBlock.instances.reduce(
+          (prevKeys, instanceId) => [...prevKeys, `${instanceId}:fp`, `${instanceId}:ip`, `${instanceId}:responses`],
+          [],
+        )
+
+        logDebug(() => console.log('[redis] Cleaning up participant data for instances:', keys))
+
+        // unlink the keys from the redis store
+        promises.push(redis.unlink(keys))
+      }
     }
   } else {
     // if the final block was reached above, reset the users active instances
     runningSession.activeInstances = []
   }
 
-  const promises = [runningSession.save(), user.save()]
+  promises.concat([runningSession.save(), user.save()])
 
   // if redis is in use, cleanup the page cache
   if (redis) {
