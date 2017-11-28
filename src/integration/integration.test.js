@@ -216,25 +216,37 @@ describe('Integration', () => {
       ensureNoErrors(await sendQuery({
         query: mutations.AddConfusionTSMutation,
         variables: {
-          fp: 'myfp1', sessionId, difficulty: 2, speed: 4,
+          fp: 'myfp1',
+          sessionId,
+          difficulty: 2,
+          speed: 4,
         },
       }))
       ensureNoErrors(await sendQuery({
         query: mutations.AddConfusionTSMutation,
         variables: {
-          fp: 'myfp1', sessionId, difficulty: -2, speed: 9,
+          fp: 'myfp1',
+          sessionId,
+          difficulty: -2,
+          speed: 9,
         },
       }))
       ensureNoErrors(await sendQuery({
         query: mutations.AddConfusionTSMutation,
         variables: {
-          fp: 'myfp1', sessionId, difficulty: -5, speed: 3,
+          fp: 'myfp1',
+          sessionId,
+          difficulty: -5,
+          speed: 3,
         },
       }))
       const data = ensureNoErrors(await sendQuery({
         query: mutations.AddConfusionTSMutation,
         variables: {
-          fp: 'myfp1', sessionId, difficulty: 5, speed: 10,
+          fp: 'myfp1',
+          sessionId,
+          difficulty: 5,
+          speed: 10,
         },
       }))
 

@@ -10,10 +10,9 @@ const { getRunningSession } = require('./sessionMgr')
 const redis = getRedis(2)
 
 // add a new feedback to a session
-const addFeedback = async ({
-  ip, fp, sessionId, content,
-}) => {
+const addFeedback = async ({ sessionId, content }) => {
   // TODO: security
+  // TODO: redis?
   // TODO: ...
 
   const session = await getRunningSession(sessionId)
@@ -56,7 +55,14 @@ const addConfusionTS = async ({
   ip, fp, sessionId, difficulty, speed,
 }) => {
   // TODO: security
+  // TODO: redis?
   // TODO: ...
+
+  // if redis is available, put the new confusion data in the store
+  if (redis) {
+    const result = redis.hset(`${sessionId}:confusion`, fp || ip, { difficulty, speed })
+    console.log(result)
+  }
 
   const session = await getRunningSession(sessionId)
 
@@ -174,14 +180,12 @@ const addResponse = async ({
     instance.markModified('results.FREE')
   }
 
-  // push the new response into the array
-  // TODO: redis for everything in here...
-  // TODO: save the IP and fingerprint of the responder and validate
-  /* instance.responses.push({
-    ip: 'some ip',
-    fingerprint: 'some fingerprint',
+  // TODO: remove saving single responses in the database
+  instance.responses.push({
+    ip,
+    fingerprint: fp,
     value: response,
-  }) */
+  })
 
   // save the updated instance
   await instance.save()
