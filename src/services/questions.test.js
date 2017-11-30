@@ -33,7 +33,11 @@ describe('QuestionService', () => {
     const question = {
       description: 'blabla',
       options: {
-        choices: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
+        choices: [
+          { correct: false, name: 'option1' },
+          { correct: true, name: 'option2' },
+          { correct: false, name: 'option2' },
+        ],
         randomized: true,
       },
       tags: ['ABCD', 'test'],
@@ -55,8 +59,19 @@ describe('QuestionService', () => {
       })).rejects.toEqual(new Error('NO_OPTIONS_SPECIFIED'))
     })
 
+    it('prevents creating a question with invalid solution', () => {
+      expect(QuestionService.createQuestion({
+        ...question,
+        solution: [true],
+      })).rejects.toEqual(new Error('INVALID_SOLUTION'))
+    })
+
     it('allows creating a valid SC question', async () => {
-      const newQuestion = await QuestionService.createQuestion({ ...question, userId: user.id })
+      const newQuestion = await QuestionService.createQuestion({
+        ...question,
+        userId: user.id,
+        solution: [false, true, false],
+      })
 
       expect(newQuestion.versions.length).toEqual(1)
       expect(newQuestion).toMatchSnapshot()
@@ -65,7 +80,12 @@ describe('QuestionService', () => {
     })
 
     it('allows creating a valid MC question', async () => {
-      const newQuestion = await QuestionService.createQuestion({ ...question, type: 'MC', userId: user.id })
+      const newQuestion = await QuestionService.createQuestion({
+        ...question,
+        type: 'MC',
+        userId: user.id,
+        solution: [true, true, false],
+      })
 
       expect(newQuestion.versions.length).toEqual(1)
       expect(newQuestion).toMatchSnapshot()
@@ -79,6 +99,7 @@ describe('QuestionService', () => {
         userId: user.id,
         type: 'FREE',
         options: {},
+        solution: 'Schweiz',
       })
 
       expect(newQuestion.versions.length).toEqual(1)
@@ -98,6 +119,7 @@ describe('QuestionService', () => {
             max: 100,
           },
         },
+        solution: 56,
       })
 
       expect(newQuestion.versions.length).toEqual(1)

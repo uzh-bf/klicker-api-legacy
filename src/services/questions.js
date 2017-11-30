@@ -1,5 +1,7 @@
 const { QuestionModel, TagModel, UserModel } = require('../models')
 
+const { QuestionGroups } = require('../constants')
+
 // process tags when editing or creating a question
 const processTags = (existingTags, newTags, userId) => {
   // get references for the already existing tags
@@ -26,7 +28,7 @@ const processTags = (existingTags, newTags, userId) => {
 
 // create a new question
 const createQuestion = async ({
-  title, type, description, options, tags, userId,
+  title, type, description, options, solution, tags, userId,
 }) => {
   // if no tags have been assigned, throw
   if (!tags || tags.length === 0) {
@@ -36,6 +38,10 @@ const createQuestion = async ({
   // if no options have been assigned, throw
   if (!options) {
     throw new Error('NO_OPTIONS_SPECIFIED')
+  }
+
+  if (QuestionGroups.CHOICES.includes(type) && solution && options.choices.length !== solution.length) {
+    throw new Error('INVALID_SOLUTION')
   }
 
   // find the corresponding user
@@ -58,7 +64,9 @@ const createQuestion = async ({
         options: {
           [type]: options,
         },
-        solution: {},
+        solution: {
+          [type]: solution,
+        },
       },
     ],
   })
@@ -81,7 +89,7 @@ const createQuestion = async ({
 }
 
 const modifyQuestion = async (questionId, userId, {
-  title, tags, description, options,
+  title, tags, description, options, solution,
 }) => {
   const promises = []
 
@@ -112,9 +120,9 @@ const modifyQuestion = async (questionId, userId, {
     const user = await UserModel.findById(userId).populate(['tags'])
 
     // process tags
-    const { allTagIds, allTags } = processTags(user.tags, tags, userId)
+    const { allTags, allTagIds } = processTags(user.tags, tags, userId)
 
-    //
+    // update all tags to contain the question
     const allTagsUpdate = allTags.map((tag) => {
       // if the tag doesn't already contain the question, add it
       if (!tag.questions.includes(questionId)) {
@@ -124,11 +132,19 @@ const modifyQuestion = async (questionId, userId, {
       return tag.save()
     })
 
+    const oldTags = question.tags.filter(prevTag => !allTagIds.includes(prevTag.id))
+    const oldTagsUpdate = oldTags.map((tag) => {
+      // remove the current question from any old tag
+      tag.questions = tag.questions.filter(({ id }) => id !== question.id) // eslint-disable-line
+
+      return tag.save()
+    })
+
     // set the question tags to the new tag list
-    question.tags = allTagIds
+    question.tags = allTags
 
     // add the tag updates to promises
-    promises.concat(allTagsUpdate)
+    promises.concat(allTagsUpdate, oldTagsUpdate)
   }
 
   // if description and options are set, add a new version
@@ -138,7 +154,9 @@ const modifyQuestion = async (questionId, userId, {
       options: {
         [question.type]: options,
       },
-      solution: {},
+      solution: {
+        [question.type]: solution,
+      },
     })
   }
 
