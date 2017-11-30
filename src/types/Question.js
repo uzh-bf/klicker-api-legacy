@@ -33,13 +33,13 @@ const Question = `
     SC: [Boolean!]
     MC: [Boolean!]
     FREE: String
-    FREE_RANGE: Number
+    FREE_RANGE: Int
   }
   type Question_Solution {
     SC: [Boolean!]
     MC: [Boolean!]
     FREE: String
-    FREE_RANGE: Number
+    FREE_RANGE: Int
   }
 
   type Question_Public {
@@ -95,5 +95,36 @@ const Question = `
 
     createdAt: String!
     updatedAt: String!
+  }
+
+  interface Question {
+    id: ID!
+    title: String!
+    type: Question_Type!
+
+    user: User!
+
+    instances: [QuestionInstance!]!
+    tags: [Tag!]!
+    versions: [Question_Version!]!
+
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type Question_SC {
+
+  }
+
+  type Question_MC {
+
+  }
+
+  type Question_FREE {
+
+  }
+
+  type Question_FREE_RANGE {
+
   }
 `
