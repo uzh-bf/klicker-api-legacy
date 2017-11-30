@@ -43,6 +43,12 @@ const Question = `
 
     tags: [ID!]!
   }
+  input QuestionModifyInput {
+    title: String
+    description: String
+    options: QuestionOptionsInput
+    tags: [ID!]
+  }
   input QuestionOptionsInput {
     randomized: Boolean
     restrictions: FREEQuestionOptions_RestrictionsInput

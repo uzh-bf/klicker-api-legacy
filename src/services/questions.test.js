@@ -13,6 +13,7 @@ mongoose.Promise = Promise
 expect.addSnapshotSerializer(questionSerializer)
 
 describe('QuestionService', () => {
+  const questions = {}
   let user
 
   beforeAll(async () => {
@@ -59,6 +60,8 @@ describe('QuestionService', () => {
 
       expect(newQuestion.versions.length).toEqual(1)
       expect(newQuestion).toMatchSnapshot()
+
+      questions.SC = newQuestion
     })
 
     it('allows creating a valid MC question', async () => {
@@ -66,6 +69,8 @@ describe('QuestionService', () => {
 
       expect(newQuestion.versions.length).toEqual(1)
       expect(newQuestion).toMatchSnapshot()
+
+      questions.MC = newQuestion
     })
 
     it('allows creating a valid FREE question', async () => {
@@ -78,6 +83,8 @@ describe('QuestionService', () => {
 
       expect(newQuestion.versions.length).toEqual(1)
       expect(newQuestion).toMatchSnapshot()
+
+      questions.FREE = newQuestion
     })
 
     it('allows creating a valid FREE_RANGE question', async () => {
@@ -95,6 +102,38 @@ describe('QuestionService', () => {
 
       expect(newQuestion.versions.length).toEqual(1)
       expect(newQuestion).toMatchSnapshot()
+
+      questions.FREE_RANGE = newQuestion
+    })
+  })
+
+  describe('modifyQuestion', () => {
+    it('allows modifying the question title', async () => {
+      const modifiedQuestion = await QuestionService.modifyQuestion(questions.SC.id, questions.SC.user, {
+        title: 'modified title',
+      })
+
+      expect(modifiedQuestion).toMatchSnapshot()
+    })
+
+    it('allows modifying the question tags', async () => {
+      const modifiedQuestion = await QuestionService.modifyQuestion(questions.SC.id, questions.SC.user, {
+        tags: ['ABCD', 'XYZ'],
+      })
+
+      expect(modifiedQuestion).toMatchSnapshot()
+    })
+
+    it('allows creating a new question version', async () => {
+      const modifiedQuestion = await QuestionService.modifyQuestion(questions.SC.id, questions.SC.user, {
+        description: 'This is the new description for version 2',
+        options: {
+          choices: [{ correct: true, name: 'option3' }, { correct: false, name: 'option4' }],
+          randomized: true,
+        },
+      })
+
+      expect(modifiedQuestion).toMatchSnapshot()
     })
   })
 })

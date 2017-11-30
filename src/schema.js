@@ -63,6 +63,7 @@ const typeDefs = [
     deleteFeedback(sessionId: ID!, feedbackId: ID!): Session!
     endSession(id: ID!): Session!
     login(email: String!, password: String!): User!
+    modifyQuestion(question: QuestionModifyInput!): Question!
     startSession(id: ID!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
   }
