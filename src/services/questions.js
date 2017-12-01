@@ -149,8 +149,11 @@ const modifyQuestion = async (questionId, userId, {
     // set the question tags to the new tag list
     question.tags = allTags
 
+    // replace the users tags
+    user.tags = Array.from(new Set([...user.tags, ...allTags]))
+
     // add the tag updates to promises
-    promises.concat(allTagsUpdate, oldTagsUpdate)
+    promises.concat(user.save(), allTagsUpdate, oldTagsUpdate)
   }
 
   // if description and options are set, add a new version
