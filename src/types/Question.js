@@ -96,35 +96,4 @@ const Question = `
     createdAt: String!
     updatedAt: String!
   }
-
-  interface Question {
-    id: ID!
-    title: String!
-    type: Question_Type!
-
-    user: User!
-
-    instances: [QuestionInstance!]!
-    tags: [Tag!]!
-    versions: [Question_Version!]!
-
-    createdAt: String!
-    updatedAt: String!
-  }
-
-  type Question_SC {
-
-  }
-
-  type Question_MC {
-
-  }
-
-  type Question_FREE {
-
-  }
-
-  type Question_FREE_RANGE {
-
-  }
 `

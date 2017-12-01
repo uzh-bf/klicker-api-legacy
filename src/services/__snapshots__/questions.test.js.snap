@@ -198,13 +198,7 @@ exports[`QuestionService modifyQuestion allows creating a new question version 1
         MC: undefined
         FREE_RANGE: undefined
       }
-      Solution: {
-        SC: []
-        MC: []
-        FREE: undefined
-        FREE_RANGE: undefined
-      }
-      
+      Solution: undefined
     ]
   
 `;

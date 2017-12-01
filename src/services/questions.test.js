@@ -62,7 +62,7 @@ describe('QuestionService', () => {
     it('prevents creating a question with invalid solution', () => {
       expect(QuestionService.createQuestion({
         ...question,
-        solution: [true],
+        solution: { SC: [true] },
       })).rejects.toEqual(new Error('INVALID_SOLUTION'))
     })
 
@@ -70,7 +70,7 @@ describe('QuestionService', () => {
       const newQuestion = await QuestionService.createQuestion({
         ...question,
         userId: user.id,
-        solution: [false, true, false],
+        solution: { SC: [false, true, false] },
       })
 
       expect(newQuestion.versions.length).toEqual(1)
@@ -84,7 +84,7 @@ describe('QuestionService', () => {
         ...question,
         type: 'MC',
         userId: user.id,
-        solution: [true, true, false],
+        solution: { MC: [true, true, false] },
       })
 
       expect(newQuestion.versions.length).toEqual(1)
@@ -99,7 +99,7 @@ describe('QuestionService', () => {
         userId: user.id,
         type: 'FREE',
         options: {},
-        solution: 'Schweiz',
+        solution: { FREE: 'Schweiz' },
       })
 
       expect(newQuestion.versions.length).toEqual(1)
@@ -119,7 +119,7 @@ describe('QuestionService', () => {
             max: 100,
           },
         },
-        solution: 56,
+        solution: { FREE_RANGE: 56 },
       })
 
       expect(newQuestion.versions.length).toEqual(1)

@@ -76,7 +76,9 @@ describe('Integration', () => {
               choices: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
               randomized: false,
             },
-            solution: [false, true],
+            solution: {
+              SC: [false, true],
+            },
             tags: ['TestTag'],
           },
         },
@@ -104,7 +106,9 @@ describe('Integration', () => {
               ],
               randomized: false,
             },
-            solution: [false, true, true],
+            solution: {
+              MC: [false, true, true],
+            },
             tags: ['TestTag'],
           },
         },
@@ -125,7 +129,9 @@ describe('Integration', () => {
             description: 'This is a simple FREE question.',
             type: 'FREE',
             options: {},
-            solution: 'This is true.',
+            solution: {
+              FREE: 'This is true.',
+            },
             tags: ['TestTag'],
           },
         },
@@ -148,7 +154,9 @@ describe('Integration', () => {
             options: {
               restrictions: { min: 0, max: 10 },
             },
-            solution: 5,
+            solution: {
+              FREE_RANGE: 5,
+            },
             tags: ['TestTag'],
           },
         },

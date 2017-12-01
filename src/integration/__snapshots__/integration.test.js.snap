@@ -19,6 +19,7 @@ exports[`Integration Question Creation works for FREE questions 1`] = `
       versions: 
         description: This is a simple FREE question.
         options: {"SC":null,"MC":null,"FREE_RANGE":null}
+        solution: {"SC":[],"MC":[],"FREE":"This is true.","FREE_RANGE":null}
       
     }
   
@@ -33,6 +34,7 @@ exports[`Integration Question Creation works for FREE_RANGE questions 1`] = `
       versions: 
         description: This is a simple FREE_RANGE question.
         options: {"SC":null,"MC":null,"FREE_RANGE":{"restrictions":{"min":0,"max":10}}}
+        solution: {"SC":[],"MC":[],"FREE":null,"FREE_RANGE":5}
       
     }
   
@@ -47,6 +49,7 @@ exports[`Integration Question Creation works for MC questions 1`] = `
       versions: 
         description: This is a simple MC question.
         options: {"SC":null,"MC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"},{"correct":true,"name":"option3"}],"randomized":false},"FREE_RANGE":null}
+        solution: {"SC":[],"MC":[false,true,true],"FREE":null,"FREE_RANGE":null}
       
     }
   
@@ -61,6 +64,7 @@ exports[`Integration Question Creation works for SC questions 1`] = `
       versions: 
         description: This is a simple SC question.
         options: {"SC":{"choices":[{"correct":false,"name":"option1"},{"correct":true,"name":"option2"}],"randomized":false},"MC":null,"FREE_RANGE":null}
+        solution: {"SC":[false,true],"MC":[],"FREE":null,"FREE_RANGE":null}
       
     }
   

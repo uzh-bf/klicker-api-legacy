@@ -40,7 +40,7 @@ const createQuestion = async ({
     throw new Error('NO_OPTIONS_SPECIFIED')
   }
 
-  if (QuestionGroups.CHOICES.includes(type) && solution && options.choices.length !== solution.length) {
+  if (QuestionGroups.CHOICES.includes(type) && solution && options.choices.length !== solution[type].length) {
     throw new Error('INVALID_SOLUTION')
   }
 
@@ -64,9 +64,7 @@ const createQuestion = async ({
         options: {
           [type]: options,
         },
-        solution: {
-          [type]: solution,
-        },
+        solution,
       },
     ],
   })
@@ -107,6 +105,14 @@ const modifyQuestion = async (questionId, userId, {
   const question = await QuestionModel.findOne({ _id: questionId, user: userId }).populate(['tags'])
   if (!question) {
     throw new Error('INVALID_QUESTION')
+  }
+
+  if (
+    QuestionGroups.CHOICES.includes(question.type) &&
+    solution &&
+    options.choices.length !== solution[question.type].length
+  ) {
+    throw new Error('INVALID_SOLUTION')
   }
 
   // if the title is set to be modified
@@ -154,9 +160,7 @@ const modifyQuestion = async (questionId, userId, {
       options: {
         [question.type]: options,
       },
-      solution: {
-        [question.type]: solution,
-      },
+      solution,
     })
   }
 
