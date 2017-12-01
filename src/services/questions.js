@@ -158,7 +158,9 @@ const modifyQuestion = async (questionId, userId, {
     question.versions.push({
       description,
       options: QuestionGroups.WITH_OPTIONS.includes(question.type) && {
-        [question.type]: options,
+        // HACK: manually ensure randomized is default set to false
+        // TODO: mongoose should do this..?
+        [question.type]: QuestionGroups.CHOICES.includes(question.type) ? { randomized: false, ...options } : options,
       },
       solution,
     })
