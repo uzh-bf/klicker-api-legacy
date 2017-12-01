@@ -36,7 +36,7 @@ const createQuestion = async ({
   }
 
   // if no options have been assigned, throw
-  if (!options) {
+  if (QuestionGroups.WITH_OPTIONS.includes(type) && !options) {
     throw new Error('NO_OPTIONS_SPECIFIED')
   }
 
@@ -61,7 +61,7 @@ const createQuestion = async ({
     versions: [
       {
         description,
-        options: {
+        options: QuestionGroups.WITH_OPTIONS.includes(type) && {
           [type]: options,
         },
         solution,
@@ -157,7 +157,7 @@ const modifyQuestion = async (questionId, userId, {
   if (description && options) {
     question.versions.push({
       description,
-      options: {
+      options: QuestionGroups.WITH_OPTIONS.includes(question.type) && {
         [question.type]: options,
       },
       solution,

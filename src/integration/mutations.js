@@ -105,20 +105,20 @@ const CreateQuestionMutation = `
 
 const ModifyQuestionMutation = `
   mutation ModifyQuestion(
+    $id: ID!
     $title: String!
     $description: String!
     $options: QuestionOptionsInput!
     $solution: Question_SolutionInput
-    $type: Question_Type!
     $tags: [ID!]!
   ) {
     modifyQuestion(
+      id: $id
       question: {
         title: $title
         description: $description
         options: $options
         solution: $solution
-        type: $type
         tags: $tags
       }
     ) {
@@ -167,12 +167,13 @@ const ModifyQuestionMutation = `
 `
 const CreateQuestionSerializer = {
   test: ({ createQuestion, modifyQuestion }) => !!createQuestion || !!modifyQuestion,
-  print: ({
-    createQuestion: {
+  print: ({ createQuestion, modifyQuestion }) => {
+    const {
       title, type, tags, versions,
-    },
-  }) => `
-    createQuestion {
+    } = createQuestion || modifyQuestion
+
+    return `
+    createQuestion / modifyQuestion {
       title: ${title}
       type: ${type}
       tags: ${tags.map(tag => tag.name)}
@@ -182,7 +183,8 @@ const CreateQuestionSerializer = {
         solution: ${JSON.stringify(solution)}
       `)}
     }
-  `,
+  `
+  },
 }
 
 const CreateSessionMutation = `

@@ -64,7 +64,7 @@ describe('Integration', () => {
   })
 
   describe('Question Creation', () => {
-    it('works for SC questions', async () => {
+    it('creates SC questions', async () => {
       const data = ensureNoErrors(await sendQuery(
         {
           query: mutations.CreateQuestionMutation,
@@ -90,7 +90,7 @@ describe('Integration', () => {
       expect(data).toMatchSnapshot()
     })
 
-    it('works for MC questions', async () => {
+    it('creates MC questions', async () => {
       const data = ensureNoErrors(await sendQuery(
         {
           query: mutations.CreateQuestionMutation,
@@ -120,7 +120,7 @@ describe('Integration', () => {
       expect(data).toMatchSnapshot()
     })
 
-    it('works for FREE questions', async () => {
+    it('creates FREE questions', async () => {
       const data = ensureNoErrors(await sendQuery(
         {
           query: mutations.CreateQuestionMutation,
@@ -143,7 +143,7 @@ describe('Integration', () => {
       expect(data).toMatchSnapshot()
     })
 
-    it('works for FREE_RANGE questions', async () => {
+    it('creates FREE_RANGE questions', async () => {
       const data = ensureNoErrors(await sendQuery(
         {
           query: mutations.CreateQuestionMutation,
@@ -164,6 +164,104 @@ describe('Integration', () => {
       ))
 
       questions[QuestionTypes.FREE_RANGE] = data.createQuestion.id
+
+      expect(data).toMatchSnapshot()
+    })
+  })
+
+  describe('Question Modification', () => {
+    it('modifies SC questions', async () => {
+      const data = ensureNoErrors(await sendQuery(
+        {
+          query: mutations.ModifyQuestionMutation,
+          variables: {
+            id: questions.SC,
+            title: 'Test SC #2',
+            description: 'This is a simple modified SC question.',
+            options: {
+              choices: [{ correct: true, name: 'option3' }, { correct: false, name: 'option4' }],
+              randomized: false,
+            },
+            solution: {
+              SC: [true, false],
+            },
+            tags: ['TestTag', 'AdditionalTag'],
+          },
+        },
+        authCookie,
+      ))
+
+      expect(data).toMatchSnapshot()
+    })
+
+    it('modifies MC questions', async () => {
+      const data = ensureNoErrors(await sendQuery(
+        {
+          query: mutations.ModifyQuestionMutation,
+          variables: {
+            id: questions.MC,
+            title: 'Test MC #2',
+            description: 'This is a simple modified MC question.',
+            options: {
+              choices: [
+                { correct: true, name: 'option3' },
+                { correct: false, name: 'option4' },
+                { correct: true, name: 'option5' },
+              ],
+              randomized: false,
+            },
+            solution: {
+              MC: [true, false, true],
+            },
+            tags: ['TestTag', 'AdditionalTag'],
+          },
+        },
+        authCookie,
+      ))
+
+      expect(data).toMatchSnapshot()
+    })
+
+    it('modifies FREE questions', async () => {
+      const data = ensureNoErrors(await sendQuery(
+        {
+          query: mutations.ModifyQuestionMutation,
+          variables: {
+            id: questions.FREE,
+            title: 'Test FREE #2',
+            description: 'This is a simple modified FREE question.',
+            options: {},
+            solution: {
+              FREE: 'New solution.',
+            },
+            tags: ['TestTag', 'AdditionalTag'],
+          },
+        },
+        authCookie,
+      ))
+
+      expect(data).toMatchSnapshot()
+    })
+
+    it('modifies FREE_RANGE questions', async () => {
+      const data = ensureNoErrors(await sendQuery(
+        {
+          query: mutations.ModifyQuestionMutation,
+          variables: {
+            id: questions.FREE_RANGE,
+            title: 'Test FREE_RANGE #2',
+            description: 'This is a simple modified FREE_RANGE question.',
+            options: {
+              restrictions: { min: -10, max: 40 },
+            },
+            solution: {
+              FREE_RANGE: 16,
+            },
+            tags: ['TestTag', 'AdditionalTag'],
+          },
+        },
+        authCookie,
+      ))
 
       expect(data).toMatchSnapshot()
     })
