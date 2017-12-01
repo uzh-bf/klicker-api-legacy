@@ -66,7 +66,7 @@ const Question = `
   input QuestionModifyInput {
     title: String
     description: String
-    options: QuestionOptionsInput!
+    options: QuestionOptionsInput
     solution: Question_SolutionInput
     tags: [ID!]
   }
