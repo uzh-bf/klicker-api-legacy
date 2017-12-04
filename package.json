@@ -6,7 +6,7 @@
   "author": "Roland Schläfli <roland.schlaefli@bf.uzh.ch>",
   "license": "AGPL-3.0",
   "dependencies": {
-    "apollo-engine": "0.5.6",
+    "apollo-engine": "0.6.0",
     "apollo-server-express": "1.2.0",
     "bcryptjs": "2.4.3",
     "body-parser": "1.18.2",
@@ -28,23 +28,23 @@
     "md5": "2.2.1",
     "moment": "2.19.3",
     "mongodb": "2.2.33",
-    "mongoose": "4.13.5",
+    "mongoose": "4.13.6",
     "morgan": "1.9.0",
     "rate-limit-redis": "1.1.0",
     "subscriptions-transport-ws": "0.9.2"
   },
   "devDependencies": {
-    "babel-eslint": "8.0.2",
+    "babel-eslint": "8.0.3",
     "eslint": "4.12.1",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-plugin-import": "2.8.0",
     "husky": "0.14.3",
     "jest": "21.2.1",
-    "lint-staged": "5.0.0",
+    "lint-staged": "6.0.0",
     "nodemon": "1.12.1",
     "prettier": "1.8.2",
-    "prettier-eslint": "8.2.2",
-    "prettier-eslint-cli": "4.4.0",
+    "prettier-eslint": "8.2.3",
+    "prettier-eslint-cli": "4.4.2",
     "supertest": "3.0.0"
   },
   "scripts": {
