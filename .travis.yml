@@ -113,8 +113,8 @@ jobs:
         - docker push $IMAGE_NAME:$TRAVIS_TAG
         - docker push $IMAGE_NAME:stable
         - >
-          curl https://intake.opbeat.com/api/v1/organizations/42f80c969ec741b6a00b8ea8b9079137/apps/3ad047cc8f/releases/
-          -H "Authorization: Bearer dd6c1f0d501afec572a1b924df4ed64b2a9b1043"
+          curl $OPBEAT_URL
+          -H "Authorization: Bearer $OPBEAT_TOKEN"
           -d rev=`git log -n 1 --pretty=format:%H`
           -d branch=`git rev-parse --abbrev-ref HEAD`
           -d status=completed

@@ -173,7 +173,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // add the opbeat middleware
-if (process.env.OPBEAT_APP_ID) {
+if (opbeat) {
   middleware.push(opbeat.middleware.express())
 }
 
