@@ -4,6 +4,9 @@
 if (process.env.OPBEAT_APP_ID) {
   require('opbeat').start({
     active: process.env.NODE_ENV === 'production',
+    appId: process.env.OPBEAT_APP_ID,
+    organizationId: process.env.OPBEAT_ORG_ID,
+    secretToken: process.env.OPBEAT_SECRET_KEY,
   })
 }
 
