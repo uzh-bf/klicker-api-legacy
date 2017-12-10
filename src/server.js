@@ -1,4 +1,13 @@
 /* eslint-disable global-require */
+
+// initialize opbeat if so configured
+if (process.env.OPBEAT_APP_ID) {
+  require('opbeat').start({
+    active: process.env.NODE_ENV === 'production',
+  })
+}
+
+/* eslint-disable global-require */
 const mongoose = require('mongoose')
 const server = require('./app')
 const { getRedis } = require('./redis')
