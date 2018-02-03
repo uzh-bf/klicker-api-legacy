@@ -2127,10 +2127,6 @@ http-signature@~1.2.0:
     jsprim "^1.2.2"
     sshpk "^1.7.0"
 
-https-pem@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/https-pem/-/https-pem-1.0.4.tgz#f34d986916d051563a7fc6ba96ddb1c28634dc18"
-
 husky@0.14.3:
   version "0.14.3"
   resolved "https://registry.yarnpkg.com/husky/-/husky-0.14.3.tgz#c69ed74e2d2779769a17ba8399b54ce0b63c12c3"
@@ -3648,9 +3644,9 @@ opbeat-release-tracker@^1.1.1:
     after-all-results "^2.0.0"
     opbeat-http-client "^1.0.3"
 
-opbeat@4.16.0:
-  version "4.16.0"
-  resolved "https://registry.yarnpkg.com/opbeat/-/opbeat-4.16.0.tgz#2d76c8d311e259829b85fbced46de97a6c4b3f70"
+opbeat@4.17.0:
+  version "4.17.0"
+  resolved "https://registry.yarnpkg.com/opbeat/-/opbeat-4.17.0.tgz#5a9ab4954becd2a6fc7c58452908fb8cd7293a11"
   dependencies:
     after-all-results "^2.0.0"
     console-log-level "^1.4.0"
@@ -3660,7 +3656,6 @@ opbeat@4.16.0:
     end-of-stream "^1.1.0"
     fast-safe-stringify "^1.1.3"
     hashlru "^2.0.0"
-    https-pem "^1.0.4"
     is-native "^1.0.1"
     normalize-bool "^1.0.0"
     object-assign "^4.1.1"
