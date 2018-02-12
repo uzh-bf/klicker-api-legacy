@@ -21,7 +21,19 @@ const sessionsByPVQuery = parentValue => SessionModel.find({ _id: { $in: parentV
 const joinSessionQuery = async (parentValue, { shortname }) => SessionExecService.joinSession({ shortname })
 
 // calculate the session runtime
-const runtimeByPVQuery = ({ startedAt }) => moment.duration(moment().diff(startedAt)).humanize()
+const runtimeByPVQuery = ({ startedAt }) => {
+  const duration = moment.duration(moment().diff(startedAt))
+  const days = duration.days()
+  const hours = `0${duration.hours()}`.slice(-2)
+  const minutes = `0${duration.minutes()}`.slice(-2)
+  const seconds = `0${duration.seconds()}`.slice(-2)
+
+  if (days > 0) {
+    return `${days}d ${hours}:${minutes}:${seconds}`
+  }
+
+  return `${hours}:${minutes}:${seconds}`
+}
 
 /* ----- mutations ----- */
 const createSessionMutation = (parentValue, { session: { name, blocks } }, { auth }) =>
