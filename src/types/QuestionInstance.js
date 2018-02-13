@@ -22,6 +22,7 @@ const QuestionInstance = `
     version: Int!
     isOpen: Boolean!
 
+    session: Session!
     question: Question!
 
     responses: [QuestionInstance_Response!]!
