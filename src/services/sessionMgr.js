@@ -259,6 +259,7 @@ const activateNextBlock = async ({ userId, shortname }) => {
   if (nextBlockIndex < runningSession.blocks.length) {
     if (runningSession.activeInstances.length === 0) {
       // if there are no active instances, activate the next block
+      runningSession.activeStep += 1
 
       // increase the index of the currently active block
       runningSession.activeBlock += 1
@@ -276,6 +277,7 @@ const activateNextBlock = async ({ userId, shortname }) => {
       runningSession.activeInstances = nextBlock.instances
     } else if (runningSession.activeBlock >= 0) {
       // if there are active instances, close them
+      runningSession.activeStep += 1
 
       // find the currently active block
       const previousBlock = runningSession.blocks[prevBlockIndex]
@@ -308,7 +310,12 @@ const activateNextBlock = async ({ userId, shortname }) => {
     }
   } else {
     // if the final block was reached above, reset the users active instances
+
+    // set the status of the previous block to executed
+    runningSession.blocks[prevBlockIndex].status = QuestionBlockStatus.EXECUTED
+
     runningSession.activeInstances = []
+    runningSession.activeStep += 1
   }
 
   promises.concat([runningSession.save(), user.save()])

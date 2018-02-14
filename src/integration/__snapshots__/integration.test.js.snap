@@ -282,7 +282,7 @@ exports[`Integration Session Execution allows evaluating sessions after completi
           responses: hello world
         
       ,
-        status: ACTIVE
+        status: EXECUTED
         instances: 
           isOpen: true
           version: 0
@@ -400,7 +400,7 @@ exports[`Integration Session Execution allows running the full session flow (res
         status: EXECUTED
         instances: false
       ,
-        status: ACTIVE
+        status: EXECUTED
         instances: true
       
     }
