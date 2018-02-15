@@ -410,6 +410,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can evaluate the first question block 1`] = `
 
     runningSession {
+      activeStep: 1
       confusionTS: 
         difficulty: 2
         speed: 4
@@ -561,6 +562,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can evaluate the second question block 1`] = `
 
     runningSession {
+      activeStep: 3
       confusionTS: 
         difficulty: 2
         speed: 4
@@ -712,6 +714,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can evaluate the third question block 1`] = `
 
     runningSession {
+      activeStep: 5
       confusionTS: 
         difficulty: 2
         speed: 4
@@ -863,6 +866,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can join the session initially 1`] = `
 
     runningSession {
+      activeStep: 0
       confusionTS: 
         difficulty: 2
         speed: 4
