@@ -1,7 +1,9 @@
+const fs = require('fs')
+const path = require('path')
+const handlebars = require('handlebars')
 const bcrypt = require('bcryptjs')
 const JWT = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
-const Email = require('email-templates')
 
 const { UserModel } = require('../models')
 
@@ -178,26 +180,21 @@ const requestPassword = async (res, email) => {
     },
   })
 
-  const emailTemplate = new Email({
-    message: {
-      from: process.env.EMAIL_FROM,
-    },
-    send: true,
-    transport: transporter,
-  })
+  // load the template source and compile it
+  const source = fs.readFileSync(path.join(__dirname, 'emails', 'passwordReset.hbs'), 'utf8')
+  const template = handlebars.compile(source)
 
   // send mail with defined transport object
   if (process.env.NODE_ENV !== 'test') {
     try {
-      await emailTemplate.send({
-        template: 'passwordRequest',
-        message: {
-          to: user.email,
-        },
-        locals: {
+      await transporter.sendMail({
+        from: 'klicker@bf.uzh.ch',
+        to: user.email,
+        subject: 'IBF Klicker - Password Reset',
+        html: template({
           email: user.email,
           jwt,
-        },
+        }),
       })
     } catch (e) {
       return 'PASSWORD_RESET_FAILED'
