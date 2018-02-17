@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const JWT = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
+const Email = require('email-templates')
 
 const { UserModel } = require('../models')
 
@@ -150,7 +151,7 @@ const changePassword = async (userId, newPassword) => {
 const requestPassword = async (res, email) => {
   // look for a user with the given email
   // and check whether the user exists
-  const user = await UserModel.find({ email })
+  const user = await UserModel.findOne({ email })
   if (!user) {
     return 'PASSWORD_RESET_FAILED'
   }
@@ -177,19 +178,27 @@ const requestPassword = async (res, email) => {
     },
   })
 
-  // setup email data with unicode symbols
-  const mailOptions = {
-    from: process.env.EMAIL_FROM, // sender address
-    to: user.email, // list of receivers
-    subject: 'IBF Klicker - Password Reset', // Subject line
-    text: `Reset your password (${jwt})`, // plain text body
-    html: `Reset your password (${jwt})`, // html body
-  }
+  const emailTemplate = new Email({
+    message: {
+      from: process.env.EMAIL_FROM,
+    },
+    send: true,
+    transport: transporter,
+  })
 
   // send mail with defined transport object
   if (process.env.NODE_ENV !== 'test') {
     try {
-      await transporter.sendMail(mailOptions)
+      await emailTemplate.send({
+        template: 'passwordRequest',
+        message: {
+          to: user.email,
+        },
+        locals: {
+          email: user.email,
+          jwt,
+        },
+      })
     } catch (e) {
       return 'PASSWORD_RESET_FAILED'
     }
