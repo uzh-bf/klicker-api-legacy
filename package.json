@@ -31,6 +31,7 @@
     "mongodb": "3.0.2",
     "mongoose": "5.0.5",
     "morgan": "1.9.0",
+    "nodemailer": "^4.4.2",
     "rate-limit-redis": "1.4.0",
     "subscriptions-transport-ws": "0.9.5"
   },
