@@ -180,17 +180,19 @@ const requestPassword = async (res, email) => {
   // setup email data with unicode symbols
   const mailOptions = {
     from: process.env.EMAIL_FROM, // sender address
-    to: 'roland.schlaefli@bf.uzh.ch', // list of receivers
+    to: user.email, // list of receivers
     subject: 'IBF Klicker - Password Reset', // Subject line
     text: `Reset your password (${jwt})`, // plain text body
     html: `Reset your password (${jwt})`, // html body
   }
 
   // send mail with defined transport object
-  try {
-    await transporter.sendMail(mailOptions)
-  } catch (e) {
-    return 'PASSWORD_RESET_FAILED'
+  if (process.env.NODE_ENV !== 'test') {
+    try {
+      await transporter.sendMail(mailOptions)
+    } catch (e) {
+      return 'PASSWORD_RESET_FAILED'
+    }
   }
 
   return 'PASSWORD_RESET_SENT'

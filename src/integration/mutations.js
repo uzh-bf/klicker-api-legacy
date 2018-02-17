@@ -384,6 +384,21 @@ const ActivateNextBlockSerializer = {
   `,
 }
 
+const ResetPasswordMutation = `
+  mutation ResetPassword($email: String!) {
+    resetPassword(email: $email)
+  }
+`
+
+const ChangePasswordMutation = `
+  mutation ChangePassword($newPassword: String!) {
+    changePassword(newPassword: $newPassword) {
+      email
+      shortname
+    }
+  }
+`
+
 module.exports = {
   RegistrationMutation,
   LoginMutation,
@@ -398,6 +413,8 @@ module.exports = {
   UpdateSessionSettingsMutation,
   AddResponseMutation,
   ActivateNextBlockMutation,
+  ResetPasswordMutation,
+  ChangePasswordMutation,
   serializers: [
     RegistrationSerializer,
     LoginSerializer,
