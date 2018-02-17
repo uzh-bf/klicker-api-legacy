@@ -123,6 +123,28 @@ const login = async (res, email, password) => {
   return user
 }
 
+// change the password of an existing user
+const changePassword = async (res, userId, newPassword) => {
+  // look for a user with the given email
+  // and check whether the user exists
+  const user = await UserModel.findById(userId)
+  if (!user) {
+    throw new Error('RESET_FAILED')
+  }
+
+  // generate a salt with bcyrpt using 10 rounds
+  // hash and salt the password
+  // set the new password and save the user
+  user.password = bcrypt.hashSync(newPassword, 10)
+  const updatedUser = await user.save()
+  if (!updatedUser) {
+    throw new Error('RESET_FAILED')
+  }
+
+  // return the updated user
+  return updatedUser
+}
+
 module.exports = {
   isAuthenticated,
   requireAuth,
@@ -130,4 +152,5 @@ module.exports = {
   getToken,
   signup,
   login,
+  changePassword,
 }
