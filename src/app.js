@@ -13,6 +13,7 @@ const cookieParser = require('cookie-parser')
 const express = require('express')
 const expressJWT = require('express-jwt')
 const mongoose = require('mongoose')
+mongoose.Promise = require('bluebird')
 const compression = require('compression')
 const helmet = require('helmet')
 const morgan = require('morgan')
@@ -39,11 +40,9 @@ appSettings.forEach((envVar) => {
 // connect to mongodb
 // use username and password authentication if passed in the environment
 // otherwise assume that no authentication needed (e.g. docker)
-mongoose.Promise = Promise
 const mongoConfig = {
   keepAlive: true,
   reconnectTries: 10,
-  promiseLibrary: Promise,
 }
 if (process.env.MONGO_USER && process.env.MONGO_PASSWORD) {
   mongoose.connect(
