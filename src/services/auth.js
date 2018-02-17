@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const JWT = require('jsonwebtoken')
+const nodemailer = require('nodemailer')
 
 const { UserModel } = require('../models')
 
@@ -124,12 +125,12 @@ const login = async (res, email, password) => {
 }
 
 // change the password of an existing user
-const changePassword = async (res, userId, newPassword) => {
-  // look for a user with the given email
+const changePassword = async (userId, newPassword) => {
+  // look for a user with the given id
   // and check whether the user exists
   const user = await UserModel.findById(userId)
   if (!user) {
-    throw new Error('RESET_FAILED')
+    throw new Error('PASSWORD_UPDATE_FAILED')
   }
 
   // generate a salt with bcyrpt using 10 rounds
@@ -138,11 +139,61 @@ const changePassword = async (res, userId, newPassword) => {
   user.password = bcrypt.hashSync(newPassword, 10)
   const updatedUser = await user.save()
   if (!updatedUser) {
-    throw new Error('RESET_FAILED')
+    throw new Error('PASSWORD_UPDATE_FAILED')
   }
 
   // return the updated user
   return updatedUser
+}
+
+// request a password reset link
+const requestPassword = async (res, email) => {
+  // look for a user with the given email
+  // and check whether the user exists
+  const user = await UserModel.find({ email })
+  if (!user) {
+    return 'PASSWORD_RESET_FAILED'
+  }
+
+  // generate a temporary JWT for password reset
+  const jwt = JWT.sign(
+    {
+      expiresIn: 86400,
+      sub: user.id,
+      scope: ['user'],
+      shortname: user.shortname,
+    },
+    process.env.APP_SECRET,
+  )
+
+  // create reusable transporter object using the default SMTP transport
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: 'tabg7kdcvd7gvurg@ethereal.email', // generated ethereal user
+      pass: '6MmJnJJKe2PtHF6fvA', // generated ethereal password
+    },
+  })
+
+  // setup email data with unicode symbols
+  const mailOptions = {
+    from: process.env.EMAIL_FROM, // sender address
+    to: 'roland.schlaefli@bf.uzh.ch', // list of receivers
+    subject: 'IBF Klicker - Password Reset', // Subject line
+    text: `Reset your password (${jwt})`, // plain text body
+    html: `Reset your password (${jwt})`, // html body
+  }
+
+  // send mail with defined transport object
+  try {
+    await transporter.sendMail(mailOptions)
+  } catch (e) {
+    return 'PASSWORD_RESET_FAILED'
+  }
+
+  return 'PASSWORD_RESET_SENT'
 }
 
 module.exports = {
@@ -153,4 +204,5 @@ module.exports = {
   signup,
   login,
   changePassword,
+  requestPassword,
 }

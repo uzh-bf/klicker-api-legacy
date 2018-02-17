@@ -176,7 +176,7 @@ describe('AuthService', () => {
       }))
 
       // change the user's password
-      const updatedUser = await changePassword(res, user.id, 'someOtherPassword')
+      const updatedUser = await changePassword(user.id, 'someOtherPassword')
       expect(updatedUser).toEqual(expect.objectContaining({
         email: 'testAuth@bf.uzh.ch',
         shortname: 'auth',
@@ -191,5 +191,7 @@ describe('AuthService', () => {
         shortname: 'auth',
       }))
     })
+
+    it('allows requesting a password reset link', async () => {})
   })
 })
