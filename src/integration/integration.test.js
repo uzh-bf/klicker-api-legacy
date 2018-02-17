@@ -74,9 +74,9 @@ describe('Integration', () => {
       ))
     })
 
-    it('can be reset', async () => {
+    it('can be requested', async () => {
       ensureNoErrors(await sendQuery({
-        query: mutations.ResetPasswordMutation,
+        query: mutations.RequestPasswordMutation,
         variables: { email: 'testIntegration@bf.uzh.ch' },
       }))
     })
