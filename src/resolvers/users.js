@@ -11,8 +11,8 @@ const createUserMutation = (parentValue, { email, password, shortname }) =>
 
 const loginMutation = (parentValue, { email, password }, { res }) => AuthService.login(res, email, password)
 
-const changePasswordMutation = (parentValue, { newPassword }, { res, auth }) =>
-  AuthService.changePassword(res, auth.sub, newPassword)
+const changePasswordMutation = (parentValue, { newPassword }, { auth }) =>
+  AuthService.changePassword(auth.sub, newPassword)
 
 const requestPasswordMutation = (parentValue, { email }, { res }) => AuthService.requestPassword(res, email)
 

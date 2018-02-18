@@ -97,6 +97,8 @@ const middleware = [
   }),
   // enable cookie parsing
   cookieParser(),
+  // parse json contents
+  bodyParser.json(),
   // setup JWT authentication
   expressJWT({
     credentialsRequired: false,
@@ -149,9 +151,6 @@ if (process.env.APP_RATE_LIMITING) {
 
   middleware.push(limiter)
 }
-
-// parse json contents
-middleware.push(bodyParser.json())
 
 if (process.env.NODE_ENV === 'production') {
   // add the morgan logging middleware in production

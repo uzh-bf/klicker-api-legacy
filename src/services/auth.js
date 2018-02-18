@@ -4,6 +4,7 @@ const handlebars = require('handlebars')
 const bcrypt = require('bcryptjs')
 const JWT = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
+const _has = require('lodash/has')
 
 const { UserModel } = require('../models')
 
@@ -50,6 +51,12 @@ const getToken = (req) => {
     if (split[0] === 'Bearer' && isValidJWT(split[1], process.env.APP_SECRET)) {
       return split[1]
     }
+  }
+
+  // if no token was found, but would be needed
+  // additionally look for a token in the GraphQL variables
+  if (_has(req, 'body.variables.jwt') && isValidJWT(req.body.variables.jwt, process.env.APP_SECRET)) {
+    return req.body.variables.jwt
   }
 
   // no token found
