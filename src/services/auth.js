@@ -178,12 +178,12 @@ const requestPassword = async (res, email) => {
 
   // create reusable transporter object using the default SMTP transport
   const transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT || 587,
+    secure: process.env.EMAIL_SECURE || false, // true for 465, false for other ports
     auth: {
-      user: 'tabg7kdcvd7gvurg@ethereal.email', // generated ethereal user
-      pass: '6MmJnJJKe2PtHF6fvA', // generated ethereal password
+      user: process.env.EMAIL_USER, // generated ethereal user
+      pass: process.env.EMAIL_PASS, // generated ethereal password
     },
   })
 
@@ -195,7 +195,7 @@ const requestPassword = async (res, email) => {
   if (process.env.NODE_ENV !== 'test') {
     try {
       await transporter.sendMail({
-        from: 'klicker@bf.uzh.ch',
+        from: process.env.EMAIL_FROM,
         to: user.email,
         subject: 'IBF Klicker - Password Reset',
         html: template({
