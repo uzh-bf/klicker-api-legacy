@@ -96,7 +96,7 @@ const login = async (res, email, password) => {
   const user = await UserModel.findOne({ email })
 
   // check whether the user exists and hashed passwords match
-  if (!user || !bcrypt.compareSync(password, user.password)) {
+  if (!user || !user.active || !bcrypt.compareSync(password, user.password)) {
     throw new Error('INVALID_LOGIN')
   }
 
