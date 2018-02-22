@@ -16,7 +16,13 @@ const allSessionsQuery = async (parentValue, args, { auth, loaders }) => {
 }
 
 const sessionQuery = async (parentValue, { id }, { loaders }) => loaders.sessions.load(id)
-const sessionByPVQuery = (parentValue, args, { loaders }) => loaders.sessions.load(parentValue.runningSession)
+const sessionByPVQuery = (parentValue, args, { loaders }) => {
+  if (!parentValue.runningSession) {
+    return null
+  }
+
+  return loaders.sessions.load(parentValue.runningSession)
+}
 const sessionsByPVQuery = (parentValue, args, { loaders }) => loaders.sessions.loadMany(parentValue.sessions)
 const sessionIdByPVQuery = parentValue => parentValue.session
 
