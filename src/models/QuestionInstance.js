@@ -23,13 +23,22 @@ const QuestionInstance = new mongoose.Schema({
   isOpen: { type: Boolean, default: false },
 
   question: {
-    type: ObjectId, ref: 'Question', required: true, index: true,
+    type: ObjectId,
+    ref: 'Question',
+    required: true,
+    index: true,
   },
   session: {
-    type: ObjectId, ref: 'Session', required: true, index: true,
+    type: ObjectId,
+    ref: 'Session',
+    required: true,
+    index: true,
   },
   user: {
-    type: ObjectId, ref: 'User', required: true, index: true,
+    type: ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
   },
   version: { type: Number, min: 0, required: true },
 

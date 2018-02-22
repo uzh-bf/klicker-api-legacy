@@ -24,7 +24,10 @@ const Session = new mongoose.Schema({
     ipFiltering: { type: Boolean, default: true },
   },
   user: {
-    type: ObjectId, ref: 'User', required: true, index: true,
+    type: ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
   },
 
   blocks: [{ type: QuestionBlock, required: true }],

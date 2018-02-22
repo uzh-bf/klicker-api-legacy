@@ -9,10 +9,16 @@ const QuestionVersion = require('./QuestionVersion')
 const Question = new mongoose.Schema({
   title: { type: String, required: true },
   type: {
-    type: String, enum: _values(QuestionTypes), required: true, index: true,
+    type: String,
+    enum: _values(QuestionTypes),
+    required: true,
+    index: true,
   },
   user: {
-    type: ObjectId, ref: 'User', required: true, index: true,
+    type: ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
   },
 
   versions: [{ type: QuestionVersion, required: true }],
