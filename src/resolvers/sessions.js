@@ -8,16 +8,15 @@ const { SessionModel, UserModel } = require('../models')
 const allSessionsQuery = async (parentValue, args, { auth }) =>
   SessionModel.find({ user: auth.sub }).sort({ createdAt: -1 })
 
-const sessionQuery = async (parentValue, { id }, { auth }) => SessionModel.findOne({ _id: id, user: auth.sub })
+const sessionQuery = async (parentValue, { id }, { loaders }) => loaders.sessions.load(id)
+const sessionByPVQuery = (parentValue, args, { loaders }) => loaders.sessions.load(parentValue.runningSession)
+const sessionsByPVQuery = (parentValue, args, { loaders }) => loaders.sessions.loadMany(parentValue.sessions)
+const sessionIdByPVQuery = parentValue => parentValue.session
 
 const runningSessionQuery = async (parentValue, args, { auth }) => {
   const user = await UserModel.findById(auth.sub).populate('runningSession')
   return user.runningSession
 }
-
-const sessionByPVQuery = parentValue => SessionModel.findById(parentValue.runningSession)
-const sessionIdByPVQuery = parentValue => parentValue.session
-const sessionsByPVQuery = parentValue => SessionModel.find({ _id: { $in: parentValue.sessions } })
 
 const joinSessionQuery = async (parentValue, { shortname }) => SessionExecService.joinSession({ shortname })
 
