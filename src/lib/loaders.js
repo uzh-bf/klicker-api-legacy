@@ -11,7 +11,21 @@ const createMapping = (arr) => {
   return mapping
 }
 
-const tagsLoader = auth =>
+// create a factory function for simple dataloaders
+const createBasicLoader = model => auth =>
+  new DataLoader(async (ids) => {
+    const results = await model.find({ _id: { $in: ids }, user: auth.sub })
+    const mapping = createMapping(results)
+    return ids.map(id => mapping[id])
+  })
+
+// setup the real loaders using the factory
+const tagsLoader = createBasicLoader(TagModel)
+const questionsLoader = createBasicLoader(QuestionModel)
+const sessionsLoader = createBasicLoader(SessionModel)
+const questionInstancesLoader = createBasicLoader(QuestionInstanceModel)
+
+/* const tagsLoader = auth =>
   new DataLoader(async (tagIds) => {
     console.log('tagsLoader: Loading tags...')
 
@@ -49,7 +63,7 @@ const sessionsLoader = auth =>
     const mapping = createMapping(results)
 
     return sessionIds.map(sessionId => mapping[sessionId])
-  })
+  }) */
 
 function createLoaders(auth) {
   console.log(`Creating loaders for ${auth && auth.sub}`)
