@@ -2,8 +2,15 @@ const QuestionService = require('../services/questions')
 const { QuestionModel } = require('../models')
 
 /* ----- queries ----- */
-const allQuestionsQuery = async (parentValue, args, { auth }) =>
-  QuestionModel.find({ user: auth.sub }).sort({ createdAt: -1 })
+const allQuestionsQuery = async (parentValue, args, { auth, loaders }) => {
+  // get all the questions for the given user
+  const results = await QuestionModel.find({ user: auth.sub }).sort({ createdAt: -1 })
+
+  // prime the dataloader cache
+  results.forEach(question => loaders.questions.prime(question.id, question))
+
+  return results
+}
 
 const questionQuery = async (parentValue, { id }, { loaders }) => loaders.questions.load(id)
 const questionByPVQuery = (parentValue, args, { loaders }) => loaders.questions.load(parentValue.question)

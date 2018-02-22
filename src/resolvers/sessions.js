@@ -5,8 +5,15 @@ const SessionExecService = require('../services/sessionExec')
 const { SessionModel, UserModel } = require('../models')
 
 /* ----- queries ----- */
-const allSessionsQuery = async (parentValue, args, { auth }) =>
-  SessionModel.find({ user: auth.sub }).sort({ createdAt: -1 })
+const allSessionsQuery = async (parentValue, args, { auth, loaders }) => {
+  // get all the sessions for the given user
+  const results = await SessionModel.find({ user: auth.sub }).sort({ createdAt: -1 })
+
+  // prime the dataloader cache
+  results.forEach(session => loaders.sessions.prime(session.id, session))
+
+  return results
+}
 
 const sessionQuery = async (parentValue, { id }, { loaders }) => loaders.sessions.load(id)
 const sessionByPVQuery = (parentValue, args, { loaders }) => loaders.sessions.load(parentValue.runningSession)
