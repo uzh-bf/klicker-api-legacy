@@ -103,7 +103,7 @@ const login = async (res, email, password) => {
 
   // check whether the user exists and hashed passwords match
   if (!user || !bcrypt.compareSync(password, user.password)) {
-    sendSlackNotification(`[auth] Login failed for ${user.email}`)
+    sendSlackNotification(`[auth] Login failed for ${email}`)
 
     throw new Error('INVALID_LOGIN')
   }
