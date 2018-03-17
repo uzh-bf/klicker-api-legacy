@@ -203,7 +203,22 @@ const modifyQuestion = async (questionId, userId, {
   return question
 }
 
+const archiveQuestion = async (questionId, userId) => {
+  // get the question instance from the DB
+  const question = await QuestionModel.findOne({ _id: questionId, user: userId })
+
+  // set the question to be archived if it does not yet have the attribute
+  // otherwise invert the previously set value
+  question.isArchived = !question.isArchived
+
+  // save the updated question
+  await question.save()
+
+  return question
+}
+
 module.exports = {
   createQuestion,
   modifyQuestion,
+  archiveQuestion,
 }

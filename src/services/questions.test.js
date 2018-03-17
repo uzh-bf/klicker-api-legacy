@@ -198,4 +198,16 @@ describe('QuestionService', () => {
       expect(modifiedQuestion).toMatchSnapshot()
     })
   })
+
+  describe('archiveQuestion', () => {
+    it('allows archiving a question', async () => {
+      const archivedQuestion = await QuestionService.archiveQuestion(questions.SC.id, questions.SC.user)
+      expect(archivedQuestion).toMatchSnapshot()
+    })
+
+    it('allows unarchiving a question', async () => {
+      const unarchivedQuestion = await QuestionService.archiveQuestion(questions.SC.id, questions.SC.user)
+      expect(unarchivedQuestion).toMatchSnapshot()
+    })
+  })
 })

@@ -10,6 +10,22 @@ exports[`Integration Login works with valid credentials 1`] = `
   
 `;
 
+exports[`Integration Question Archiving can archive questions 1`] = `
+
+    archiveQuestion {
+      isArchived: true
+    }
+  
+`;
+
+exports[`Integration Question Archiving can unarchive questions 1`] = `
+
+    archiveQuestion {
+      isArchived: false
+    }
+  
+`;
+
 exports[`Integration Question Creation creates FREE questions 1`] = `
 
     createQuestion / modifyQuestion {

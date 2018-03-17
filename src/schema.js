@@ -8,6 +8,7 @@ const {
   questionByPV,
   question,
   modifyQuestion,
+  archiveQuestion,
 } = require('./resolvers/questions')
 const {
   questionInstancesByPV, addResponse, responsesByPV, resultsByPV,
@@ -63,6 +64,7 @@ const typeDefs = [
     addConfusionTS(fp: ID, sessionId: ID!, difficulty: Int!, speed: Int!): String!
     addFeedback(fp: ID, sessionId: ID!, content: String!): String!
     addResponse(fp: ID, instanceId: ID!, response: QuestionInstance_ResponseInput!): String!
+    archiveQuestion(id: ID!): Question!
     changePassword(newPassword: String!): User!
     createQuestion(question: QuestionInput!): Question!
     createSession(session: SessionInput!): Session!
@@ -93,6 +95,7 @@ const resolvers = {
     user: requireAuth(authUser),
   },
   Mutation: {
+    archiveQuestion: requireAuth(archiveQuestion),
     addFeedback,
     deleteFeedback: requireAuth(deleteFeedback),
     addConfusionTS,

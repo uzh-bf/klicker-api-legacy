@@ -187,6 +187,24 @@ const CreateQuestionSerializer = {
   },
 }
 
+const ArchiveQuestionMutation = `
+  mutation ArchiveQuestion($id: ID!) {
+    archiveQuestion(id: $id) {
+      id
+      isArchived
+    }
+  }
+`
+
+const ArchiveQuestionSerializer = {
+  test: ({ archiveQuestion }) => !!archiveQuestion,
+  print: ({ archiveQuestion: { isArchived } }) => `
+    archiveQuestion {
+      isArchived: ${isArchived}
+    }
+  `,
+}
+
 const CreateSessionMutation = `
   mutation CreateSession($name: String!, $blocks: [Session_QuestionBlockInput!]!) {
     createSession(session: { name: $name, blocks: $blocks }) {
@@ -386,6 +404,7 @@ module.exports = {
   ActivateNextBlockMutation,
   RequestPasswordMutation,
   ChangePasswordMutation,
+  ArchiveQuestionMutation,
   serializers: [
     RegistrationSerializer,
     LoginSerializer,
@@ -395,5 +414,6 @@ module.exports = {
     UpdateSessionSettingsSerializer,
     ActivateNextBlockSerializer,
     ChangePasswordSerializer,
+    ArchiveQuestionSerializer,
   ],
 }
