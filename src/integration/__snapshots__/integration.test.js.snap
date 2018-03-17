@@ -12,17 +12,21 @@ exports[`Integration Login works with valid credentials 1`] = `
 
 exports[`Integration Question Archiving can archive questions 1`] = `
 
-    archiveQuestion {
+    archiveQuestions: [
       isArchived: true
-    }
+    ,
+      isArchived: true
+    ]
   
 `;
 
 exports[`Integration Question Archiving can unarchive questions 1`] = `
 
-    archiveQuestion {
+    archiveQuestions: [
       isArchived: false
-    }
+    ,
+      isArchived: false
+    ]
   
 `;
 

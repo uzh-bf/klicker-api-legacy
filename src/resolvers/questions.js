@@ -26,7 +26,7 @@ const createQuestionMutation = (parentValue, { question }, { auth }) =>
 const modifyQuestionMutation = (parentValue, { id, question }, { auth }) =>
   QuestionService.modifyQuestion(id, auth.sub, question)
 
-const archiveQuestionMutation = (parentValue, { id }, { auth }) => QuestionService.archiveQuestion(id, auth.sub)
+const archiveQuestionsMutation = (parentValue, { ids }, { auth }) => QuestionService.archiveQuestions(ids, auth.sub)
 
 module.exports = {
   // queries
@@ -38,5 +38,5 @@ module.exports = {
   // mutations
   createQuestion: createQuestionMutation,
   modifyQuestion: modifyQuestionMutation,
-  archiveQuestion: archiveQuestionMutation,
+  archiveQuestions: archiveQuestionsMutation,
 }

@@ -791,9 +791,9 @@ describe('Integration', () => {
     it('can archive questions', async () => {
       const data = ensureNoErrors(await sendQuery(
         {
-          query: mutations.ArchiveQuestionMutation,
+          query: mutations.ArchiveQuestionsMutation,
           variables: {
-            id: questions.FREE_RANGE,
+            ids: [questions.FREE_RANGE, questions.SC],
           },
         },
         authCookie,
@@ -805,9 +805,9 @@ describe('Integration', () => {
     it('can unarchive questions', async () => {
       const data = ensureNoErrors(await sendQuery(
         {
-          query: mutations.ArchiveQuestionMutation,
+          query: mutations.ArchiveQuestionsMutation,
           variables: {
-            id: questions.FREE_RANGE,
+            ids: [questions.FREE_RANGE, questions.SC],
           },
         },
         authCookie,

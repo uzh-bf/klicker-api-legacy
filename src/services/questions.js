@@ -203,22 +203,24 @@ const modifyQuestion = async (questionId, userId, {
   return question
 }
 
-const archiveQuestion = async (questionId, userId) => {
+const archiveQuestions = async (questionIds, userId) => {
   // get the question instance from the DB
-  const question = await QuestionModel.findOne({ _id: questionId, user: userId })
+  const questions = await QuestionModel.find({ _id: { $in: questionIds }, user: userId })
 
-  // set the question to be archived if it does not yet have the attribute
+  // set the questions to be archived if it does not yet have the attribute
   // otherwise invert the previously set value
-  question.isArchived = !question.isArchived
+  const promises = questions.map((question) => {
+    // eslint-disable-next-line no-param-reassign
+    question.isArchived = !question.isArchived
+    return question.save()
+  })
 
-  // save the updated question
-  await question.save()
-
-  return question
+  // await the question update promises
+  return Promise.all(promises)
 }
 
 module.exports = {
   createQuestion,
   modifyQuestion,
-  archiveQuestion,
+  archiveQuestions,
 }

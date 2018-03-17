@@ -187,21 +187,21 @@ const CreateQuestionSerializer = {
   },
 }
 
-const ArchiveQuestionMutation = `
-  mutation ArchiveQuestion($id: ID!) {
-    archiveQuestion(id: $id) {
+const ArchiveQuestionsMutation = `
+  mutation ArchiveQuestions($ids: [ID!]!) {
+    archiveQuestions(ids: $ids) {
       id
       isArchived
     }
   }
 `
 
-const ArchiveQuestionSerializer = {
-  test: ({ archiveQuestion }) => !!archiveQuestion,
-  print: ({ archiveQuestion: { isArchived } }) => `
-    archiveQuestion {
+const ArchiveQuestionsSerializer = {
+  test: ({ archiveQuestions }) => !!archiveQuestions,
+  print: ({ archiveQuestions }) => `
+    archiveQuestions: [${archiveQuestions.map(({ isArchived }) => `
       isArchived: ${isArchived}
-    }
+    `)}]
   `,
 }
 
@@ -404,7 +404,7 @@ module.exports = {
   ActivateNextBlockMutation,
   RequestPasswordMutation,
   ChangePasswordMutation,
-  ArchiveQuestionMutation,
+  ArchiveQuestionsMutation,
   serializers: [
     RegistrationSerializer,
     LoginSerializer,
@@ -414,6 +414,6 @@ module.exports = {
     UpdateSessionSettingsSerializer,
     ActivateNextBlockSerializer,
     ChangePasswordSerializer,
-    ArchiveQuestionSerializer,
+    ArchiveQuestionsSerializer,
   ],
 }
