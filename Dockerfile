@@ -3,9 +3,10 @@ FROM node:8-alpine@sha256:a55d3e87802b2a8464b3bfc1f8c3c409f89e9b70a31f1dccce70bd
 
 # root application directory
 ENV KLICKER_DIR /app
+ENV NODE_ENV="production"
 
 # install tini
-RUN apk add --no-cache tini
+RUN set -x && apk add --no-cache tini
 
 # switch to the node user (uid 1000)
 # non-root as provided by the base image
@@ -17,7 +18,6 @@ WORKDIR $KLICKER_DIR
 
 # update permissions for klicker dir
 # install yarn packages
-ARG NODE_ENV="production"
 RUN set -x && yarn install --frozen-lockfile
 
 # inject application sources and entrypoint
