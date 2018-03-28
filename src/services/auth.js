@@ -157,10 +157,6 @@ const logout = async (res) => {
       path: process.env.APP_PATH ? `${process.env.APP_PATH}/graphql` : '/graphql',
       secure: !dev && process.env.APP_HTTPS,
     })
-
-    // redirect to the klicker main page
-    // TODO: redirect after logout?
-    // res.redirect('/')
   }
   return 'LOGGED_OUT'
 }
