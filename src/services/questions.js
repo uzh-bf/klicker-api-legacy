@@ -1,5 +1,6 @@
 const _isNumber = require('lodash/isNumber')
-const convertFromRaw = require('draft-js/lib/convertFromRawToDraftState')
+// TODO: find a way to use draft.js without needing react and react-dom
+const { ContentState, convertFromRaw, convertToRaw } = require('draft-js')
 
 const { QuestionModel, TagModel, UserModel } = require('../models')
 const { QuestionGroups, QuestionTypes } = require('../constants')
@@ -134,12 +135,12 @@ const createQuestion = async ({
 }
 
 const modifyQuestion = async (questionId, userId, {
-  title, tags, description, options, solution,
+  title, tags, content, options, solution,
 }) => {
   const promises = []
 
-  // check if both description and options are set for a new version
-  if (description ? !options : options) {
+  // check if both content and options are set for a new version
+  if (content ? !options : options) {
     throw new Error('INVALID_VERSION_DEFINITION')
   }
 
@@ -203,10 +204,31 @@ const modifyQuestion = async (questionId, userId, {
     promises.concat(user.save(), allTagsUpdate, oldTagsUpdate)
   }
 
-  // if description and options are set, add a new version
-  if (description && options) {
+  // migrate old question versions without content field
+  for (let i = 0; i < question.versions.length; i += 1) {
+    // if the content field is not set on any old version
+    if (!question.versions[i].content) {
+      // get the description of the old version
+      const { description } = question.versions[i]
+
+      // instantiate a content state
+      const contentState = ContentState.createFromText(description)
+
+      // convert the content state to raw json
+      const rawContent = convertToRaw(contentState)
+
+      // set the content of the version to the raw state
+      question.versions[i].content = rawContent
+      question.markModified(`versions.${i}`)
+    }
+  }
+
+  // TODO: ensure that content is not empty
+  // if content and options are set, add a new version
+  if (content && options) {
     question.versions.push({
-      description,
+      content,
+      description: calculateDescription(content),
       options: QuestionGroups.WITH_OPTIONS.includes(question.type) && {
         // HACK: manually ensure randomized is default set to false
         // TODO: mongoose should do this..?
