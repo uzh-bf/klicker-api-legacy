@@ -1,4 +1,5 @@
 const _isNumber = require('lodash/isNumber')
+const convertFromRaw = require('draft-js/lib/convertFromRawToDraftState')
 
 const { QuestionModel, TagModel, UserModel } = require('../models')
 const { QuestionGroups, QuestionTypes } = require('../constants')
@@ -27,9 +28,27 @@ const processTags = (existingTags, newTags, userId) => {
   }
 }
 
+// calculate the plain text question description from content state
+const calculateDescription = (content) => {
+  let description
+
+  try {
+    // create a content state from the raw json definition
+    const contentState = convertFromRaw(content)
+
+    // calculate the plain text description
+    description = contentState.getPlainText(' ')
+  } catch (e) {
+    // if we were unable to calculate a description, return a placeholder string
+    description = '-'
+  }
+
+  return description
+}
+
 // create a new question
 const createQuestion = async ({
-  title, type, description, options, solution, tags, userId,
+  title, type, content, options, solution, tags, userId,
 }) => {
   // if no tags have been assigned, throw
   if (!tags || tags.length === 0) {
@@ -87,7 +106,8 @@ const createQuestion = async ({
     user: userId,
     versions: [
       {
-        description,
+        content,
+        description: calculateDescription(content),
         options: QuestionGroups.WITH_OPTIONS.includes(type) && {
           [type]: options,
         },

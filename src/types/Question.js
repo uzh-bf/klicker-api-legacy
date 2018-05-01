@@ -9,6 +9,8 @@ const FREEQuestionOptions = require('./questionTypes/FREEQuestionOptions')
 const SCQuestionOptions = require('./questionTypes/SCQuestionOptions')
 
 const Question = `
+  scalar JSON
+
   union QuestionOptions = SCQuestionOptions | FREEQuestionOptions
 
   enum Question_Type {
@@ -56,7 +58,7 @@ const Question = `
   input QuestionInput {
     title: String!
     type: Question_Type!
-    description: String!
+    content: JSON!
 
     options: QuestionOptionsInput!
     solution: Question_SolutionInput
@@ -88,6 +90,7 @@ const Question = `
 
   type Question_Version {
     id: ID!
+    content: JSON!
     description: String!
 
     options: Question_Options
