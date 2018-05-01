@@ -67,7 +67,7 @@ const Question = `
   }
   input QuestionModifyInput {
     title: String
-    description: String
+    content: JSON
     options: QuestionOptionsInput
     solution: Question_SolutionInput
     tags: [ID!]
