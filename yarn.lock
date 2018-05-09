@@ -358,21 +358,21 @@ apollo-cache-control@^0.1.0:
   dependencies:
     graphql-extensions "^0.0.x"
 
-apollo-engine-binary-darwin@0.2018.4-20-g7a8822c14:
-  version "0.2018.4-20-g7a8822c14"
-  resolved "https://registry.yarnpkg.com/apollo-engine-binary-darwin/-/apollo-engine-binary-darwin-0.2018.4-20-g7a8822c14.tgz#d3aad6b4aceb6063d51ca56324e1b9c4004cc72c"
+apollo-engine-binary-darwin@0.2018.4-86-gf35bdc892:
+  version "0.2018.4-86-gf35bdc892"
+  resolved "https://registry.yarnpkg.com/apollo-engine-binary-darwin/-/apollo-engine-binary-darwin-0.2018.4-86-gf35bdc892.tgz#f1e4ae4b72afdb298039d0230e38dab8774c8890"
 
-apollo-engine-binary-linux@0.2018.4-20-g7a8822c14:
-  version "0.2018.4-20-g7a8822c14"
-  resolved "https://registry.yarnpkg.com/apollo-engine-binary-linux/-/apollo-engine-binary-linux-0.2018.4-20-g7a8822c14.tgz#6da7e5773206962bc28620ca3feb02d523268629"
+apollo-engine-binary-linux@0.2018.4-86-gf35bdc892:
+  version "0.2018.4-86-gf35bdc892"
+  resolved "https://registry.yarnpkg.com/apollo-engine-binary-linux/-/apollo-engine-binary-linux-0.2018.4-86-gf35bdc892.tgz#bc63eee10cb5191d7eb5e61f01d50e28983c89d7"
 
-apollo-engine-binary-windows@0.2018.4-20-g7a8822c14:
-  version "0.2018.4-20-g7a8822c14"
-  resolved "https://registry.yarnpkg.com/apollo-engine-binary-windows/-/apollo-engine-binary-windows-0.2018.4-20-g7a8822c14.tgz#7a1ee3ef3db923f65d172c37864dd4d5867a93ce"
+apollo-engine-binary-windows@0.2018.4-86-gf35bdc892:
+  version "0.2018.4-86-gf35bdc892"
+  resolved "https://registry.yarnpkg.com/apollo-engine-binary-windows/-/apollo-engine-binary-windows-0.2018.4-86-gf35bdc892.tgz#1e02f8ceb9f75ab72551f584a4730260907ef199"
 
-apollo-engine@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/apollo-engine/-/apollo-engine-1.1.0.tgz#6d21b7136b35c2eb4fc4bc51d99c21a536fc8b14"
+apollo-engine@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/apollo-engine/-/apollo-engine-1.1.1.tgz#5e0ea8f1d6d23b5b931cee5404c472893045b201"
   dependencies:
     "@types/connect" "^3.4.31"
     "@types/express" "^4.0.36"
@@ -381,9 +381,9 @@ apollo-engine@1.1.0:
     "@types/koa-router" "^7.0.27"
     "@types/restify" "^5.0.7"
   optionalDependencies:
-    apollo-engine-binary-darwin "0.2018.4-20-g7a8822c14"
-    apollo-engine-binary-linux "0.2018.4-20-g7a8822c14"
-    apollo-engine-binary-windows "0.2018.4-20-g7a8822c14"
+    apollo-engine-binary-darwin "0.2018.4-86-gf35bdc892"
+    apollo-engine-binary-linux "0.2018.4-86-gf35bdc892"
+    apollo-engine-binary-windows "0.2018.4-86-gf35bdc892"
 
 apollo-link@1.2.1:
   version "1.2.1"
@@ -1350,7 +1350,7 @@ debug@2.6.9, debug@^2.2.0, debug@^2.3.3, debug@^2.6.8, debug@^2.6.9:
   dependencies:
     ms "2.0.0"
 
-debug@^3.0.0, debug@^3.1.0:
+debug@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-3.1.0.tgz#5bb5a0672628b64149566ba16819e61518c67261"
   dependencies:
@@ -1556,16 +1556,15 @@ elastic-apm-http-client@^5.2.0:
   dependencies:
     fast-safe-stringify "^1.2.0"
 
-elastic-apm-node@1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-1.4.0.tgz#e96c093977e74d1f0c4651774124aafe9b28b512"
+elastic-apm-node@1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-1.5.0.tgz#ea6ffe2fbe4f163d75d748787f7c262442611a46"
   dependencies:
     after-all-results "^2.0.0"
     async-value-promise "^1.1.0"
     console-log-level "^1.4.0"
     cookie "^0.3.1"
     core-util-is "^1.0.2"
-    debug "^3.0.0"
     elastic-apm-http-client "^5.2.0"
     end-of-stream "^1.1.0"
     fast-safe-stringify "^2.0.3"
@@ -2409,9 +2408,9 @@ graphql-subscriptions@0.5.8:
   dependencies:
     iterall "^1.2.1"
 
-graphql-tools@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/graphql-tools/-/graphql-tools-3.0.0.tgz#ff22ad15315fc268de8639d03936b911d78b9e9b"
+graphql-tools@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/graphql-tools/-/graphql-tools-3.0.1.tgz#456c27061fb2f1040f6bb7bf8a68459651090462"
   dependencies:
     apollo-link "1.2.1"
     apollo-utilities "^1.0.1"
@@ -4225,11 +4224,24 @@ mongodb-core@3.0.7:
     bson "~1.0.4"
     require_optional "^1.0.1"
 
+mongodb-core@3.0.8:
+  version "3.0.8"
+  resolved "https://registry.yarnpkg.com/mongodb-core/-/mongodb-core-3.0.8.tgz#8d401f4eab6056c0d874a3d5844a4844f761d4d7"
+  dependencies:
+    bson "~1.0.4"
+    require_optional "^1.0.1"
+
 mongodb@3.0.7:
   version "3.0.7"
   resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-3.0.7.tgz#cfcbaee992d78dabca67177f8f9db9cf13ac3a44"
   dependencies:
     mongodb-core "3.0.7"
+
+mongodb@3.0.8:
+  version "3.0.8"
+  resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-3.0.8.tgz#2c1daecac9a0ec2de2f2aea4dc97d76ae70f8951"
+  dependencies:
+    mongodb-core "3.0.8"
 
 mongoose-legacy-pluralize@1.0.2:
   version "1.0.2"
@@ -5762,9 +5774,9 @@ strip-json-comments@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
 
-subscriptions-transport-ws@0.9.8:
-  version "0.9.8"
-  resolved "https://registry.yarnpkg.com/subscriptions-transport-ws/-/subscriptions-transport-ws-0.9.8.tgz#3a26ab96e06f78cf4ace8d083f6227fa55970947"
+subscriptions-transport-ws@0.9.9:
+  version "0.9.9"
+  resolved "https://registry.yarnpkg.com/subscriptions-transport-ws/-/subscriptions-transport-ws-0.9.9.tgz#8a0bdc4c31df2e90e92901047fd8961deb138acc"
   dependencies:
     backo2 "^1.0.2"
     eventemitter3 "^2.0.3"
