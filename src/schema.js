@@ -1,5 +1,3 @@
-const GraphQLJSON = require('graphql-type-json')
-
 const { makeExecutableSchema } = require('graphql-tools')
 const { requireAuth } = require('./services/auth')
 const {
@@ -86,8 +84,6 @@ const typeDefs = [
 // define graphql resolvers for schema above
 // everything imported from their respective modules in resolvers/
 const resolvers = {
-  // map the JSON scalar to the graphql-json-type library definition
-  JSON: GraphQLJSON,
   // map queries and mutations
   Query: {
     allQuestions: requireAuth(allQuestions),
