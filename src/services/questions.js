@@ -35,7 +35,7 @@ const calculateDescription = (content) => {
 
   try {
     // create a content state from the raw json definition
-    const contentState = convertFromRaw(content)
+    const contentState = convertFromRaw(JSON.parse(content))
 
     // calculate the plain text description
     description = contentState.getPlainText(' ')
@@ -215,7 +215,7 @@ const modifyQuestion = async (questionId, userId, {
       const contentState = ContentState.createFromText(description)
 
       // convert the content state to raw json
-      const rawContent = convertToRaw(contentState)
+      const rawContent = JSON.stringify(convertToRaw(contentState))
 
       // set the content of the version to the raw state
       question.versions[i].content = rawContent
