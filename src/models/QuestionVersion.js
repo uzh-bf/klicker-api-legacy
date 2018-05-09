@@ -13,7 +13,7 @@ const QuestionSolution = new mongoose.Schema({
 
 module.exports = new mongoose.Schema({
   // content for draft.js editor state (added 01.05.18)
-  content: { type: Object, required: true },
+  content: { type: String, required: true },
 
   // "text-only" version of the above content
   description: { type: String, required: true },
