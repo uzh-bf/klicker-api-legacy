@@ -47,7 +47,7 @@ const Question = `
     instanceId: ID!
     title: String!
     type: Question_Type!
-    content: String!
+    content: String
     description: String!
 
     options: Question_Options
@@ -89,7 +89,7 @@ const Question = `
 
   type Question_Version {
     id: ID!
-    content: String!
+    content: String
     description: String!
 
     options: Question_Options
