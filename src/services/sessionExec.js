@@ -5,6 +5,7 @@ const { QuestionInstanceModel, UserModel } = require('../models')
 const { QuestionGroups, QuestionTypes } = require('../constants')
 const { getRedis } = require('../redis')
 const { getRunningSession } = require('./sessionMgr')
+const { pubsub } = require('../resolvers/subscriptions')
 
 // initialize redis if available
 const redis = getRedis(2)
@@ -22,8 +23,14 @@ const addFeedback = async ({ sessionId, content }) => {
     throw new Error('SESSION_FEEDBACKS_DEACTIVATED')
   }
 
+  // instantiate a feedback object
+  const newFeedback = { content, createdAt: Date.now() }
+
+  // publish the new feedback via subscription
+  pubsub.publish('feedbackAdded', { feedbackAdded: newFeedback })
+
   // push a new feedback into the array
-  session.feedbacks.push({ content, createdAt: Date.now() })
+  session.feedbacks.push({ newFeedback })
 
   // save the updated session
   await session.save()
