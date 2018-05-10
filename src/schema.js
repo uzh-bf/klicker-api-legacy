@@ -81,7 +81,7 @@ const typeDefs = [
   }
 
   type Subscription {
-    feedbackAdded(session: ID!): Session_Feedback!
+    feedbackAdded(sessionId: ID!): Session_Feedback!
   }
 `,
   ...allTypes,

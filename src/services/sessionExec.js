@@ -27,7 +27,7 @@ const addFeedback = async ({ sessionId, content }) => {
   const newFeedback = { content, createdAt: Date.now() }
 
   // publish the new feedback via subscription
-  pubsub.publish('feedbackAdded', { feedbackAdded: newFeedback })
+  pubsub.publish('feedbackAdded', { feedbackAdded: newFeedback, sessionId })
 
   // push a new feedback into the array
   session.feedbacks.push({ newFeedback })

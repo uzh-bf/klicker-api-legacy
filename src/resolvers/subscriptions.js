@@ -1,11 +1,16 @@
-const { PubSub } = require('graphql-subscriptions')
+const { PubSub, withFilter } = require('graphql-subscriptions')
 
 const pubsub = new PubSub()
 
 /* ----- subscriptions ----- */
 const feedbackAddedSubscription = {
   // resolve: {},
-  subscribe: () => pubsub.asyncIterator('feedbackAdded'),
+  subscribe: () =>
+    withFilter(
+      () => pubsub.asyncIterator('feedbackAdded'),
+      // filter out feedbacks for the requested session
+      (payload, variables) => payload.sessionId === variables.sessionId,
+    ),
 }
 
 module.exports = {
