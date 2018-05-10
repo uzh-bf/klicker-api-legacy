@@ -51,6 +51,7 @@ const QuestionDetailsQuery = `
       }
       versions {
         id
+        content
         description
         options {
           SC {
@@ -97,7 +98,10 @@ const QuestionDetailsSerializer = {
       tags: ${JSON.stringify(tags.map(tag => tag.name))}
 
       instances: ${instances.length}
-      versions: ${versions.map(({ description, options, solution }) => `
+      versions: ${versions.map(({
+    content, description, options, solution,
+  }) => `
+        content: ${content}
         description: ${description}
         options: ${JSON.stringify(options)}
         solution: ${JSON.stringify(solution)}
@@ -229,6 +233,7 @@ const JoinSessionQuery = `
         id
         instanceId
         title
+        content
         description
         type
         options {
@@ -268,9 +273,10 @@ const JoinSessionSerializer = {
     joinSession {
       settings: ${JSON.stringify(settings)}
       activeQuestions: ${activeQuestions.map(({
-    title, description, type, options,
+    title, content, description, type, options,
   }) => `
         title: ${title}
+        content: ${content}
         description: ${description}
         type: ${type}
         options: ${JSON.stringify(options)}
