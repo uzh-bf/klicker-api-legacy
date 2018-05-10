@@ -1,3 +1,5 @@
+const { draftContentSerializer } = require('../lib/test/serializers')
+
 const TagListQuery = `
   query TagList {
     tags: allTags {
@@ -101,7 +103,7 @@ const QuestionDetailsSerializer = {
       versions: ${versions.map(({
     content, description, options, solution,
   }) => `
-        content: ${content}
+        content: ${draftContentSerializer(content)}
         description: ${description}
         options: ${JSON.stringify(options)}
         solution: ${JSON.stringify(solution)}
@@ -276,7 +278,7 @@ const JoinSessionSerializer = {
     title, content, description, type, options,
   }) => `
         title: ${title}
-        content: ${content}
+        content: ${draftContentSerializer(content)}
         description: ${description}
         type: ${type}
         options: ${JSON.stringify(options)}

@@ -134,6 +134,7 @@ const questionInstanceSerializer = {
 }
 
 module.exports = {
+  draftContentSerializer,
   questionSerializer,
   sessionSerializer,
   questionInstanceSerializer,

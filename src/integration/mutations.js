@@ -1,3 +1,5 @@
+const { draftContentSerializer } = require('../lib/test/serializers')
+
 const RegistrationMutation = `
   mutation CreateUser($email: String!, $password: String!, $shortname: String!) {
     createUser(email: $email, password: $password, shortname: $shortname) {
@@ -171,7 +173,7 @@ const CreateQuestionSerializer = {
       versions: ${versions.map(({
     content, description, options, solution,
   }) => `
-        content: ${content}
+        content: ${draftContentSerializer(content)}
         description: ${description}
         options: ${JSON.stringify(options)}
         solution: ${JSON.stringify(solution)}
