@@ -1,9 +1,10 @@
 const _isNumber = require('lodash/isNumber')
 // TODO: find a way to use draft.js without needing react and react-dom
-const { ContentState, convertFromRaw, convertToRaw } = require('draft-js')
+const { ContentState, convertToRaw } = require('draft-js')
 
 const { QuestionModel, TagModel, UserModel } = require('../models')
 const { QuestionGroups, QuestionTypes } = require('../constants')
+const { convertToPlainText } = require('../lib/draft')
 
 // process tags when editing or creating a question
 const processTags = (existingTags, newTags, userId) => {
@@ -27,24 +28,6 @@ const processTags = (existingTags, newTags, userId) => {
     allTagIds,
     createdTagIds,
   }
-}
-
-// calculate the plain text question description from content state
-const calculateDescription = (content) => {
-  let description
-
-  try {
-    // create a content state from the raw json definition
-    const contentState = convertFromRaw(JSON.parse(content))
-
-    // calculate the plain text description
-    description = contentState.getPlainText(' ')
-  } catch (e) {
-    // if we were unable to calculate a description, return a placeholder string
-    description = '-'
-  }
-
-  return description
 }
 
 // create a new question
@@ -108,7 +91,7 @@ const createQuestion = async ({
     versions: [
       {
         content,
-        description: calculateDescription(content),
+        description: convertToPlainText(content),
         options: QuestionGroups.WITH_OPTIONS.includes(type) && {
           [type]: options,
         },
@@ -228,7 +211,7 @@ const modifyQuestion = async (questionId, userId, {
   if (content && options) {
     question.versions.push({
       content,
-      description: calculateDescription(content),
+      description: convertToPlainText(content),
       options: QuestionGroups.WITH_OPTIONS.includes(question.type) && {
         // HACK: manually ensure randomized is default set to false
         // TODO: mongoose should do this..?
