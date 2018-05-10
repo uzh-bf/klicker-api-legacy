@@ -10,8 +10,9 @@ const questionSerializer = {
     Instances: [${val.instances}]
     Tags: [${val.tags.map(tag => tag.name)}]
     Versions: [${val.versions.map(({
-    description, instances, options, solution,
+    content, description, instances, options, solution,
   }) => `
+      Content: ${content}
       Description: ${description}
       Instances: [${instances}]
       Options: {
