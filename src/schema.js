@@ -34,7 +34,7 @@ const { allTags, tags } = require('./resolvers/tags')
 const {
   createUser, login, logout, user, authUser, changePassword, requestPassword,
 } = require('./resolvers/users')
-const { feedbackAdded } = require('./resolvers/subscriptions')
+const { confusionAdded, feedbackAdded } = require('./resolvers/subscriptions')
 const { allTypes } = require('./types')
 
 // create graphql schema in schema language
@@ -81,6 +81,7 @@ const typeDefs = [
   }
 
   type Subscription {
+    confusionAdded(sessionId: ID!): Session_ConfusionTimestep
     feedbackAdded(sessionId: ID!): Session_Feedback
   }
 `,
@@ -121,6 +122,8 @@ const resolvers = {
     activateNextBlock: requireAuth(activateNextBlock),
   },
   Subscription: {
+    // TODO: authentication
+    confusionAdded,
     feedbackAdded,
   },
   // map our own types
