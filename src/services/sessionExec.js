@@ -20,14 +20,13 @@ const addFeedback = async ({ sessionId, content }) => {
   }
 
   // push a new feedback into the array
-  const newFeedback = { content, createdAt: Date.now() }
-  session.feedbacks.push(newFeedback)
+  session.feedbacks.push({ content })
 
   // save the updated session
   await session.save()
 
   // publish the new feedback via subscription
-  pubsub.publish(FEEDBACK_ADDED, { [FEEDBACK_ADDED]: newFeedback, sessionId })
+  pubsub.publish(FEEDBACK_ADDED, { [FEEDBACK_ADDED]: session.feedbacks[session.feedbacks.length - 1], sessionId })
 
   // return the updated session
   return session
@@ -61,14 +60,13 @@ const addConfusionTS = async ({ sessionId, difficulty, speed }) => {
   }
 
   // push a new timestep into the array
-  const newConfusion = { createdAt: Date.now(), difficulty, speed }
-  session.confusionTS.push(newConfusion)
+  session.confusionTS.push({ difficulty, speed })
 
   // save the updated session
   await session.save()
 
   // publish the new feedback via subscription
-  pubsub.publish(CONFUSION_ADDED, { [CONFUSION_ADDED]: newConfusion, sessionId })
+  pubsub.publish(CONFUSION_ADDED, { [CONFUSION_ADDED]: session.confusionTS[session.confusionTS.length - 1], sessionId })
 
   // return the updated session
   return session
