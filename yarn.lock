@@ -2406,7 +2406,7 @@ graphql-extensions@^0.0.x:
     core-js "^2.5.3"
     source-map-support "^0.5.1"
 
-graphql-redis-subscriptions@^1.5.0:
+graphql-redis-subscriptions@1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/graphql-redis-subscriptions/-/graphql-redis-subscriptions-1.5.0.tgz#53c9be28ee69f61ffbfe808f8f82f7e718254acf"
   dependencies:
@@ -2415,7 +2415,7 @@ graphql-redis-subscriptions@^1.5.0:
   optionalDependencies:
     ioredis "^3.1.2"
 
-graphql-subscriptions@^0.5.6, graphql-subscriptions@^0.5.8:
+graphql-subscriptions@0.5.8, graphql-subscriptions@^0.5.6:
   version "0.5.8"
   resolved "https://registry.yarnpkg.com/graphql-subscriptions/-/graphql-subscriptions-0.5.8.tgz#13a6143c546bce390404657dc73ca501def30aa7"
   dependencies:
@@ -5770,7 +5770,7 @@ strip-json-comments@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
 
-subscriptions-transport-ws@^0.9.9:
+subscriptions-transport-ws@0.9.9:
   version "0.9.9"
   resolved "https://registry.yarnpkg.com/subscriptions-transport-ws/-/subscriptions-transport-ws-0.9.9.tgz#8a0bdc4c31df2e90e92901047fd8961deb138acc"
   dependencies:
