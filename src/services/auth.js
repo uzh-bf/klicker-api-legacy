@@ -74,7 +74,7 @@ const getToken = (req) => {
 // make this an async function such that it returns a promise
 // we can later use this promise as a return value for resolvers or similar
 const signup = async (email, password, shortname, institution, useCase, { isAAI, isActive } = {}) => {
-  // TODO: validation etc.
+  // TODO: validation etc. (shortname!)
   // TODO: activation of new accounts (send an email)
 
   // generate a salt with bcyrpt using 10 rounds
