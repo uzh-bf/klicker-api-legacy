@@ -15,12 +15,19 @@ const User = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 3,
-    maxlength: 6,
+    maxlength: 8,
     index: true,
     unique: true,
   },
+  institution: {
+    type: String,
+    required: true,
+  },
+  useCase: {
+    type: String,
+  },
   isActive: { type: Boolean, default: false },
-  isAAI: { type: Boolean, required: true },
+  isAAI: { type: Boolean, default: false },
 
   tags: [{ type: ObjectId, ref: 'Tag' }],
   questions: [{ type: ObjectId, ref: 'Question' }],
