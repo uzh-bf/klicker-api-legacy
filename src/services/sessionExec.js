@@ -25,8 +25,11 @@ const addFeedback = async ({ sessionId, content }) => {
   // save the updated session
   await session.save()
 
-  // publish the new feedback via subscription
-  pubsub.publish(FEEDBACK_ADDED, { [FEEDBACK_ADDED]: session.feedbacks[session.feedbacks.length - 1], sessionId })
+  // extract the saved feedback and convert it to a plain object
+  // then readd the mongo _id field under the id key and publish the result
+  // this is needed as redis swallows the _id field and the client could break!
+  const savedFeedback = session.feedbacks[session.feedbacks.length - 1].toObject()
+  pubsub.publish(FEEDBACK_ADDED, { [FEEDBACK_ADDED]: { ...savedFeedback, id: savedFeedback._id }, sessionId })
 
   // return the updated session
   return session
@@ -65,8 +68,11 @@ const addConfusionTS = async ({ sessionId, difficulty, speed }) => {
   // save the updated session
   await session.save()
 
-  // publish the new feedback via subscription
-  pubsub.publish(CONFUSION_ADDED, { [CONFUSION_ADDED]: session.confusionTS[session.confusionTS.length - 1], sessionId })
+  // extract the saved confusion timestep and convert it to a plain object
+  // then readd the mongo _id field under the id key and publish the result
+  // this is needed as redis swallows the _id field and the client could break!
+  const savedConfusion = session.confusionTS[session.confusionTS.length - 1].toObject()
+  pubsub.publish(CONFUSION_ADDED, { [CONFUSION_ADDED]: { ...savedConfusion, id: savedConfusion._id }, sessionId })
 
   // return the updated session
   return session
