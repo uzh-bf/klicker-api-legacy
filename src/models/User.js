@@ -28,6 +28,7 @@ const User = new mongoose.Schema({
   },
   isActive: { type: Boolean, default: false },
   isAAI: { type: Boolean, default: false },
+  isMigrated: { type: Boolean, default: false },
 
   tags: [{ type: ObjectId, ref: 'Tag' }],
   questions: [{ type: ObjectId, ref: 'Question' }],
