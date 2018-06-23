@@ -212,7 +212,6 @@ const apollo = new ApolloServer({
   context: async ({ connection, req, res }) => {
     // context handler for subscriptions
     if (connection) {
-      console.log(connection)
       return {}
     }
 
