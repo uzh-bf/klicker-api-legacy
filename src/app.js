@@ -209,12 +209,20 @@ app.use(middleware)
 const apollo = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ req, res }) => ({
-    auth: req.auth,
-    ip: req.ip,
-    loaders: createLoaders(req.auth),
-    res,
-  }),
+  context: async ({ connection, req, res }) => {
+    // context handler for subscriptions
+    if (connection) {
+      return {}
+    }
+
+    // context handler for normal requests
+    return {
+      auth: req.auth,
+      ip: req.ip,
+      loaders: createLoaders(req.auth),
+      res,
+    }
+  },
 })
 
 // apply the apollo middleware to express
