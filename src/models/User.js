@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { isAlphanumeric, isEmail, normalizeEmail } = require('validator')
 
 const { ObjectId } = mongoose.Schema.Types
 
@@ -9,6 +10,10 @@ const User = new mongoose.Schema({
     required: true,
     unique: true,
     index: true,
+    validate: {
+      message: 'INVALID_EMAIL',
+      validator: isEmail,
+    },
   },
   password: { type: String, required: true },
   shortname: {
@@ -18,6 +23,10 @@ const User = new mongoose.Schema({
     maxlength: 8,
     index: true,
     unique: true,
+    validate: {
+      message: 'INVALID_SHORTNAME',
+      validator: isAlphanumeric,
+    },
   },
   institution: {
     type: String,
@@ -38,6 +47,11 @@ const User = new mongoose.Schema({
   lastLoginAt: { type: Date },
   createdAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() },
+})
+
+User.pre('save', true, async () => {
+  // ensure the email is properly normalized
+  this.email = normalizeEmail(this.email)
 })
 
 module.exports = mongoose.model('User', User)
