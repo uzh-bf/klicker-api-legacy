@@ -51,9 +51,13 @@ const User = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now() },
 })
 
-User.pre('save', true, async () => {
+User.pre('save', (next) => {
   // ensure the email is properly normalized
-  this.email = normalizeEmail(this.email)
+  if (this.email) {
+    this.email = normalizeEmail(this.email)
+  }
+
+  next()
 })
 
 module.exports = mongoose.model('User', User)
