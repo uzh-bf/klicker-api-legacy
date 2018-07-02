@@ -5,11 +5,12 @@ const bcrypt = require('bcryptjs')
 const JWT = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
 const _get = require('lodash/get')
-const { isEmail, normalizeEmail } = require('validator')
+const { isLength, isEmail, normalizeEmail } = require('validator')
 const { AuthenticationError, UserInputError } = require('apollo-server-express')
 
 const { UserModel } = require('../models')
 const { sendSlackNotification } = require('./notifications')
+const { Errors } = require('../constants')
 
 const dev = process.env.NODE_ENV !== 'production'
 
@@ -110,7 +111,11 @@ const signup = async (
   // TODO: activation of new accounts (send an email)
 
   if (!isEmail(email)) {
-    throw new UserInputError('INVALID_EMAIL')
+    throw new UserInputError(Errors.INVALID_EMAIL)
+  }
+
+  if (!isLength(password, { min: 8 })) {
+    throw new UserInputError(Errors.INVALID_PASSWORD)
   }
 
   // normalize the email address
@@ -150,7 +155,7 @@ const signup = async (
 // we can later use this promise as a return value for resolvers or similar
 const login = async (res, email, password) => {
   if (!isEmail(email)) {
-    throw new UserInputError('INVALID_EMAIL')
+    throw new UserInputError(Errors.INVALID_EMAIL)
   }
 
   // normalize the email address
@@ -232,7 +237,7 @@ const changePassword = async (userId, newPassword) => {
 // request a password reset link
 const requestPassword = async (res, email) => {
   if (!isEmail(email)) {
-    throw new UserInputError('INVALID_EMAIL')
+    throw new UserInputError(Errors.INVALID_EMAIL)
   }
 
   // normalize the email address
