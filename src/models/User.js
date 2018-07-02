@@ -3,6 +3,8 @@ const { isAlphanumeric, isEmail, normalizeEmail } = require('validator')
 
 const { ObjectId } = mongoose.Schema.Types
 
+const { Errors } = require('../constants')
+
 const User = new mongoose.Schema({
   // define email as unique (not a validator, only for index)
   email: {
@@ -11,7 +13,7 @@ const User = new mongoose.Schema({
     unique: true,
     index: true,
     validate: {
-      message: 'INVALID_EMAIL',
+      message: Errors.INVALID_EMAIL,
       validator: isEmail,
     },
   },
@@ -24,7 +26,7 @@ const User = new mongoose.Schema({
     index: true,
     unique: true,
     validate: {
-      message: 'INVALID_SHORTNAME',
+      message: Errors.INVALID_SHORTNAME,
       validator: isAlphanumeric,
     },
   },
