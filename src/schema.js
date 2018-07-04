@@ -66,7 +66,6 @@ const typeDefs = [
     joinSession(shortname: String!): Session_Public
     question(id: ID!): Question
     runningSession: Session
-    requestPresignedURL: String!
     session(id: ID!): Session
     user: User
   }
@@ -88,6 +87,7 @@ const typeDefs = [
     modifyQuestion(id: ID!, question: QuestionModifyInput!): Question!
     pauseSession(id: ID!): Session!
     requestPassword(email: String!): String!
+    requestPresignedURL(file: FileInput!): String!
     startSession(id: ID!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
   }
@@ -110,7 +110,6 @@ const resolvers = {
     allTags: requireAuth(allTags),
     joinSession,
     question: requireAuth(question),
-    requestPresignedURL: requireAuth(requestPresignedURL),
     runningSession: requireAuth(runningSession),
     session: requireAuth(session),
     user: requireAuth(authUser),
@@ -131,6 +130,7 @@ const resolvers = {
     modifyQuestion: requireAuth(modifyQuestion),
     pauseSession: requireAuth(pauseSession),
     requestPassword,
+    requestPresignedURL: requireAuth(requestPresignedURL),
     startSession: requireAuth(startSession),
     updateSessionSettings: requireAuth(updateSessionSettings),
     activateNextBlock: requireAuth(activateNextBlock),
