@@ -1,4 +1,5 @@
 const { requireAuth } = require('./services/auth')
+const { requestPresignedURL } = require('./resolvers/files')
 const {
   allQuestions,
   createQuestion,
@@ -65,6 +66,7 @@ const typeDefs = [
     joinSession(shortname: String!): Session_Public
     question(id: ID!): Question
     runningSession: Session
+    requestPresignedURL: String!
     session(id: ID!): Session
     user: User
   }
@@ -108,6 +110,7 @@ const resolvers = {
     allTags: requireAuth(allTags),
     joinSession,
     question: requireAuth(question),
+    requestPresignedURL: requireAuth(requestPresignedURL),
     runningSession: requireAuth(runningSession),
     session: requireAuth(session),
     user: requireAuth(authUser),
