@@ -19,6 +19,18 @@ const allSessionsQuery = async (parentValue, args, { auth, loaders }) => {
 }
 
 const sessionQuery = async (parentValue, { id }, { loaders }) => ensureLoaders(loaders).sessions.load(id)
+const sessionPublicQuery = async (parentValue, { id }, { loaders }) => {
+  // load the requested session
+  const session = await ensureLoaders(loaders).sessions.load(id)
+
+  // ensure that the evaluation has been set to be public
+  if (session.settings.isEvaluationPublic) {
+    return session
+  }
+
+  // otherwise don't return any data
+  return null
+}
 const sessionByPVQuery = (parentValue, args, { loaders }) => {
   if (!parentValue.runningSession) {
     return null
@@ -140,6 +152,7 @@ module.exports = {
   allSessions: allSessionsQuery,
   runningSession: runningSessionQuery,
   session: sessionQuery,
+  sessionPublic: sessionPublicQuery,
   sessionByPV: sessionByPVQuery,
   sessionIdByPV: sessionIdByPVQuery,
   sessionsByPV: sessionsByPVQuery,
