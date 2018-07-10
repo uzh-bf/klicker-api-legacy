@@ -67,7 +67,7 @@ const typeDefs = [
     question(id: ID!): Question
     runningSession: Session
     session(id: ID!): Session
-    sessionPublic(id: ID!): Session_Public
+    sessionPublic(id: ID!): Session_PublicEvaluation
     user: User
   }
 
@@ -154,6 +154,19 @@ const resolvers = {
 
       if (obj.SC || obj.MC) {
         return 'SCQuestionOptions'
+      }
+
+      return null
+    },
+  },
+  QuestionOptions_Public: {
+    __resolveType(obj) {
+      if (obj.FREE_RANGE) {
+        return 'FREEQuestionOptions_Public'
+      }
+
+      if (obj.SC || obj.MC) {
+        return 'SCQuestionOptions_Public'
       }
 
       return null

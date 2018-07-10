@@ -52,7 +52,7 @@ const Session = `
     startedAt: String!
     finishedAt: String!
   }
-  type Session_Public {
+  type Session_PublicEvaluation {
     id: ID!
     status: Session_Status!
 
