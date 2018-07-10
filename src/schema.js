@@ -32,6 +32,7 @@ const {
   activateNextBlock,
   runtimeByPV,
   session,
+  sessionPublic,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -66,6 +67,7 @@ const typeDefs = [
     question(id: ID!): Question
     runningSession: Session
     session(id: ID!): Session
+    sessionPublic(id: ID!): Session_Public
     user: User
   }
 
@@ -110,6 +112,7 @@ const resolvers = {
     question: requireAuth(question),
     runningSession: requireAuth(runningSession),
     session: requireAuth(session),
+    sessionPublic,
     user: requireAuth(authUser),
   },
   Mutation: {
