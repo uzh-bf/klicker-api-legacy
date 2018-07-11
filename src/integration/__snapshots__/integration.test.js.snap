@@ -455,6 +455,190 @@ exports[`Integration Session Execution allows evaluating sessions after completi
   
 `;
 
+exports[`Integration Session Execution allows publishing session evaluations 1`] = `
+Object {
+  "header": Object {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-origin": "http://localhost:3000",
+    "connection": "close",
+    "content-length": "32",
+    "content-type": "application/json",
+    "date": "Wed, 11 Jul 2018 11:09:50 GMT",
+    "vary": "Origin",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-download-options": "noopen",
+    "x-frame-options": "SAMEORIGIN",
+    "x-xss-protection": "1; mode=block",
+  },
+  "req": Object {
+    "data": Object {
+      "query": "
+  query EvaluatePublicSession($sessionId: ID!) {
+    sessionPublic(id: $sessionId) {
+      id
+      status
+      blocks {
+        id
+        status
+        instances {
+          id
+          isOpen
+          version
+          question {
+            id
+            title
+            type
+            versions {
+              description
+              options {
+                FREE_RANGE {
+                  restrictions {
+                    min
+                    max
+                  }
+                }
+                SC {
+                  choices {
+                    name
+                  }
+                  randomized
+                }
+                MC {
+                  choices {
+                    name
+                  }
+                  randomized
+                }
+              }
+            }
+          }
+          results {
+            ... on SCQuestionResults {
+              CHOICES
+            }
+            ... on FREEQuestionResults {
+              FREE {
+                count
+                key
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+",
+      "variables": Object {
+        "sessionId": "5b45e5791709e04b443a58ab",
+      },
+    },
+    "headers": Object {
+      "content-type": "application/json",
+      "user-agent": "node-superagent/3.8.2",
+    },
+    "method": "POST",
+    "url": "http://127.0.0.1:63475/graphql",
+  },
+  "status": 200,
+  "text": "{\\"data\\":{\\"sessionPublic\\":null}}
+",
+}
+`;
+
+exports[`Integration Session Execution allows publishing session evaluations 2`] = `
+Object {
+  "header": Object {
+    "access-control-allow-credentials": "true",
+    "access-control-allow-origin": "http://localhost:3000",
+    "connection": "close",
+    "content-length": "274",
+    "content-type": "application/json",
+    "date": "Wed, 11 Jul 2018 11:09:50 GMT",
+    "vary": "Origin",
+    "x-content-type-options": "nosniff",
+    "x-dns-prefetch-control": "off",
+    "x-download-options": "noopen",
+    "x-frame-options": "SAMEORIGIN",
+    "x-xss-protection": "1; mode=block",
+  },
+  "req": Object {
+    "data": Object {
+      "query": "
+  query EvaluatePublicSession($sessionId: ID!) {
+    sessionPublic(id: $sessionId) {
+      id
+      status
+      blocks {
+        id
+        status
+        instances {
+          id
+          isOpen
+          version
+          question {
+            id
+            title
+            type
+            versions {
+              description
+              options {
+                FREE_RANGE {
+                  restrictions {
+                    min
+                    max
+                  }
+                }
+                SC {
+                  choices {
+                    name
+                  }
+                  randomized
+                }
+                MC {
+                  choices {
+                    name
+                  }
+                  randomized
+                }
+              }
+            }
+          }
+          results {
+            ... on SCQuestionResults {
+              CHOICES
+            }
+            ... on FREEQuestionResults {
+              FREE {
+                count
+                key
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+",
+      "variables": Object {
+        "sessionId": "5b45e5791709e04b443a58ab",
+      },
+    },
+    "headers": Object {
+      "content-type": "application/json",
+      "user-agent": "node-superagent/3.8.2",
+    },
+    "method": "POST",
+    "url": "http://127.0.0.1:63479/graphql",
+  },
+  "status": 200,
+  "text": "{\\"data\\":{\\"sessionPublic\\":null},\\"errors\\":[{\\"message\\":\\"Cannot return null for non-nullable field QuestionInstance_Public.isOpen.\\",\\"locations\\":[{\\"line\\":11,\\"column\\":11}],\\"path\\":[\\"sessionPublic\\",\\"blocks\\",0,\\"instances\\",0,\\"isOpen\\"],\\"extensions\\":{\\"code\\":\\"INTERNAL_SERVER_ERROR\\"}}]}
+",
+}
+`;
+
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can activate the first question block 1`] = `
 
     activateNextBlock {

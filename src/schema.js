@@ -198,6 +198,9 @@ const resolvers = {
   Session_QuestionBlock: {
     instances: questionInstancesByPV,
   },
+  Session_QuestionBlock_Public: {
+    instances: questionInstancesByPV,
+  },
   Tag: {
     questions: questionsByPV,
     user,

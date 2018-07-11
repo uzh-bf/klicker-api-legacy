@@ -19,9 +19,9 @@ const allSessionsQuery = async (parentValue, args, { auth, loaders }) => {
 }
 
 const sessionQuery = async (parentValue, { id }, { loaders }) => ensureLoaders(loaders).sessions.load(id)
-const sessionPublicQuery = async (parentValue, { id }, { loaders }) => {
+const sessionPublicQuery = async (parentValue, { id }) => {
   // load the requested session
-  const session = await ensureLoaders(loaders).sessions.load(id)
+  const session = await SessionModel.findById(id)
 
   // ensure that the evaluation has been set to be public
   if (session.settings.isEvaluationPublic) {
