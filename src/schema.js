@@ -178,6 +178,10 @@ const resolvers = {
     responses: responsesByPV,
     results: resultsByPV,
   },
+  QuestionInstance_Public: {
+    question: questionByPV,
+    results: resultsByPV,
+  },
   QuestionInstance_Results: {
     __resolveType(obj) {
       if (obj.FREE) {
