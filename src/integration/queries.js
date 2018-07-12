@@ -350,6 +350,7 @@ const SessionEvaluationQuery = `
           results {
             ... on SCQuestionResults {
               CHOICES
+              totalParticipants
             }
             ... on FREEQuestionResults {
               FREE {
@@ -357,12 +358,8 @@ const SessionEvaluationQuery = `
                 key
                 value
               }
+              totalParticipants
             }
-          }
-          responses {
-            id
-            value
-            createdAt
           }
         }
       }
@@ -412,6 +409,7 @@ const SessionPublicEvaluationQuery = `
           results {
             ... on SCQuestionResults {
               CHOICES
+              totalParticipants
             }
             ... on FREEQuestionResults {
               FREE {
@@ -419,6 +417,7 @@ const SessionPublicEvaluationQuery = `
                 key
                 value
               }
+              totalParticipants
             }
           }
         }
@@ -451,7 +450,7 @@ const SessionEvaluationSerializer = {
   )}
           }
           results: ${JSON.stringify(results)}
-          responses: ${responses.map(response => response.value)}
+          responses: ${responses && responses.map(response => response.value)}
         `,
   )}
       `,
@@ -484,7 +483,7 @@ const SessionPublicEvaluationSerializer = {
   )}
           }
           results: ${JSON.stringify(results)}
-          responses: ${responses.map(response => response.value)}
+          responses: ${responses && responses.map(response => response.value)}
         `,
   )}
       `,
