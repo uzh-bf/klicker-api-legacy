@@ -21,7 +21,10 @@ const { logDebug } = require('../lib/utils')
 const redisCache = getRedis()
 const redisControl = getRedis(2)
 
-// if redis is in use, unlink the cached /join/:shortname pages
+/**
+ * If redis is in use, unlink the cached /join/:shortname pages
+ * @param {*} shortname
+ */
 const cleanCache = (shortname) => {
   const key = `/join/${shortname}`
 
@@ -32,6 +35,11 @@ const cleanCache = (shortname) => {
   return redisCache.del([`${key}:de`, `${key}:en`])
 }
 
+/**
+ * Ensure that the specified session is actually running
+ * Then return the session as running
+ * @param {*} sessionId
+ */
 const getRunningSession = async (sessionId) => {
   const session = await SessionModel.findById(sessionId)
 
@@ -48,7 +56,10 @@ const getRunningSession = async (sessionId) => {
   return session
 }
 
-// create a new session
+/**
+ * Create a new session
+ * @param {*} param0
+ */
 const createSession = async ({ name, questionBlocks = [], userId }) => {
   // initialize a store for newly created instance models
   let instances = []
@@ -112,7 +123,25 @@ const createSession = async ({ name, questionBlocks = [], userId }) => {
   return newSession
 }
 
-// generic session action handler (start, pause, stop...)
+/**
+ * Modify a session
+ * @param {*} param0
+ */
+const modifySession = async ({
+  id, name, questionBlocks = [], userId,
+}) => {
+  console.log(id, name, questionBlocks, userId)
+
+  // TODO: mark/cleanup the question instances that are no longer needed?
+  // TODO: perform the updates on the session
+  // TODO: return the updates session
+}
+
+/**
+ * Generic session action handler (start, pause, stop...)
+ * @param {*} param0
+ * @param {*} actionType
+ */
 const sessionAction = async ({ sessionId, userId, shortname }, actionType) => {
   // get the current user instance
   const user = await UserModel.findById(userId)
@@ -211,16 +240,28 @@ const sessionAction = async ({ sessionId, userId, shortname }, actionType) => {
   return session
 }
 
-// start an existing session
+/**
+ * Start an existing session
+ * @param {*} param0
+ */
 const startSession = ({ id, userId, shortname }) => sessionAction({ sessionId: id, userId, shortname }, SESSION_ACTIONS.START)
 
-// pause a running session
+/**
+ * Pause a running session
+ * @param {*} param0
+ */
 const pauseSession = ({ id, userId, shortname }) => sessionAction({ sessionId: id, userId, shortname }, SESSION_ACTIONS.PAUSE)
 
-// end (complete) an existing session
+/**
+ * End (complete) an existing session
+ * @param {*} param0
+ */
 const endSession = ({ id, userId, shortname }) => sessionAction({ sessionId: id, userId, shortname }, SESSION_ACTIONS.STOP)
 
-// update session settings
+/**
+ * Update session settings
+ * @param {*} param0
+ */
 const updateSettings = async ({
   sessionId, userId, settings, shortname,
 }) => {
@@ -258,7 +299,10 @@ const updateSettings = async ({
   return session
 }
 
-// activate the next question block
+/**
+ * Activate the next question block of a running session
+ * @param {*} param0
+ */
 const activateNextBlock = async ({ userId, shortname }) => {
   const user = await UserModel.findById(userId).populate([
     'activeInstances',
@@ -373,6 +417,7 @@ const activateNextBlock = async ({ userId, shortname }) => {
 
 module.exports = {
   createSession,
+  modifySession,
   startSession,
   endSession,
   updateSettings,

@@ -71,6 +71,19 @@ const createSessionMutation = (
   userId: auth.sub,
 })
 
+const modifySessionMutation = (
+  parentValue,
+  { session: { id, name, blocks } },
+  { auth },
+) => {
+  SessionMgrService.modifySession({
+    id,
+    name,
+    questionBlocks: blocks,
+    userId: auth.sub,
+  })
+}
+
 const startSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.startSession({
   id,
   userId: auth.sub,
@@ -156,6 +169,7 @@ module.exports = {
 
   // mutations
   createSession: createSessionMutation,
+  modifySession: modifySessionMutation,
   endSession: endSessionMutation,
   activateNextBlock: activateNextBlockMutation,
   pauseSession: pauseSessionMutation,
