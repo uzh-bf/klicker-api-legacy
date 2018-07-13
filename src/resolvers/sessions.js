@@ -73,16 +73,14 @@ const createSessionMutation = (
 
 const modifySessionMutation = (
   parentValue,
-  { session: { id, name, blocks } },
+  { id, session: { name, blocks } },
   { auth },
-) => {
-  SessionMgrService.modifySession({
-    id,
-    name,
-    questionBlocks: blocks,
-    userId: auth.sub,
-  })
-}
+) => SessionMgrService.modifySession({
+  id,
+  name,
+  questionBlocks: blocks,
+  userId: auth.sub,
+})
 
 const startSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.startSession({
   id,

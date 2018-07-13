@@ -147,10 +147,14 @@ const modifySession = async ({
   id, name, questionBlocks, userId,
 }) => {
   // get the specified session from the database
-  const session = await SessionModel.findOne({
+  const sessionWithInstances = await SessionModel.findOne({
     _id: id,
     user: userId,
   }).populate('blocks.instances')
+  const session = await SessionModel.findOne({
+    _id: id,
+    user: userId,
+  })
 
   // ensure the user is authorized to modify this session
   if (!session) {
@@ -172,7 +176,7 @@ const modifySession = async ({
   // if the question blocks parameter is set, update the blocks
   if (questionBlocks) {
     // calculate the ids of the old question instances
-    const oldInstances = session.blocks.reduce(
+    const oldInstances = sessionWithInstances.blocks.reduce(
       (acc, block) => [...acc, ...block.instances],
       [],
     )

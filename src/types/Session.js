@@ -33,7 +33,6 @@ const Session = `
     blocks: [Session_QuestionBlockInput!]!
   }
   input SessionModifyInput {
-    id: ID!
     name: String
     blocks: [Session_QuestionBlockInput!]
   }

@@ -1,11 +1,12 @@
 module.exports = {
-  test: ({ createSession }) => !!createSession,
-  print: ({
-    createSession: {
+  test: ({ createSession, modifySession }) => !!createSession || !!modifySession,
+  print: ({ createSession, modifySession }) => {
+    const {
       confusionTS, feedbacks, blocks, settings,
-    },
-  }) => `
-    createSession {
+    } = createSession || modifySession
+
+    return `
+    createSession / modifySession {
       confusionTS: ${confusionTS}
       feedbacks: ${feedbacks}
       blocks: ${blocks.map(
@@ -21,5 +22,6 @@ module.exports = {
   )}
       settings: ${JSON.stringify(settings)}
     }
-  `,
+  `
+  },
 }

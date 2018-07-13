@@ -447,8 +447,8 @@ describe('Integration', () => {
     })
   })
 
-  describe('Session Creation', () => {
-    it('works', async () => {
+  describe('Session Management', () => {
+    it('enables the creation of a new session', async () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
@@ -485,6 +485,52 @@ describe('Integration', () => {
       )
 
       sessionId = data.createSession.id
+
+      expect(data).toMatchSnapshot()
+    })
+
+    it('enables modifications on the created session', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ModifySessionMutation,
+            variables: {
+              id: sessionId,
+              name: 'Updated Session Name',
+              blocks: [
+                {
+                  questions: [
+                    { question: questions[QUESTION_TYPES.SC], version: 0 },
+                    { question: questions[QUESTION_TYPES.MC], version: 0 },
+                  ],
+                },
+                {
+                  questions: [
+                    { question: questions[QUESTION_TYPES.FREE], version: 0 },
+                  ],
+                },
+                {
+                  questions: [
+                    {
+                      question: questions[QUESTION_TYPES.FREE_RANGE],
+                      version: 0,
+                    },
+                    { question: questions.FREE_RANGE_PART, version: 0 },
+                    { question: questions.FREE_RANGE_OPEN, version: 0 },
+                  ],
+                },
+                {
+                  questions: [
+                    { question: questions[QUESTION_TYPES.MC], version: 0 },
+                    { question: questions[QUESTION_TYPES.SC], version: 0 },
+                  ],
+                },
+              ],
+            },
+          },
+          authCookie,
+        ),
+      )
 
       expect(data).toMatchSnapshot()
     })
