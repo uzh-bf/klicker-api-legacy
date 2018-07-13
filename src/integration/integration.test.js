@@ -1,16 +1,16 @@
 const request = require('supertest')
 const mongoose = require('mongoose')
 
+const Queries = require('./queries/index')
+const Mutations = require('./mutations/index')
 const { app } = require('../app')
 const { initializeDb } = require('../lib/test/setup')
 const { createContentState } = require('../lib/draft')
-const queries = require('./queries')
-const mutations = require('./mutations')
 const { QUESTION_TYPES } = require('../constants')
 
 process.env.NODE_ENV = 'test'
 
-const serializers = [...queries.serializers, ...mutations.serializers]
+const serializers = [...Queries.serializers, ...Mutations.serializers]
 serializers.forEach(serializer => expect.addSnapshotSerializer(serializer))
 
 const sendQuery = (body, authCookie) => {
@@ -59,7 +59,7 @@ describe('Integration', () => {
     it('works with valid credentials', async () => {
       // send a login request
       const response = await sendQuery({
-        query: mutations.LoginMutation,
+        query: Mutations.LoginMutation,
         variables: {
           email: 'testintegration@bf.uzh.ch',
           password: 'somePassword',
@@ -80,7 +80,7 @@ describe('Integration', () => {
       ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.ChangePasswordMutation,
+            query: Mutations.ChangePasswordMutation,
             variables: { newPassword: 'someOtherPassword' },
           },
           authCookie,
@@ -91,7 +91,7 @@ describe('Integration', () => {
     it('can be requested', async () => {
       ensureNoErrors(
         await sendQuery({
-          query: mutations.RequestPasswordMutation,
+          query: Mutations.RequestPasswordMutation,
           variables: { email: 'testintegration@bf.uzh.ch' },
         }),
       )
@@ -104,7 +104,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.CreateQuestionMutation,
+            query: Mutations.CreateQuestionMutation,
             variables: {
               title: 'Test SC',
               content: createContentState(questionContent),
@@ -135,7 +135,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.CreateQuestionMutation,
+            query: Mutations.CreateQuestionMutation,
             variables: {
               title: 'Test MC',
               content: createContentState('This is a simple MC question.'),
@@ -167,7 +167,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.CreateQuestionMutation,
+            query: Mutations.CreateQuestionMutation,
             variables: {
               title: 'Test FREE',
               content: createContentState('This is a simple FREE question.'),
@@ -192,7 +192,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.CreateQuestionMutation,
+            query: Mutations.CreateQuestionMutation,
             variables: {
               title: 'Test FREE_RANGE',
               content: createContentState(
@@ -221,7 +221,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.CreateQuestionMutation,
+            query: Mutations.CreateQuestionMutation,
             variables: {
               title: 'Test partly restricted FREE_RANGE',
               content: createContentState(
@@ -250,7 +250,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.CreateQuestionMutation,
+            query: Mutations.CreateQuestionMutation,
             variables: {
               title: 'Test unrestricted FREE_RANGE',
               content: createContentState(
@@ -281,7 +281,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.ModifyQuestionMutation,
+            query: Mutations.ModifyQuestionMutation,
             variables: {
               id: questions.SC,
               title: 'Test SC #2',
@@ -312,7 +312,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.ModifyQuestionMutation,
+            query: Mutations.ModifyQuestionMutation,
             variables: {
               id: questions.MC,
               title: 'Test MC #2',
@@ -344,7 +344,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.ModifyQuestionMutation,
+            query: Mutations.ModifyQuestionMutation,
             variables: {
               id: questions.FREE,
               title: 'Test FREE #2',
@@ -369,7 +369,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.ModifyQuestionMutation,
+            query: Mutations.ModifyQuestionMutation,
             variables: {
               id: questions.FREE_RANGE,
               title: 'Test FREE_RANGE #2',
@@ -396,7 +396,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.ModifyQuestionMutation,
+            query: Mutations.ModifyQuestionMutation,
             variables: {
               id: questions.FREE_RANGE,
               title: 'Test FREE_RANGE #2',
@@ -423,7 +423,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.ModifyQuestionMutation,
+            query: Mutations.ModifyQuestionMutation,
             variables: {
               id: questions.FREE_RANGE,
               title: 'Test FREE_RANGE #2',
@@ -452,7 +452,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.CreateSessionMutation,
+            query: Mutations.CreateSessionMutation,
             variables: {
               name: 'Session Name',
               blocks: [
@@ -495,7 +495,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.StartSessionMutation,
+            query: Mutations.StartSessionMutation,
             variables: { id: sessionId },
           },
           authCookie,
@@ -509,7 +509,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.UpdateSessionSettingsMutation,
+            query: Mutations.UpdateSessionSettingsMutation,
             variables: {
               sessionId,
               settings: {
@@ -529,7 +529,7 @@ describe('Integration', () => {
     it('allows adding confusion timesteps', async () => {
       ensureNoErrors(
         await sendQuery({
-          query: mutations.AddConfusionTSMutation,
+          query: Mutations.AddConfusionTSMutation,
           variables: {
             fp: 'myfp1',
             sessionId,
@@ -540,7 +540,7 @@ describe('Integration', () => {
       )
       ensureNoErrors(
         await sendQuery({
-          query: mutations.AddConfusionTSMutation,
+          query: Mutations.AddConfusionTSMutation,
           variables: {
             fp: 'myfp1',
             sessionId,
@@ -551,7 +551,7 @@ describe('Integration', () => {
       )
       ensureNoErrors(
         await sendQuery({
-          query: mutations.AddConfusionTSMutation,
+          query: Mutations.AddConfusionTSMutation,
           variables: {
             fp: 'myfp1',
             sessionId,
@@ -562,7 +562,7 @@ describe('Integration', () => {
       )
       const data = ensureNoErrors(
         await sendQuery({
-          query: mutations.AddConfusionTSMutation,
+          query: Mutations.AddConfusionTSMutation,
           variables: {
             fp: 'myfp1',
             sessionId,
@@ -578,19 +578,19 @@ describe('Integration', () => {
     it('allows adding feedbacks', async () => {
       ensureNoErrors(
         await sendQuery({
-          query: mutations.AddFeedbackMutation,
+          query: Mutations.AddFeedbackMutation,
           variables: { fp: 'myfp1', sessionId, content: 'my test feedback' },
         }),
       )
       ensureNoErrors(
         await sendQuery({
-          query: mutations.AddFeedbackMutation,
+          query: Mutations.AddFeedbackMutation,
           variables: { fp: 'myfp1', sessionId, content: 'good lecture' },
         }),
       )
       const data = ensureNoErrors(
         await sendQuery({
-          query: mutations.AddFeedbackMutation,
+          query: Mutations.AddFeedbackMutation,
           variables: { fp: 'myfp1', sessionId, content: 'my test feedback' },
         }),
       )
@@ -605,7 +605,7 @@ describe('Integration', () => {
         const runningSession = ensureNoErrors(
           await sendQuery(
             {
-              query: queries.RunningSessionQuery,
+              query: Queries.RunningSessionQuery,
             },
             authCookie,
           ),
@@ -615,7 +615,7 @@ describe('Integration', () => {
         const evaluateSession = ensureNoErrors(
           await sendQuery(
             {
-              query: queries.SessionEvaluationQuery,
+              query: Queries.SessionEvaluationQuery,
               variables: { sessionId },
             },
             authCookie,
@@ -628,7 +628,7 @@ describe('Integration', () => {
         const data = ensureNoErrors(
           await sendQuery(
             {
-              query: mutations.ActivateNextBlockMutation,
+              query: Mutations.ActivateNextBlockMutation,
             },
             authCookie,
           ),
@@ -640,7 +640,7 @@ describe('Integration', () => {
       it('PARTICIPANT: can join the session initially', async () => {
         const data = ensureNoErrors(
           await sendQuery({
-            query: queries.JoinSessionQuery,
+            query: Queries.JoinSessionQuery,
             variables: { shortname: 'integr' },
           }),
         )
@@ -654,7 +654,7 @@ describe('Integration', () => {
       it('PARTICIPANT: can respond to the SC question in the first block', async () => {
         ensureNoErrors(
           await sendQuery({
-            query: mutations.AddResponseMutation,
+            query: Mutations.AddResponseMutation,
             variables: {
               fp: 'myfp1',
               instanceId: instanceIds.SC,
@@ -669,7 +669,7 @@ describe('Integration', () => {
       it('PARTICIPANT: can respond to the MC question in the first block', async () => {
         ensureNoErrors(
           await sendQuery({
-            query: mutations.AddResponseMutation,
+            query: Mutations.AddResponseMutation,
             variables: {
               fp: 'myfp1',
               instanceId: instanceIds.MC,
@@ -685,7 +685,7 @@ describe('Integration', () => {
         const runningSession = ensureNoErrors(
           await sendQuery(
             {
-              query: queries.RunningSessionQuery,
+              query: Queries.RunningSessionQuery,
             },
             authCookie,
           ),
@@ -695,7 +695,7 @@ describe('Integration', () => {
         const evaluateSession = ensureNoErrors(
           await sendQuery(
             {
-              query: queries.SessionEvaluationQuery,
+              query: Queries.SessionEvaluationQuery,
               variables: { sessionId },
             },
             authCookie,
@@ -708,7 +708,7 @@ describe('Integration', () => {
         const data = ensureNoErrors(
           await sendQuery(
             {
-              query: mutations.PauseSessionMutation,
+              query: Mutations.PauseSessionMutation,
               variables: { id: sessionId },
             },
             authCookie,
@@ -722,7 +722,7 @@ describe('Integration', () => {
         const data = ensureNoErrors(
           await sendQuery(
             {
-              query: mutations.StartSessionMutation,
+              query: Mutations.StartSessionMutation,
               variables: { id: sessionId },
             },
             authCookie,
@@ -736,7 +736,7 @@ describe('Integration', () => {
         const data = ensureNoErrors(
           await sendQuery(
             {
-              query: mutations.ActivateNextBlockMutation,
+              query: Mutations.ActivateNextBlockMutation,
             },
             authCookie,
           ),
@@ -751,7 +751,7 @@ describe('Integration', () => {
         const data = ensureNoErrors(
           await sendQuery(
             {
-              query: mutations.ActivateNextBlockMutation,
+              query: Mutations.ActivateNextBlockMutation,
             },
             authCookie,
           ),
@@ -763,7 +763,7 @@ describe('Integration', () => {
       it('PARTICIPANT: can update the joined session for the second block', async () => {
         const data = ensureNoErrors(
           await sendQuery({
-            query: queries.JoinSessionQuery,
+            query: Queries.JoinSessionQuery,
             variables: { shortname: 'integr' },
           }),
         )
@@ -776,7 +776,7 @@ describe('Integration', () => {
       it('PARTICIPANT: can respond to the FREE question in the second block', async () => {
         ensureNoErrors(
           await sendQuery({
-            query: mutations.AddResponseMutation,
+            query: Mutations.AddResponseMutation,
             variables: {
               fp: 'myfp1',
               instanceId: instanceIds.FREE,
@@ -790,7 +790,7 @@ describe('Integration', () => {
         const runningSession = ensureNoErrors(
           await sendQuery(
             {
-              query: queries.RunningSessionQuery,
+              query: Queries.RunningSessionQuery,
             },
             authCookie,
           ),
@@ -800,7 +800,7 @@ describe('Integration', () => {
         const evaluateSession = ensureNoErrors(
           await sendQuery(
             {
-              query: queries.SessionEvaluationQuery,
+              query: Queries.SessionEvaluationQuery,
               variables: { sessionId },
             },
             authCookie,
@@ -813,7 +813,7 @@ describe('Integration', () => {
         const data = ensureNoErrors(
           await sendQuery(
             {
-              query: mutations.ActivateNextBlockMutation,
+              query: Mutations.ActivateNextBlockMutation,
             },
             authCookie,
           ),
@@ -828,7 +828,7 @@ describe('Integration', () => {
         const data = ensureNoErrors(
           await sendQuery(
             {
-              query: mutations.ActivateNextBlockMutation,
+              query: Mutations.ActivateNextBlockMutation,
             },
             authCookie,
           ),
@@ -840,7 +840,7 @@ describe('Integration', () => {
       it('PARTICIPANT: can update the joined session for the third block', async () => {
         const data = ensureNoErrors(
           await sendQuery({
-            query: queries.JoinSessionQuery,
+            query: Queries.JoinSessionQuery,
             variables: { shortname: 'integr' },
           }),
         )
@@ -855,7 +855,7 @@ describe('Integration', () => {
       it('PARTICIPANT: can respond to the FREE_RANGE question in the third block', async () => {
         ensureNoErrors(
           await sendQuery({
-            query: mutations.AddResponseMutation,
+            query: Mutations.AddResponseMutation,
             variables: {
               fp: 'myfp1',
               instanceId: instanceIds.FREE_RANGE,
@@ -868,7 +868,7 @@ describe('Integration', () => {
       it('PARTICIPANT: can respond to the partly restricted FREE_RANGE question in the third block', async () => {
         ensureNoErrors(
           await sendQuery({
-            query: mutations.AddResponseMutation,
+            query: Mutations.AddResponseMutation,
             variables: {
               fp: 'myfp1',
               instanceId: instanceIds.FREE_RANGE_PART,
@@ -881,7 +881,7 @@ describe('Integration', () => {
       it('PARTICIPANT: can respond to the unrestricted FREE_RANGE question in the third block', async () => {
         ensureNoErrors(
           await sendQuery({
-            query: mutations.AddResponseMutation,
+            query: Mutations.AddResponseMutation,
             variables: {
               fp: 'myfp1',
               instanceId: instanceIds.FREE_RANGE_OPEN,
@@ -895,7 +895,7 @@ describe('Integration', () => {
         const runningSession = ensureNoErrors(
           await sendQuery(
             {
-              query: queries.RunningSessionQuery,
+              query: Queries.RunningSessionQuery,
             },
             authCookie,
           ),
@@ -905,7 +905,7 @@ describe('Integration', () => {
         const evaluateSession = ensureNoErrors(
           await sendQuery(
             {
-              query: queries.SessionEvaluationQuery,
+              query: Queries.SessionEvaluationQuery,
               variables: { sessionId },
             },
             authCookie,
@@ -918,7 +918,7 @@ describe('Integration', () => {
         const data = ensureNoErrors(
           await sendQuery(
             {
-              query: mutations.ActivateNextBlockMutation,
+              query: Mutations.ActivateNextBlockMutation,
             },
             authCookie,
           ),
@@ -932,7 +932,7 @@ describe('Integration', () => {
       // ensure that the session evaluation data is not leaked before publishing
       const privateSessionData = ensureNoErrors(
         await sendQuery({
-          query: queries.SessionPublicEvaluationQuery,
+          query: Queries.SessionPublicEvaluationQuery,
           variables: {
             sessionId,
           },
@@ -944,7 +944,7 @@ describe('Integration', () => {
       // set the session evaluation to be publicly available
       await sendQuery(
         {
-          query: mutations.UpdateSessionSettingsMutation,
+          query: Mutations.UpdateSessionSettingsMutation,
           variables: {
             sessionId,
             settings: {
@@ -958,7 +958,7 @@ describe('Integration', () => {
       // ensure that the evaluation can be publicly accessed (but only in restricted format)
       const publicSessionData = ensureNoErrors(
         await sendQuery({
-          query: queries.SessionPublicEvaluationQuery,
+          query: Queries.SessionPublicEvaluationQuery,
           variables: {
             sessionId,
           },
@@ -972,7 +972,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.EndSessionMutation,
+            query: Mutations.EndSessionMutation,
             variables: { id: sessionId },
           },
           authCookie,
@@ -986,7 +986,7 @@ describe('Integration', () => {
       const evaluateSession = ensureNoErrors(
         await sendQuery(
           {
-            query: queries.SessionEvaluationQuery,
+            query: Queries.SessionEvaluationQuery,
             variables: { sessionId },
           },
           authCookie,
@@ -1002,7 +1002,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.ArchiveQuestionsMutation,
+            query: Mutations.ArchiveQuestionsMutation,
             variables: {
               ids: [questions.FREE_RANGE, questions.SC],
             },
@@ -1018,7 +1018,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: mutations.ArchiveQuestionsMutation,
+            query: Mutations.ArchiveQuestionsMutation,
             variables: {
               ids: [questions.FREE_RANGE, questions.SC],
             },
@@ -1035,7 +1035,7 @@ describe('Integration', () => {
     it('works', async () => {
       const response = await sendQuery(
         {
-          query: mutations.LogoutMutation,
+          query: Mutations.LogoutMutation,
         },
         authCookie,
       )
@@ -1050,7 +1050,7 @@ describe('Integration', () => {
       // try to archive questions (should not work)
       const response2 = await sendQuery(
         {
-          query: mutations.ArchiveQuestionsMutation,
+          query: Mutations.ArchiveQuestionsMutation,
           variables: {
             ids: [questions.FREE_RANGE, questions.SC],
           },
