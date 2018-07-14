@@ -3,7 +3,7 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 
 const SessionMgrService = require('./sessionMgr')
-const { QuestionInstanceModel } = require('../models')
+const { QuestionInstanceModel, SessionModel } = require('../models')
 const { initializeDb, prepareSessionFactory } = require('../lib/test/setup')
 const {
   sessionSerializer,
@@ -403,6 +403,53 @@ describe('SessionMgrService', () => {
       await SessionMgrService.endSession({
         id: preparedSession.id,
         userId,
+      })
+    })
+  })
+
+  describe('deleteSession', () => {
+    let preparedSession
+
+    beforeAll(async () => {
+      preparedSession = await prepareSession(userId)
+    })
+
+    it('fully deletes a session and all question instances', async () => {
+      expect(preparedSession).toMatchSnapshot()
+
+      // compute the instance ids related to the session
+      const instanceIds = preparedSession.blocks.reduce(
+        (acc, block) => [...acc, ...block.instances],
+        [],
+      )
+
+      // ensure that all the instances are present
+      instanceIds.forEach(async (questionInstance) => {
+        const matchingInstances = await QuestionInstanceModel.count({
+          _id: questionInstance,
+        })
+        expect(matchingInstances).toEqual(1)
+      })
+
+      // perform the session deletion
+      const result = await SessionMgrService.deleteSession({
+        sessionId: preparedSession.id,
+        userId,
+      })
+      expect(result).toEqual('DELETION_SUCCESSFUL')
+
+      // expect the session to have been deleted
+      const matchingSessions = await SessionModel.count({
+        _id: preparedSession.id,
+      })
+      expect(matchingSessions).toEqual(0)
+
+      // expect the instances to have been deleted
+      instanceIds.forEach(async (questionInstance) => {
+        const matchingInstances = await QuestionInstanceModel.count({
+          _id: questionInstance,
+        })
+        expect(matchingInstances).toEqual(0)
       })
     })
   })

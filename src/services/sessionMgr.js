@@ -188,7 +188,7 @@ const modifySession = async ({
 
     // completely remove the instance entities
     const instanceCleanup = QuestionInstanceModel.deleteMany({
-      id: { $in: oldInstances },
+      _id: { $in: oldInstances },
     })
 
     // map the blocks
@@ -495,6 +495,36 @@ const activateNextBlock = async ({ userId, shortname }) => {
   return user.runningSession
 }
 
+/**
+ * Delete a session
+ * @param {*} param0
+ */
+const deleteSession = async ({ userId, sessionId }) => {
+  // get the session from the database
+  const session = await SessionModel.findOne({ _id: sessionId, user: userId })
+
+  if (!session) {
+    throw new ForbiddenError('SESSION_NOT_FOUND')
+  }
+
+  // compute the list of question instances used in this session
+  const instanceIds = session.blocks.reduce(
+    (acc, block) => [...acc, ...block.instances],
+    [],
+  )
+
+  // delete the session and all related question instances
+  await Promise.all([
+    SessionModel.deleteOne({ _id: sessionId, user: userId }),
+    QuestionInstanceModel.deleteMany({
+      _id: { $in: instanceIds },
+      user: userId,
+    }),
+  ])
+
+  return 'DELETION_SUCCESSFUL'
+}
+
 module.exports = {
   createSession,
   modifySession,
@@ -504,4 +534,5 @@ module.exports = {
   activateNextBlock,
   getRunningSession,
   pauseSession,
+  deleteSession,
 }
