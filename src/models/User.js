@@ -49,6 +49,9 @@ const User = new mongoose.Schema({
   lastLoginAt: { type: Date },
   createdAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() },
+
+  deletionToken: { type: String },
+  deletionRequestedAt: { type: Date },
 })
 
 User.pre('save', (next) => {

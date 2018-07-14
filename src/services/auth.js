@@ -22,10 +22,10 @@ const AUTH_COOKIE_SETTINGS = {
   secure: !dev && process.env.APP_HTTPS,
 }
 
-const generateJwtSettings = user => ({
+const generateJwtSettings = (user, scope = ['user']) => ({
   // expiresIn: 86400,
   sub: user.id,
-  scope: ['user'],
+  scope,
   shortname: user.shortname,
 })
 
@@ -297,6 +297,41 @@ const requestPassword = async (res, email) => {
   }
 
   return 'PASSWORD_RESET_SENT'
+}
+
+/**
+ * Request account deletion
+ * Send a deletion token to the stored email
+ * @param {*} userId
+ */
+const requestAccountDeletion = async (userId) => {
+  // get the user from the database
+  const user = await UserModel.findById(userId)
+
+  // generate a jwt that is valid for account deletion
+  const jwt = JWT.sign(
+    generateJwtSettings(user, ['delete']),
+    process.env.APP_SECRET,
+    {
+      expiresIn: '1d',
+    },
+  )
+
+  console.log(jwt)
+
+  // TODO: send the token via email
+  // TODO:
+}
+
+/**
+ * Perform account deletion
+ * Validate the deletion token previosuly sent to the stored email
+ * @param {*} userId
+ * @param {*} deletionToken
+ */
+const performAccountDeletion = async (userId, deletionToken) => {
+  // TODO: validate the deletion token
+  // TODO: perform account deletion
 }
 
 module.exports = {
