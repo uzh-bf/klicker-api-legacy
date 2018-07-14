@@ -3,6 +3,7 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 
 const QuestionService = require('./questions')
+const { QuestionModel } = require('../models')
 const { initializeDb } = require('../lib/test/setup')
 const { questionSerializer } = require('../lib/test/serializers')
 const { createContentState } = require('../lib/draft')
@@ -238,6 +239,23 @@ describe('QuestionService', () => {
         questions.SC.user,
       )
       expect(unarchivedQuestions).toMatchSnapshot()
+    })
+  })
+
+  describe('deleteQuestion', () => {
+    it('performs soft-deletion on a used question', async () => {
+      // perform the deletion
+      const result = await QuestionService.deleteQuestion({
+        questionId: questions.SC.id,
+        userId,
+      })
+      expect(result).toEqual('DELETION_SUCCESSFUL')
+
+      const question = await QuestionModel.findById(questions.SC.id)
+      expect(question.isDeleted).toEqual(true)
+    })
+    it.skip('performs hard-deletion on an unused question', async () => {
+      // TODO: implementation
     })
   })
 })

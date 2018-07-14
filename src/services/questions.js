@@ -1,7 +1,7 @@
 const _isNumber = require('lodash/isNumber')
 // TODO: find a way to use draft.js without needing react and react-dom
 const { ContentState, convertToRaw } = require('draft-js')
-const { UserInputError } = require('apollo-server-express')
+const { ForbiddenError, UserInputError } = require('apollo-server-express')
 
 const { QuestionModel, TagModel, UserModel } = require('../models')
 const { QUESTION_GROUPS, QUESTION_TYPES } = require('../constants')
@@ -270,9 +270,39 @@ const archiveQuestions = async (questionIds, userId) => {
   // await the question update promises
   return Promise.all(promises)
 }
+/**
+ * Delete a question from the database
+ * @param {*} param0
+ */
+const deleteQuestion = async ({ questionId, userId }) => {
+  // get the question from the database
+  const question = await QuestionModel.findOne({
+    _id: questionId,
+    user: userId,
+  })
+
+  if (!question) {
+    throw new ForbiddenError('QUESTION_NOT_FOUND')
+  }
+
+  // if the question has not been used anywhere, perform hard deletion
+  /* if (question.instances.length === 0) {
+    // TODO: implement hard deletion
+    // need to account for tags that are no longer needed etc.
+    return 'DELETION_SUCCESSFUL'
+  } */
+
+  // if the question has already been used (there are instances)
+  // perform soft deletion by setting the isDeleted flag
+  question.isDeleted = true
+  await question.save()
+
+  return 'DELETION_SUCCESSFUL'
+}
 
 module.exports = {
   createQuestion,
   modifyQuestion,
   archiveQuestions,
+  deleteQuestion,
 }
