@@ -25,6 +25,11 @@ const Question = new mongoose.Schema({
     default: false,
     index: true,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
 
   versions: [{ type: QuestionVersion, required: true }],
   instances: [{ type: ObjectId, ref: 'QuestionInstance' }],
