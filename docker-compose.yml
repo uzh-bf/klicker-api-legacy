@@ -14,6 +14,17 @@ services:
       ORIGIN: "http://localhost:3000"
       PORT: 3000
 
+  minio:
+    image: minio/minio
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: klicker
+      MINIO_SECRET_KEY: secret123
+    command: server /data
+
   #redis:
     #image: "redis:3-32bit"
     #ports:
@@ -23,3 +34,6 @@ services:
     #image: "mongo:3.2"
     #ports:
       #- "27017:27017"
+
+volumes:
+  minio-data:
