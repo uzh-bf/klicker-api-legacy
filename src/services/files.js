@@ -21,15 +21,15 @@ const requestPresignedURL = async ({ fileType, userId, questionId }) => {
     throw new ForbiddenError('S3 not available.')
   }
 
-  // compute a scoped filename
-  // images are scoped to the question as they can be reused across versions
-  const fileName = `${userId}/${questionId}/${UUID()}`
-
   // define the list of allowed file types
   const allowedFileTypes = ['png', 'jpeg', 'gif']
   if (!allowedFileTypes.includes(fileType)) {
     throw new UserInputError('Unsupported file type.')
   }
+
+  // compute a scoped filename
+  // images are scoped to the question as they can be reused across versions
+  const fileName = `${userId}/${questionId}/${UUID()}.${fileType}`
 
   // generate a presigned url with the specified file type and generated name
   return S3.getSignedUrl('putObject', {
