@@ -1,4 +1,8 @@
 const FileService = require('../services/files')
+const { ensureLoaders } = require('../lib/loaders')
+
+const fileByIDQuery = (parentValue, { id }, { loaders }) => ensureLoaders(loaders).files.load(id)
+const filesByPVQuery = (parentValue, args, { loaders }) => ensureLoaders(loaders).files.loadMany(parentValue.files)
 
 const requestPresignedURLMutation = async (
   parentValue,
@@ -10,5 +14,10 @@ const requestPresignedURLMutation = async (
 })
 
 module.exports = {
+  // queries
+  file: fileByIDQuery,
+  files: filesByPVQuery,
+
+  // mutations
   requestPresignedURL: requestPresignedURLMutation,
 }
