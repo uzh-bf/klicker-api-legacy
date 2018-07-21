@@ -65,6 +65,7 @@ const Question = `
     options: QuestionOptionsInput!
     solution: Question_SolutionInput
 
+    files: [FileInput!]
     tags: [ID!]!
   }
   input QuestionModifyInput {
@@ -73,6 +74,7 @@ const Question = `
     options: QuestionOptionsInput
     solution: Question_SolutionInput
 
+    files: [FileInput!]
     tags: [ID!]
   }
   type Question {
@@ -117,6 +119,7 @@ const Question = `
     solution: Question_Solution
 
     instances: [QuestionInstance!]!
+    files: [File!]!
 
     createdAt: String!
     updatedAt: String!
@@ -125,5 +128,6 @@ const Question = `
     id: ID!
     description: String!
     options: Question_Options_Public
+    files: [File_Public!]!
   }
 `
