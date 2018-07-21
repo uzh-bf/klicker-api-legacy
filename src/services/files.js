@@ -9,6 +9,7 @@ if (process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY) {
     endpoint: process.env.S3_ENDPOINT
       ? new AWS.Endpoint(process.env.S3_ENDPOINT)
       : undefined,
+    region: process.env.S3_REGION,
     secretAccessKey: process.env.S3_SECRET_KEY,
     s3ForcePathStyle: true,
     signatureVersion: 'v4',
