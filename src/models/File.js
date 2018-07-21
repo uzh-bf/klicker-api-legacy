@@ -9,9 +9,18 @@ const File = new mongoose.Schema({
     index: true,
     unique: true,
   },
-  type: { type: String, required: true, index: true },
-  version: { type: Number, required: true, default: 0 },
+  type: {
+    type: String,
+    enum: ['png', 'jpeg', 'gif'],
+    required: true,
+    index: true,
+  },
 
+  question: {
+    type: ObjectId,
+    ref: 'Question',
+    required: true,
+  },
   user: {
     type: ObjectId,
     ref: 'User',
