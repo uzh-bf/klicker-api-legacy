@@ -101,6 +101,7 @@ const Question = `
     description: String!
     options: Question_Options
     solution: Question_Solution
+    files: [File_Public!]
   }
   type Question_PublicEvaluation {
     id: ID!

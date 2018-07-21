@@ -28,6 +28,7 @@ const File = `
     updatedAt: String!
   }
   type File_Public {
+    id: ID!
     name: String!
     type: String!
   }
