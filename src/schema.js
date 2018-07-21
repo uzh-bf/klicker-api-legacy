@@ -33,6 +33,7 @@ const {
   activateNextBlock,
   runtimeByPV,
   session,
+  modifySession,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -67,6 +68,7 @@ const typeDefs = [
     question(id: ID!): Question
     runningSession: Session
     session(id: ID!): Session
+    sessionPublic(id: ID!): Session_PublicEvaluation
     user: User
   }
 
@@ -85,6 +87,7 @@ const typeDefs = [
     login(email: String!, password: String!): ID!
     logout: String!
     modifyQuestion(id: ID!, question: QuestionModifyInput!): Question!
+    modifySession(id: ID!, session: SessionModifyInput!): Session!
     pauseSession(id: ID!): Session!
     requestPassword(email: String!): String!
     requestPresignedURL(file: FileInput!): String!
@@ -112,6 +115,7 @@ const resolvers = {
     question: requireAuth(question),
     runningSession: requireAuth(runningSession),
     session: requireAuth(session),
+    sessionPublic: session,
     user: requireAuth(authUser),
   },
   Mutation: {
@@ -128,6 +132,7 @@ const resolvers = {
     login,
     logout,
     modifyQuestion: requireAuth(modifyQuestion),
+    modifySession: requireAuth(modifySession),
     pauseSession: requireAuth(pauseSession),
     requestPassword,
     requestPresignedURL: requireAuth(requestPresignedURL),
@@ -159,10 +164,27 @@ const resolvers = {
       return null
     },
   },
+  QuestionOptions_Public: {
+    __resolveType(obj) {
+      if (obj.FREE_RANGE) {
+        return 'FREEQuestionOptions_Public'
+      }
+
+      if (obj.SC || obj.MC) {
+        return 'SCQuestionOptions_Public'
+      }
+
+      return null
+    },
+  },
   QuestionInstance: {
     question: questionByPV,
     session: sessionIdByPV,
     responses: responsesByPV,
+    results: resultsByPV,
+  },
+  QuestionInstance_Public: {
+    question: questionByPV,
     results: resultsByPV,
   },
   QuestionInstance_Results: {
@@ -183,6 +205,9 @@ const resolvers = {
     runtime: runtimeByPV,
   },
   Session_QuestionBlock: {
+    instances: questionInstancesByPV,
+  },
+  Session_QuestionBlock_Public: {
     instances: questionInstancesByPV,
   },
   Tag: {
