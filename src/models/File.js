@@ -9,6 +9,10 @@ const File = new mongoose.Schema({
     index: true,
     unique: true,
   },
+  originalName: {
+    type: String,
+    required: true,
+  },
   type: {
     type: String,
     enum: ['image/png', 'image/jpeg', 'image/gif'],
