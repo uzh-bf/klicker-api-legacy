@@ -12,6 +12,8 @@ if (
     accessKeyId: process.env.S3_ACCESS_KEY,
     endpoint: new AWS.Endpoint(process.env.S3_ENDPOINT),
     secretAccessKey: process.env.S3_SECRET_KEY,
+    s3ForcePathStyle: true,
+    signatureVersion: 'v4',
   })
 }
 
