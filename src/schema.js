@@ -45,6 +45,7 @@ const {
   changePassword,
   requestPassword,
 } = require('./resolvers/users')
+const { files } = require('./resolvers/files')
 const { confusionAdded, feedbackAdded } = require('./resolvers/subscriptions')
 const { allTypes } = require('./types')
 
@@ -200,6 +201,12 @@ const resolvers = {
       return null
     },
   },
+  Question_Version: {
+    files,
+  },
+  Question_Version_Public: {
+    files,
+  },
   Session: {
     user,
     runtime: runtimeByPV,
@@ -219,6 +226,7 @@ const resolvers = {
     runningSession: sessionByPV,
     sessions: sessionsByPV,
     tags,
+    files,
   },
 }
 
