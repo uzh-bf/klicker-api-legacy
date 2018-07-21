@@ -5,14 +5,9 @@ module.exports = () => [File]
 
 const File = `
   enum File_Type {
-    PNG
-    JPG
-    GIF
-  }
-
-  input FileInput {
-    fileName: String!
-    fileType: File_Type!
+    png
+    jpeg
+    gif
   }
 
   type File {
