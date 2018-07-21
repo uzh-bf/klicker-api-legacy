@@ -11,16 +11,11 @@ const File = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['png', 'jpeg', 'gif'],
+    enum: ['image/png', 'image/jpeg', 'image/gif'],
     required: true,
     index: true,
   },
 
-  question: {
-    type: ObjectId,
-    ref: 'Question',
-    required: true,
-  },
   user: {
     type: ObjectId,
     ref: 'User',
