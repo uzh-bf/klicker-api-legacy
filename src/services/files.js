@@ -41,8 +41,6 @@ const requestPresignedURL = async ({ fileType, userId }) => {
   // const fileName = `${userId}/${questionId}/${UUID()}.${fileType}`
   const fileName = `${userId}/${UUID()}.${fileExtensions[fileType]}`
 
-  console.log(fileName)
-
   // generate a presigned url with the specified file type and generated name
   const signedUrl = await S3.getSignedUrl('putObject', {
     Bucket: process.env.S3_BUCKET,
