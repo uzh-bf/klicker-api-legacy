@@ -4,23 +4,19 @@
 module.exports = () => [File]
 
 const File = `
-  enum File_Type {
-    png
-    jpeg
-    gif
+  type File_PresignedURL {
+    fileName: String!
+    signedUrl: String!
   }
 
   type File {
     id: ID!
-    title: String!
+
+    name: String!
     type: Question_Type!
-    isArchived: Boolean
 
+    question: Question!
     user: User!
-
-    instances: [QuestionInstance!]!
-    tags: [Tag!]!
-    versions: [Question_Version!]!
 
     createdAt: String!
     updatedAt: String!

@@ -90,7 +90,7 @@ const typeDefs = [
     modifySession(id: ID!, session: SessionModifyInput!): Session!
     pauseSession(id: ID!): Session!
     requestPassword(email: String!): String!
-    requestPresignedURL(questionId: ID!, fileType: File_Type!): String!
+    requestPresignedURL(fileType: String!): File_PresignedURL!
     startSession(id: ID!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
   }
