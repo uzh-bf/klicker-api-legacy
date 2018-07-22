@@ -9,7 +9,12 @@ const {
 const { QUESTION_GROUPS, QUESTION_TYPES } = require('../constants')
 const { convertToPlainText } = require('../lib/draft')
 
-// process tags when editing or creating a question
+/**
+ * Process tags when editing or creating a question
+ * @param {*} existingTags
+ * @param {*} newTags
+ * @param {*} userId
+ */
 const processTags = (existingTags, newTags, userId) => {
   // get references for the already existing tags
   const reusableTags = existingTags.filter(tag => newTags.includes(tag.name))
@@ -33,8 +38,17 @@ const processTags = (existingTags, newTags, userId) => {
   }
 }
 
+/**
+ *
+ * @param {*} files
+ * @param {*} userId
+ */
 const processFiles = (files = [], userId) => {
-  const createdFiles = files.map(
+  // extract the ids of already existing files
+  const existingFileIds = files.filter(file => file.id).map(file => file.id)
+
+  // create models for entirely new files
+  const createdFiles = files.filter(file => !file.id).map(
     ({ name, originalName, type }) => new FileModel({
       name,
       originalName,
@@ -46,6 +60,7 @@ const processFiles = (files = [], userId) => {
   return {
     createdFiles,
     createdFileIds: createdFiles.map(file => file.id),
+    existingFileIds,
   }
 }
 
@@ -168,7 +183,7 @@ const modifyQuestion = async (
   questionId,
   userId,
   {
-    title, tags, content, options, solution,
+    title, tags, content, options, solution, files,
   },
 ) => {
   const promises = []
@@ -205,11 +220,11 @@ const modifyQuestion = async (
     question.title = title
   }
 
+  // find the corresponding user and corresponding tags
+  const user = await UserModel.findById(userId).populate(['tags'])
+
   // if tags have been changed
   if (tags) {
-    // find the corresponding user and corresponding tags
-    const user = await UserModel.findById(userId).populate(['tags'])
-
     // process tags
     const { allTags, allTagIds } = processTags(user.tags, tags, userId)
 
@@ -240,7 +255,7 @@ const modifyQuestion = async (
     user.tags = Array.from(new Set([...user.tags, ...allTags]))
 
     // add the tag updates to promises
-    promises.concat(user.save(), allTagsUpdate, oldTagsUpdate)
+    promises.push(allTagsUpdate, oldTagsUpdate)
   }
 
   // migrate old question versions without content field
@@ -263,23 +278,49 @@ const modifyQuestion = async (
   }
 
   // TODO: ensure that content is not empty
-  // if content and options are set, add a new version
-  if (content && options) {
+  // if content and options, or files, are set, add a new version
+  if ((content && options) || files) {
+    // extract the last version of the question
+    const lastVersion = question.versions[question.versions.length - 1]
+
+    // process files
+    const { createdFiles, createdFileIds, existingFileIds } = processFiles(
+      files,
+      userId,
+    )
+
+    // replace the files of the user
+    if (files) {
+      user.files = Array.from(new Set([...user.files, ...createdFileIds]))
+      promises.push(createdFiles.map(file => file.save()))
+    }
+
+    // push a new version into the question model
     question.versions.push({
-      content,
-      description: convertToPlainText(content),
-      options: QUESTION_GROUPS.WITH_OPTIONS.includes(question.type) && {
-        // HACK: manually ensure randomized is default set to false
-        // TODO: mongoose should do this..?
-        [question.type]: QUESTION_GROUPS.CHOICES.includes(question.type)
-          ? { randomized: false, ...options }
-          : options,
-      },
-      solution,
+      content: content || lastVersion.content,
+      description: content
+        ? convertToPlainText(content)
+        : lastVersion.description,
+      options: options
+        ? QUESTION_GROUPS.WITH_OPTIONS.includes(question.type) && {
+          // HACK: manually ensure randomized is default set to false
+          // TODO: mongoose should do this..?
+          [question.type]: QUESTION_GROUPS.CHOICES.includes(question.type)
+            ? { randomized: false, ...options }
+            : options,
+        }
+        : lastVersion.options,
+      files: files ? existingFileIds.concat(createdFileIds) : lastVersion.files,
+      solution: solution || lastVersion.solution,
     })
   }
 
   promises.push(question.save())
+
+  // if tags or files have been changed, save the user
+  if (tags || files) {
+    promises.push(user.save())
+  }
 
   await Promise.all(promises)
 
