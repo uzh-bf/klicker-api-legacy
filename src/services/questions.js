@@ -33,7 +33,7 @@ const processTags = (existingTags, newTags, userId) => {
   }
 }
 
-const processFiles = (files, userId) => {
+const processFiles = (files = [], userId) => {
   const createdFiles = files.map(
     ({ name, originalName, type }) => new FileModel({
       name,
