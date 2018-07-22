@@ -14,8 +14,13 @@ if (process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY) {
     s3ForcePathStyle: true,
     signatureVersion: 'v4',
   })
+  console.log('[s3] Registered S3 storage backend')
 }
 
+/**
+ * Request a presigned URL from the S3 backend
+ * @param {*} param0
+ */
 const requestPresignedURL = async ({ fileType, userId }) => {
   // ensure that S3 is available in the environment
   if (typeof S3 === 'undefined') {
