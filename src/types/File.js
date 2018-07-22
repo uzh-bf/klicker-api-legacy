@@ -10,6 +10,7 @@ const File = `
   }
 
   input FileInput {
+    id: ID
     name: String!
     type: String!
     originalName: String!
