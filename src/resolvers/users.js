@@ -10,7 +10,7 @@ const userByIDQuery = parentValue => UserModel.findById(parentValue.user)
 // Generate an HMAC for user identity verification
 const hmacQuery = (parentValue, args, { auth }) => crypto
   .createHmac('sha256', process.env.APP_SECRET)
-  .update(auth.shortname)
+  .update(auth.sub)
   .digest('hex')
 
 /* ----- mutations ----- */
