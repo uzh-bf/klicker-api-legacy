@@ -9,12 +9,7 @@ const {
   modifyQuestion,
   archiveQuestions,
 } = require('./resolvers/questions')
-const {
-  questionInstancesByPV,
-  addResponse,
-  responsesByPV,
-  resultsByPV,
-} = require('./resolvers/questionInstances')
+const { questionInstancesByPV, addResponse, responsesByPV, resultsByPV } = require('./resolvers/questionInstances')
 const {
   addFeedback,
   deleteFeedback,

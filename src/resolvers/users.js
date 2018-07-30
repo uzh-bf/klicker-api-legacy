@@ -8,24 +8,22 @@ const authUserByIDQuery = (parentValue, args, { auth }) => UserModel.findById(au
 const userByIDQuery = parentValue => UserModel.findById(parentValue.user)
 
 // Generate an HMAC for user identity verification
-const hmacQuery = (parentValue, args, { auth }) => crypto
-  .createHmac('sha256', process.env.APP_SECRET)
-  .update(auth.sub)
-  .digest('hex')
+const hmacQuery = (parentValue, args, { auth }) =>
+  crypto
+    .createHmac('sha256', process.env.APP_SECRET)
+    .update(auth.sub)
+    .digest('hex')
 
 /* ----- mutations ----- */
-const createUserMutation = (
-  parentValue,
-  {
-    email, password, shortname, institution, useCase,
-  },
-) => AuthService.signup(email, password, shortname, institution, useCase)
+const createUserMutation = (parentValue, { email, password, shortname, institution, useCase }) =>
+  AuthService.signup(email, password, shortname, institution, useCase)
 
 const loginMutation = (parentValue, { email, password }, { res }) => AuthService.login(res, email, password)
 
 const logoutMutation = (parentValue, args, { res }) => AuthService.logout(res)
 
-const changePasswordMutation = (parentValue, { newPassword }, { auth }) => AuthService.changePassword(auth.sub, newPassword)
+const changePasswordMutation = (parentValue, { newPassword }, { auth }) =>
+  AuthService.changePassword(auth.sub, newPassword)
 
 const requestPasswordMutation = (parentValue, { email }, { res }) => AuthService.requestPassword(res, email)
 

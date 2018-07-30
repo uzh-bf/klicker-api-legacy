@@ -83,8 +83,8 @@ describe('Integration', () => {
             query: Mutations.ChangePasswordMutation,
             variables: { newPassword: 'someOtherPassword' },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
     })
 
@@ -93,7 +93,7 @@ describe('Integration', () => {
         await sendQuery({
           query: Mutations.RequestPasswordMutation,
           variables: { email: 'testintegration@bf.uzh.ch' },
-        }),
+        })
       )
     })
   })
@@ -110,10 +110,7 @@ describe('Integration', () => {
               content: createContentState(questionContent),
               type: 'SC',
               options: {
-                choices: [
-                  { correct: false, name: 'option1' },
-                  { correct: true, name: 'option2' },
-                ],
+                choices: [{ correct: false, name: 'option1' }, { correct: true, name: 'option2' }],
                 randomized: false,
               },
               solution: {
@@ -122,8 +119,8 @@ describe('Integration', () => {
               tags: ['TestTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       questions[QUESTION_TYPES.SC] = data.createQuestion.id
@@ -154,8 +151,8 @@ describe('Integration', () => {
               tags: ['TestTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       questions[QUESTION_TYPES.MC] = data.createQuestion.id
@@ -179,8 +176,8 @@ describe('Integration', () => {
               tags: ['TestTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       questions[QUESTION_TYPES.FREE] = data.createQuestion.id
@@ -195,9 +192,7 @@ describe('Integration', () => {
             query: Mutations.CreateQuestionMutation,
             variables: {
               title: 'Test FREE_RANGE',
-              content: createContentState(
-                'This is a simple FREE_RANGE question.',
-              ),
+              content: createContentState('This is a simple FREE_RANGE question.'),
               type: 'FREE_RANGE',
               options: {
                 restrictions: { min: 0, max: 10 },
@@ -208,8 +203,8 @@ describe('Integration', () => {
               tags: ['TestTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       questions[QUESTION_TYPES.FREE_RANGE] = data.createQuestion.id
@@ -224,9 +219,7 @@ describe('Integration', () => {
             query: Mutations.CreateQuestionMutation,
             variables: {
               title: 'Test partly restricted FREE_RANGE',
-              content: createContentState(
-                'This is a simple partly restricted FREE_RANGE question.',
-              ),
+              content: createContentState('This is a simple partly restricted FREE_RANGE question.'),
               type: 'FREE_RANGE',
               options: {
                 restrictions: { min: 10, max: null },
@@ -237,8 +230,8 @@ describe('Integration', () => {
               tags: ['TestTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       questions.FREE_RANGE_PART = data.createQuestion.id
@@ -253,9 +246,7 @@ describe('Integration', () => {
             query: Mutations.CreateQuestionMutation,
             variables: {
               title: 'Test unrestricted FREE_RANGE',
-              content: createContentState(
-                'This is a simple unrestricted FREE_RANGE question.',
-              ),
+              content: createContentState('This is a simple unrestricted FREE_RANGE question.'),
               type: 'FREE_RANGE',
               options: {
                 restrictions: { min: null, max: null },
@@ -266,8 +257,8 @@ describe('Integration', () => {
               tags: ['TestTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       questions.FREE_RANGE_OPEN = data.createQuestion.id
@@ -285,14 +276,9 @@ describe('Integration', () => {
             variables: {
               id: questions.SC,
               title: 'Test SC #2',
-              content: createContentState(
-                'This is a simple modified SC question.',
-              ),
+              content: createContentState('This is a simple modified SC question.'),
               options: {
-                choices: [
-                  { correct: true, name: 'option3' },
-                  { correct: false, name: 'option4' },
-                ],
+                choices: [{ correct: true, name: 'option3' }, { correct: false, name: 'option4' }],
                 randomized: false,
               },
               solution: {
@@ -301,8 +287,8 @@ describe('Integration', () => {
               tags: ['TestTag', 'AdditionalTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -316,9 +302,7 @@ describe('Integration', () => {
             variables: {
               id: questions.MC,
               title: 'Test MC #2',
-              content: createContentState(
-                'This is a simple modified MC question.',
-              ),
+              content: createContentState('This is a simple modified MC question.'),
               options: {
                 choices: [
                   { correct: true, name: 'option3' },
@@ -333,8 +317,8 @@ describe('Integration', () => {
               tags: ['TestTag', 'AdditionalTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -348,9 +332,7 @@ describe('Integration', () => {
             variables: {
               id: questions.FREE,
               title: 'Test FREE #2',
-              content: createContentState(
-                'This is a simple modified FREE question.',
-              ),
+              content: createContentState('This is a simple modified FREE question.'),
               options: {},
               solution: {
                 FREE: 'New solution.',
@@ -358,8 +340,8 @@ describe('Integration', () => {
               tags: ['TestTag', 'AdditionalTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -373,9 +355,7 @@ describe('Integration', () => {
             variables: {
               id: questions.FREE_RANGE,
               title: 'Test FREE_RANGE #2',
-              content: createContentState(
-                'This is a simple modified FREE_RANGE question.',
-              ),
+              content: createContentState('This is a simple modified FREE_RANGE question.'),
               options: {
                 restrictions: { min: -10, max: 40 },
               },
@@ -385,8 +365,8 @@ describe('Integration', () => {
               tags: ['TestTag', 'AdditionalTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -400,9 +380,7 @@ describe('Integration', () => {
             variables: {
               id: questions.FREE_RANGE,
               title: 'Test FREE_RANGE #2',
-              content: createContentState(
-                'This is a simple modified FREE_RANGE question.',
-              ),
+              content: createContentState('This is a simple modified FREE_RANGE question.'),
               options: {
                 restrictions: { min: null, max: 10 },
               },
@@ -412,8 +390,8 @@ describe('Integration', () => {
               tags: ['TestTag', 'AdditionalTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -427,9 +405,7 @@ describe('Integration', () => {
             variables: {
               id: questions.FREE_RANGE,
               title: 'Test FREE_RANGE #2',
-              content: createContentState(
-                'This is a simple modified FREE_RANGE question.',
-              ),
+              content: createContentState('This is a simple modified FREE_RANGE question.'),
               options: {
                 restrictions: { min: null, max: null },
               },
@@ -439,8 +415,8 @@ describe('Integration', () => {
               tags: ['TestTag', 'AdditionalTag'],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -463,9 +439,7 @@ describe('Integration', () => {
                   ],
                 },
                 {
-                  questions: [
-                    { question: questions[QUESTION_TYPES.FREE], version: 0 },
-                  ],
+                  questions: [{ question: questions[QUESTION_TYPES.FREE], version: 0 }],
                 },
                 {
                   questions: [
@@ -480,8 +454,8 @@ describe('Integration', () => {
               ],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       sessionId = data.createSession.id
@@ -505,9 +479,7 @@ describe('Integration', () => {
                   ],
                 },
                 {
-                  questions: [
-                    { question: questions[QUESTION_TYPES.FREE], version: 0 },
-                  ],
+                  questions: [{ question: questions[QUESTION_TYPES.FREE], version: 0 }],
                 },
                 {
                   questions: [
@@ -528,8 +500,8 @@ describe('Integration', () => {
               ],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -544,8 +516,8 @@ describe('Integration', () => {
             query: Mutations.StartSessionMutation,
             variables: { id: sessionId },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -565,8 +537,8 @@ describe('Integration', () => {
               },
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -582,7 +554,7 @@ describe('Integration', () => {
             difficulty: 2,
             speed: 4,
           },
-        }),
+        })
       )
       ensureNoErrors(
         await sendQuery({
@@ -593,7 +565,7 @@ describe('Integration', () => {
             difficulty: -2,
             speed: 3,
           },
-        }),
+        })
       )
       ensureNoErrors(
         await sendQuery({
@@ -604,7 +576,7 @@ describe('Integration', () => {
             difficulty: -5,
             speed: 3,
           },
-        }),
+        })
       )
       const data = ensureNoErrors(
         await sendQuery({
@@ -615,7 +587,7 @@ describe('Integration', () => {
             difficulty: 5,
             speed: 2,
           },
-        }),
+        })
       )
 
       expect(data).toMatchSnapshot()
@@ -626,19 +598,19 @@ describe('Integration', () => {
         await sendQuery({
           query: Mutations.AddFeedbackMutation,
           variables: { fp: 'myfp1', sessionId, content: 'my test feedback' },
-        }),
+        })
       )
       ensureNoErrors(
         await sendQuery({
           query: Mutations.AddFeedbackMutation,
           variables: { fp: 'myfp1', sessionId, content: 'good lecture' },
-        }),
+        })
       )
       const data = ensureNoErrors(
         await sendQuery({
           query: Mutations.AddFeedbackMutation,
           variables: { fp: 'myfp1', sessionId, content: 'my test feedback' },
-        }),
+        })
       )
 
       expect(data).toMatchSnapshot()
@@ -653,8 +625,8 @@ describe('Integration', () => {
             {
               query: Queries.RunningSessionQuery,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
         expect(runningSession).toMatchSnapshot()
 
@@ -664,8 +636,8 @@ describe('Integration', () => {
               query: Queries.SessionEvaluationQuery,
               variables: { sessionId },
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
         expect(evaluateSession).toMatchSnapshot()
       })
@@ -676,8 +648,8 @@ describe('Integration', () => {
             {
               query: Mutations.ActivateNextBlockMutation,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
 
         expect(data).toMatchSnapshot()
@@ -688,7 +660,7 @@ describe('Integration', () => {
           await sendQuery({
             query: Queries.JoinSessionQuery,
             variables: { shortname: 'integr' },
-          }),
+          })
         )
 
         instanceIds.SC = data.joinSession.activeInstances[0].id
@@ -708,7 +680,7 @@ describe('Integration', () => {
                 choices: [0],
               },
             },
-          }),
+          })
         )
       })
 
@@ -723,7 +695,7 @@ describe('Integration', () => {
                 choices: [0, 1],
               },
             },
-          }),
+          })
         )
       })
 
@@ -733,8 +705,8 @@ describe('Integration', () => {
             {
               query: Queries.RunningSessionQuery,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
         expect(runningSession).toMatchSnapshot()
 
@@ -744,8 +716,8 @@ describe('Integration', () => {
               query: Queries.SessionEvaluationQuery,
               variables: { sessionId },
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
         expect(evaluateSession).toMatchSnapshot()
       })
@@ -757,8 +729,8 @@ describe('Integration', () => {
               query: Mutations.PauseSessionMutation,
               variables: { id: sessionId },
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
 
         expect(data).toMatchSnapshot()
@@ -771,8 +743,8 @@ describe('Integration', () => {
               query: Mutations.StartSessionMutation,
               variables: { id: sessionId },
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
 
         expect(data).toMatchSnapshot()
@@ -784,8 +756,8 @@ describe('Integration', () => {
             {
               query: Mutations.ActivateNextBlockMutation,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
 
         expect(data).toMatchSnapshot()
@@ -799,8 +771,8 @@ describe('Integration', () => {
             {
               query: Mutations.ActivateNextBlockMutation,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
 
         expect(data).toMatchSnapshot()
@@ -811,7 +783,7 @@ describe('Integration', () => {
           await sendQuery({
             query: Queries.JoinSessionQuery,
             variables: { shortname: 'integr' },
-          }),
+          })
         )
 
         instanceIds.FREE = data.joinSession.activeInstances[0].id
@@ -828,7 +800,7 @@ describe('Integration', () => {
               instanceId: instanceIds.FREE,
               response: { value: 'hello world' },
             },
-          }),
+          })
         )
       })
 
@@ -838,8 +810,8 @@ describe('Integration', () => {
             {
               query: Queries.RunningSessionQuery,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
         expect(runningSession).toMatchSnapshot()
 
@@ -849,8 +821,8 @@ describe('Integration', () => {
               query: Queries.SessionEvaluationQuery,
               variables: { sessionId },
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
         expect(evaluateSession).toMatchSnapshot()
       })
@@ -861,8 +833,8 @@ describe('Integration', () => {
             {
               query: Mutations.ActivateNextBlockMutation,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
 
         expect(data).toMatchSnapshot()
@@ -876,8 +848,8 @@ describe('Integration', () => {
             {
               query: Mutations.ActivateNextBlockMutation,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
 
         expect(data).toMatchSnapshot()
@@ -888,7 +860,7 @@ describe('Integration', () => {
           await sendQuery({
             query: Queries.JoinSessionQuery,
             variables: { shortname: 'integr' },
-          }),
+          })
         )
 
         instanceIds.FREE_RANGE = data.joinSession.activeInstances[0].id
@@ -907,7 +879,7 @@ describe('Integration', () => {
               instanceId: instanceIds.FREE_RANGE,
               response: { value: 4 },
             },
-          }),
+          })
         )
       })
 
@@ -920,7 +892,7 @@ describe('Integration', () => {
               instanceId: instanceIds.FREE_RANGE_PART,
               response: { value: 99999 },
             },
-          }),
+          })
         )
       })
 
@@ -933,7 +905,7 @@ describe('Integration', () => {
               instanceId: instanceIds.FREE_RANGE_OPEN,
               response: { value: 99999.3784 },
             },
-          }),
+          })
         )
       })
 
@@ -943,8 +915,8 @@ describe('Integration', () => {
             {
               query: Queries.RunningSessionQuery,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
         expect(runningSession).toMatchSnapshot()
 
@@ -954,8 +926,8 @@ describe('Integration', () => {
               query: Queries.SessionEvaluationQuery,
               variables: { sessionId },
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
         expect(evaluateSession).toMatchSnapshot()
       })
@@ -966,8 +938,8 @@ describe('Integration', () => {
             {
               query: Mutations.ActivateNextBlockMutation,
             },
-            authCookie,
-          ),
+            authCookie
+          )
         )
 
         expect(data).toMatchSnapshot()
@@ -982,7 +954,7 @@ describe('Integration', () => {
           variables: {
             sessionId,
           },
-        }),
+        })
       )
 
       expect(privateSessionData.sessionPublic).toBeFalsy()
@@ -998,7 +970,7 @@ describe('Integration', () => {
             },
           },
         },
-        authCookie,
+        authCookie
       )
 
       // ensure that the evaluation can be publicly accessed (but only in restricted format)
@@ -1008,7 +980,7 @@ describe('Integration', () => {
           variables: {
             sessionId,
           },
-        }),
+        })
       )
 
       expect(publicSessionData).toMatchSnapshot()
@@ -1021,8 +993,8 @@ describe('Integration', () => {
             query: Mutations.EndSessionMutation,
             variables: { id: sessionId },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -1035,8 +1007,8 @@ describe('Integration', () => {
             query: Queries.SessionEvaluationQuery,
             variables: { sessionId },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(evaluateSession).toMatchSnapshot()
@@ -1053,8 +1025,8 @@ describe('Integration', () => {
               ids: [questions.FREE_RANGE, questions.SC],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -1069,8 +1041,8 @@ describe('Integration', () => {
               ids: [questions.FREE_RANGE, questions.SC],
             },
           },
-          authCookie,
-        ),
+          authCookie
+        )
       )
 
       expect(data).toMatchSnapshot()
@@ -1083,7 +1055,7 @@ describe('Integration', () => {
         {
           query: Mutations.LogoutMutation,
         },
-        authCookie,
+        authCookie
       )
 
       const data = ensureNoErrors(response)
@@ -1101,7 +1073,7 @@ describe('Integration', () => {
             ids: [questions.FREE_RANGE, questions.SC],
           },
         },
-        authCookie,
+        authCookie
       )
 
       // expect the response to contain "INVALID_LOGIN"

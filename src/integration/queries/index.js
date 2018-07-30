@@ -8,9 +8,7 @@ const JoinSessionQuery = loadAsString('./JoinSessionQuery.graphql')
 const RunningSessionQuery = loadAsString('./RunningSessionQuery.graphql')
 const SessionEvaluationQuery = loadAsString('./SessionEvaluationQuery.graphql')
 const SessionListQuery = loadAsString('./SessionListQuery.graphql')
-const SessionPublicEvaluationQuery = loadAsString(
-  './SessionPublicEvaluationQuery.graphql',
-)
+const SessionPublicEvaluationQuery = loadAsString('./SessionPublicEvaluationQuery.graphql')
 
 const QuestionDetailsSerializer = require('./QuestionDetailsSerializer')
 const RunningSessionSerializer = require('./RunningSessionSerializer')
