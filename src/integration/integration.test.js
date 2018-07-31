@@ -99,6 +99,66 @@ describe('Integration', () => {
   })
 
   describe('Account Data', () => {
+    it('allows checking the availability of email addresses', async () => {
+      expect(
+        ensureNoErrors(
+          await sendQuery({
+            query: Queries.CheckAvailabilityQuery,
+            variables: { email: 'testintegration@bf.uzh.ch' },
+          })
+        )
+      ).toMatchObject({
+        checkAvailability: {
+          email: false,
+          shortname: null,
+        },
+      })
+
+      expect(
+        ensureNoErrors(
+          await sendQuery({
+            query: Queries.CheckAvailabilityQuery,
+            variables: { email: 'doesnotexist@bf.uzh.ch' },
+          })
+        )
+      ).toMatchObject({
+        checkAvailability: {
+          email: true,
+          shortname: null,
+        },
+      })
+    })
+
+    it('allows checking the availability of shortnames', async () => {
+      expect(
+        ensureNoErrors(
+          await sendQuery({
+            query: Queries.CheckAvailabilityQuery,
+            variables: { shortname: 'integr' },
+          })
+        )
+      ).toMatchObject({
+        checkAvailability: {
+          shortname: false,
+          email: null,
+        },
+      })
+
+      expect(
+        ensureNoErrors(
+          await sendQuery({
+            query: Queries.CheckAvailabilityQuery,
+            variables: { shortname: 'nonexist' },
+          })
+        )
+      ).toMatchObject({
+        checkAvailability: {
+          shortname: true,
+          email: null,
+        },
+      })
+    })
+
     it('can be updated', async () => {
       const data = ensureNoErrors(
         await sendQuery(
