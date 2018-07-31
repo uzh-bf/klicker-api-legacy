@@ -31,7 +31,7 @@ describe('AccountService', () => {
     userId = undefined
   })
 
-  describe('checkAvailability', () => {
+  describe.only('checkAvailability', () => {
     it('throws on invalid email', async () => {
       expect(
         AccountService.checkAvailability({
@@ -52,7 +52,7 @@ describe('AccountService', () => {
 
     it('returns a correct response for valid email', async () => {
       const result = await AccountService.checkAvailability({
-        email: 'testaccounts3@bf.uzh.ch',
+        email: 'existinguser@bf.uzh.ch',
         shortname: undefined,
       })
       expect(result.email).toBeFalsy()
@@ -62,7 +62,7 @@ describe('AccountService', () => {
     it('returns a correct response for valid shortname', async () => {
       const result = await AccountService.checkAvailability({
         email: undefined,
-        shortname: 'accnts3',
+        shortname: 'exusr',
       })
       expect(result.email).toBeUndefined()
       expect(result.shortname).toBeFalsy()
@@ -70,8 +70,8 @@ describe('AccountService', () => {
 
     it('returns a correct response for valid email and shortname', async () => {
       const result = await AccountService.checkAvailability({
-        email: 'testblaa@bf.uzh.ch',
-        shortname: 'testblee',
+        email: 'nonexistent@bf.uzh.ch',
+        shortname: 'nonexst',
       })
       expect(result.email).toBeTruthy()
       expect(result.shortname).toBeTruthy()
@@ -85,7 +85,7 @@ describe('AccountService', () => {
           userId,
           email: 'existinguser@bf.uzh.ch',
         })
-      ).rejects.toThrow(new UserInputError('EMAIL_NOT_AVAILABLE'))
+      ).rejects.toEqual(new UserInputError('EMAIL_NOT_AVAILABLE'))
     })
 
     it('prevents changing the shortname to an already existing one', async () => {
@@ -94,7 +94,7 @@ describe('AccountService', () => {
           userId,
           shortname: 'exusr',
         })
-      ).rejects.toThrow(new UserInputError('SHORTNAME_NOT_AVAILABLE'))
+      ).rejects.toEqual(new UserInputError('SHORTNAME_NOT_AVAILABLE'))
     })
 
     it('prevents changing the email address to an invalid value', async () => {
@@ -103,7 +103,7 @@ describe('AccountService', () => {
           userId,
           email: 'invalidEmail@',
         })
-      ).rejects.toThrow(new UserInputError('INVALID_INPUT'))
+      ).rejects.toEqual(new UserInputError('INVALID_INPUT'))
     })
 
     it('prevents changing the shortname to an invalid value', async () => {
@@ -112,7 +112,7 @@ describe('AccountService', () => {
           userId,
           shortname: 'B',
         })
-      ).rejects.toThrow(new UserInputError('INVALID_INPUT'))
+      ).rejects.toEqual(new UserInputError('INVALID_INPUT'))
     })
 
     it('allows changing user data with valid values', async () => {
