@@ -33,6 +33,7 @@ const {
 const { allTags, tags } = require('./resolvers/tags')
 const {
   createUser,
+  modifyUser,
   login,
   logout,
   user,
@@ -40,6 +41,7 @@ const {
   changePassword,
   requestPassword,
   hmac,
+  checkAvailability,
 } = require('./resolvers/users')
 const { files } = require('./resolvers/files')
 const { confusionAdded, feedbackAdded } = require('./resolvers/subscriptions')
@@ -61,6 +63,7 @@ const typeDefs = [
     allQuestions: [Question]!
     allSessions: [Session]!
     allTags: [Tag]!
+    checkAvailability(email: String, shortname: String): User_Availability!
     joinSession(shortname: String!): Session_Public
     question(id: ID!): Question
     runningSession: Session
@@ -85,6 +88,7 @@ const typeDefs = [
     logout: String!
     modifyQuestion(id: ID!, question: QuestionModifyInput!): Question!
     modifySession(id: ID!, session: SessionModifyInput!): Session!
+    modifyUser(user: User_Modify!): User!
     pauseSession(id: ID!): Session!
     requestPassword(email: String!): String!
     requestPresignedURL(fileType: String!): File_PresignedURL!
@@ -108,6 +112,7 @@ const resolvers = {
     allQuestions: requireAuth(allQuestions),
     allSessions: requireAuth(allSessions),
     allTags: requireAuth(allTags),
+    checkAvailability,
     joinSession,
     question: requireAuth(question),
     runningSession: requireAuth(runningSession),
@@ -130,6 +135,7 @@ const resolvers = {
     logout,
     modifyQuestion: requireAuth(modifyQuestion),
     modifySession: requireAuth(modifySession),
+    modifyUser: requireAuth(modifyUser),
     pauseSession: requireAuth(pauseSession),
     requestPassword,
     requestPresignedURL: requireAuth(requestPresignedURL),
