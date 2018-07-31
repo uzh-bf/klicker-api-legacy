@@ -1,9 +1,24 @@
-const { QuestionModel, QuestionInstanceModel, SessionModel, TagModel, UserModel } = require('../../models')
+const { QuestionModel, QuestionInstanceModel, SessionModel, TagModel, UserModel, FileModel } = require('../../models')
 const AuthService = require('../../services/auth')
 const QuestionService = require('../../services/questions')
 const { createContentState } = require('../../lib/draft')
 
 const { QUESTION_TYPES } = require('../../constants')
+
+/**
+ * Cleanup all data belonging to a user
+ * @param {*} user The id of the user
+ */
+const cleanupUser = async user => {
+  await Promise.all([
+    QuestionInstanceModel.remove({ user }),
+    SessionModel.remove({ user }),
+    QuestionModel.remove({ user }),
+    TagModel.remove({ user }),
+    FileModel.remove({ user }),
+    UserModel.findByIdAndRemove(user),
+  ])
+}
 
 const setupTestEnv = async ({ email, password, shortname }) => {
   // find the id of the user to reset
@@ -11,13 +26,7 @@ const setupTestEnv = async ({ email, password, shortname }) => {
 
   // if the user already exists, delete everything associated
   if (user) {
-    await Promise.all([
-      QuestionInstanceModel.remove({ user: user.id }),
-      SessionModel.remove({ user: user.id }),
-      QuestionModel.remove({ user: user.id }),
-      TagModel.remove({ user: user.id }),
-      UserModel.findByIdAndRemove(user.id),
-    ])
+    await cleanupUser(user.id)
   }
 
   // sign up a fresh user
@@ -155,6 +164,7 @@ const initializeDb = async ({ mongoose, email, shortname, withLogin = false, wit
 }
 
 module.exports = {
+  cleanupUser,
   setupTestEnv,
   prepareSessionFactory,
   initializeDb,

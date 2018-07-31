@@ -6,7 +6,6 @@ const { UserModel } = require('../models')
 
 /**
  * Check the availability of fields with uniqueness constraints
- * @param {ID} userId
  * @param {String} email
  * @param {String} shortname
  */
@@ -52,8 +51,6 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
 
   if (email || shortname) {
     const availability = await checkAvailability({ email, shortname })
-
-    console.log(email, shortname, availability)
 
     if (email) {
       if (availability.email === false) {

@@ -4,7 +4,8 @@ const { UserInputError } = require('apollo-server-express')
 const mongoose = require('mongoose')
 
 const AccountService = require('./accounts')
-const { initializeDb } = require('../lib/test/setup')
+const { initializeDb, cleanupUser } = require('../lib/test/setup')
+const { Errors } = require('../constants')
 
 mongoose.Promise = require('bluebird')
 
@@ -27,11 +28,12 @@ describe('AccountService', () => {
   })
 
   afterAll(async done => {
+    await cleanupUser(userId)
     mongoose.disconnect(done)
     userId = undefined
   })
 
-  describe.only('checkAvailability', () => {
+  describe('checkAvailability', () => {
     it('throws on invalid email', async () => {
       expect(
         AccountService.checkAvailability({
@@ -80,50 +82,57 @@ describe('AccountService', () => {
 
   describe('updateAccountData', () => {
     it('prevents changing the email address to an already existing one', async () => {
-      expect(
+      await expect(
         AccountService.updateAccountData({
           userId,
           email: 'existinguser@bf.uzh.ch',
         })
-      ).rejects.toEqual(new UserInputError('EMAIL_NOT_AVAILABLE'))
+      ).rejects.toThrow(new UserInputError(Errors.EMAIL_NOT_AVAILABLE))
     })
 
     it('prevents changing the shortname to an already existing one', async () => {
-      expect(
+      await expect(
         AccountService.updateAccountData({
           userId,
           shortname: 'exusr',
         })
-      ).rejects.toEqual(new UserInputError('SHORTNAME_NOT_AVAILABLE'))
+      ).rejects.toThrow(new UserInputError(Errors.SHORTNAME_NOT_AVAILABLE))
     })
 
     it('prevents changing the email address to an invalid value', async () => {
-      expect(
+      await expect(
         AccountService.updateAccountData({
           userId,
           email: 'invalidEmail@',
         })
-      ).rejects.toEqual(new UserInputError('INVALID_INPUT'))
+      ).rejects.toThrow(new UserInputError(Errors.INVALID_INPUT))
     })
 
     it('prevents changing the shortname to an invalid value', async () => {
-      expect(
+      await expect(
         AccountService.updateAccountData({
           userId,
           shortname: 'B',
         })
-      ).rejects.toEqual(new UserInputError('INVALID_INPUT'))
+      ).rejects.toThrow(new UserInputError(Errors.INVALID_INPUT))
     })
 
     it('allows changing user data with valid values', async () => {
-      expect(
+      await expect(
         AccountService.updateAccountData({
           userId,
+          email: 'changed1@bf.uzh.ch',
           shortname: 'accnts4',
           institution: 'testing4',
           useCase: 'something4',
         })
-      ).resolves.toMatchSnapshot()
+      ).resolves.toMatchObject({
+        id: userId,
+        email: 'changed1@bf.uzh.ch',
+        institution: 'testing4',
+        shortname: 'accnts4',
+        useCase: 'something4',
+      })
     })
   })
 })
