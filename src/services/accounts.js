@@ -53,7 +53,7 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
     const availability = await checkAvailability({ email, shortname })
 
     if (email) {
-      if (availability.email === false) {
+      if (user.email !== email && availability.email === false) {
         throw new UserInputError(Errors.EMAIL_NOT_AVAILABLE)
       }
 
@@ -61,7 +61,7 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
     }
 
     if (shortname) {
-      if (availability.shortname === false) {
+      if (user.shortname !== shortname && availability.shortname === false) {
         throw new UserInputError(Errors.SHORTNAME_NOT_AVAILABLE)
       }
 
