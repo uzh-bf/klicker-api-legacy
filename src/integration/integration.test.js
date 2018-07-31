@@ -98,6 +98,27 @@ describe('Integration', () => {
     })
   })
 
+  describe('Account Data', () => {
+    it('can be updated', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ModifyUserMutation,
+            variables: { institution: 'integrator', useCase: 'integration' },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchObject({
+        modifyUser: {
+          institution: 'integrator',
+          useCase: 'integration',
+        },
+      })
+    })
+  })
+
   describe('Question Creation', () => {
     it('creates SC questions', async () => {
       const questionContent = 'This is a simple SC question.'

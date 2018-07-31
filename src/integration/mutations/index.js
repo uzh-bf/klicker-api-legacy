@@ -19,6 +19,7 @@ const AddResponseMutation = loadAsString('./AddResponseMutation.graphql')
 const ActivateNextBlockMutation = loadAsString('./ActivateNextBlockMutation.graphql')
 const RequestPasswordMutation = loadAsString('./RequestPasswordMutation.graphql')
 const ChangePasswordMutation = loadAsString('./ChangePasswordMutation.graphql')
+const ModifyUserMutation = loadAsString('./ModifyUserMutation.graphql')
 
 const RegistrationSerializer = require('./RegistrationSerializer')
 const ActivateNextBlockSerializer = require('./ActivateNextBlockSerializer')
@@ -49,6 +50,7 @@ module.exports = {
   ActivateNextBlockMutation,
   RequestPasswordMutation,
   ChangePasswordMutation,
+  ModifyUserMutation,
   serializers: [
     RegistrationSerializer,
     ActivateNextBlockSerializer,
