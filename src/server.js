@@ -2,21 +2,36 @@
 const { createServer } = require('http')
 const mongoose = require('mongoose')
 
+// import the configuration
+const cfg = require('./klicker.conf.js')
+
+// validate the configuration
+// fail early if anything is invalid
+cfg.validate({ allowed: 'strict' })
+
+const isDev = process.env.NODE_ENV === 'development'
+const hasRedis = cfg.get('cache.redis.enabled')
+
 // initialize APM if so configured
-if (process.env.APM_SERVER_URL) {
+if (cfg.get('services.apm.enabled')) {
+  const { monitorDev, secretToken, serverUrl, serviceName } = cfg.get('services.apm')
   require('elastic-apm-node').start({
-    active: process.env.NODE_ENV === 'production',
-    serviceName: process.env.APM_NAME,
-    secretToken: process.env.APM_SECRET_TOKEN,
-    serverUrl: process.env.APM_SERVER_URL,
+    active: monitorDev || !isDev,
+    secretToken,
+    serverUrl,
+    serviceName,
   })
 }
 
 const { app, apollo } = require('./app')
-const { getRedis } = require('./redis')
 
-// get the redis singleton
-const redis = getRedis()
+let redis
+if (hasRedis) {
+  const { getRedis } = require('./redis')
+
+  // get the redis singleton
+  redis = getRedis()
+}
 
 // wrap express for websockets
 const httpServer = createServer(app)
@@ -32,8 +47,14 @@ httpServer.listen(process.env.PORT, err => {
 
 const shutdown = async () => {
   console.log('[klicker-api] Shutting down server')
+
   await mongoose.disconnect()
-  await redis.disconnect()
+  console.log('[mongodb] Disconnected')
+
+  if (hasRedis) {
+    await redis.disconnect()
+    console.log('[redis] Disconnected')
+  }
 
   console.log('[klicker-api] Shutdown complete')
   process.exit(0)

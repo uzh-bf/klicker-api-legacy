@@ -1,18 +1,6 @@
 /* eslint-disable global-require */
-require('dotenv').config()
 
 const isProd = process.env.NODE_ENV === 'production'
-
-// initialize APM if so configured
-let apm
-if (process.env.APM_SERVER_URL) {
-  apm = require('elastic-apm-node')
-}
-
-let Raven
-if (process.env.SENTRY_DSN) {
-  Raven = require('raven')
-}
 
 // base packages
 const mongoose = require('mongoose')
@@ -31,43 +19,48 @@ const helmet = require('helmet')
 const morgan = require('morgan')
 const RateLimit = require('express-rate-limit')
 
+// import the configuration
+const cfg = require('./klicker.conf.js')
+
+// initialize APM if so configured
+let apm
+if (cfg.get('services.apm.enabled')) {
+  apm = require('elastic-apm-node')
+}
+
+let Raven
+if (cfg.get('services.sentry.enabled')) {
+  Raven = require('raven')
+}
+
 const AuthService = require('./services/auth')
 const { resolvers, typeDefs } = require('./schema')
 const { getRedis } = require('./redis')
 const { exceptTest } = require('./lib/utils')
 const { createLoaders } = require('./lib/loaders')
 
-// require important environment variables to be present
-// otherwise exit the application
-const appSettings = ['APP_DOMAIN', 'PORT', 'APP_SECRET', 'MONGO_URL', 'ORIGIN']
-appSettings.forEach(envVar => {
-  if (!process.env[envVar]) {
-    exceptTest(() => console.warn(`> Error: Please pass ${envVar} as an environment variable.`))
-    process.exit(1)
-  }
-})
-
 // connect to mongodb
 // use username and password authentication if passed in the environment
 // otherwise assume that no authentication needed (e.g. docker)
+const mongoCfg = cfg.get('mongo')
 const mongoConfig = {
   keepAlive: true,
   reconnectTries: Number.MAX_VALUE,
   reconnectInterval: 1000,
 }
-if (process.env.MONGO_USER && process.env.MONGO_PASSWORD) {
+if (mongoCfg.user && mongoCfg.password) {
   mongoose.connect(
-    `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URL}`,
+    `mongodb://${mongoCfg.user}:${mongoCfg.password}@${mongoCfg.url}`,
     mongoConfig
   )
 } else {
   mongoose.connect(
-    `mongodb://${process.env.MONGO_URL}`,
+    `mongodb://${mongoCfg.url}`,
     mongoConfig
   )
 }
 
-if (process.env.MONGO_DEBUG) {
+if (mongoCfg.debug) {
   // activate mongoose debug mode (log all queries)
   mongoose.set('debug', true)
 }
@@ -88,7 +81,7 @@ const app = express()
 
 // if the server is behind a proxy, set the APP_PROXY env to true
 // this will make express trust the X-* proxy headers and set corresponding req.ip
-if (process.env.APP_PROXY) {
+if (cfg.get('app.trustProxy')) {
   app.enable('trust proxy')
 }
 
@@ -103,8 +96,8 @@ let middleware = [
   cors({
     // HACK: temporarily always allow sending credentials over CORS
     // credentials: dev, // allow passing credentials over CORS in dev mode
-    credentials: true,
-    origin: process.env.ORIGIN,
+    credentials: cfg.get('security.cors.credentials'),
+    origin: cfg.get('security.cors.origin'),
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   }),
   // enable cookie parsing
@@ -115,7 +108,7 @@ let middleware = [
   expressJWT({
     credentialsRequired: false,
     requestProperty: 'auth',
-    secret: process.env.APP_SECRET,
+    secret: cfg.get('app.secret'),
     getToken: AuthService.getToken,
   }),
 ]
@@ -127,9 +120,9 @@ if (process.env.NODE_ENV !== 'test') {
 
 // add production middlewares
 if (isProd) {
-  if (process.env.SENTRY_DSN) {
+  if (Raven) {
     // if a sentry dsn is set, configure raven
-    Raven.config(process.env.SENTRY_DSN, {
+    Raven.config(cfg.get('services.sentry.dsn'), {
       environment: process.env.NODE_ENV,
     }).install()
     middleware = [Raven.requestHandler(), compression(), ...middleware, Raven.errorHandler()]
@@ -163,13 +156,14 @@ if (isProd) {
   })
 
   // add a rate limiting middleware
-  if (process.env.APP_RATE_LIMITING) {
+  if (cfg.get('security.rateLimit.enabled')) {
+    const { windowMs, max, delayAfter, delayMs } = cfg('security.rateLimit')
     // basic rate limiting configuration
     const limiterSettings = {
-      windowMs: 5 * 60 * 1000, // in a 5 minute window
-      max: 1000, // limit to 200 requests
-      delayAfter: 200, // start delaying responses after 100 requests
-      delayMs: 50, // delay responses by 250ms * (numResponses - delayAfter)
+      windowMs, // in a 5 minute window
+      max, // limit to 200 requests
+      delayAfter, // start delaying responses after 100 requests
+      delayMs, // delay responses by 250ms * (numResponses - delayAfter)
       keyGenerator: req => `${req.auth ? req.auth.sub : req.ip}`,
       onLimitReached: req =>
         exceptTest(() => {
@@ -195,7 +189,7 @@ if (isProd) {
         ...limiterSettings,
         store: new RedisStore({
           client: redis,
-          expiry: 5 * 60,
+          expiry: Math.round(windowMs / 1000),
           prefix: 'rl-api:',
         }),
       })

@@ -1,18 +1,15 @@
-require('dotenv').config()
-
 const Redis = require('ioredis')
+
+// import the configuration
+const cfg = require('./klicker.conf.js')
 
 const newRedis = (db = 0) => {
   // otherwise initialize a new redis client for the respective url and database
-  if (process.env.REDIS_HOST && process.env.NODE_ENV !== 'test') {
+  if (cfg.get('cache.redis.enabled') && process.env.NODE_ENV !== 'test') {
     try {
-      const newClient = new Redis({
-        db,
-        family: 4,
-        host: process.env.REDIS_HOST,
-        password: process.env.REDIS_PASS,
-        port: process.env.REDIS_PORT || 6379,
-      })
+      const { host, password, port } = cfg.get('cache.redis')
+      const newClient = new Redis({ db, family: 4, host, password, port })
+
       console.log(`[redis] Connected to db ${db}`)
       return newClient
     } catch ({ message }) {
