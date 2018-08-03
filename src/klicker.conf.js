@@ -200,7 +200,7 @@ module.exports = convict({
     filtering: {
       byIP: {
         enabled: {
-          default: false,
+          default: true,
           env: 'SECURITY_FILTERING_BY_IP_ENABLED',
           format: Boolean,
         },
@@ -212,7 +212,7 @@ module.exports = convict({
       },
       byFP: {
         enabled: {
-          default: false,
+          default: true,
           env: 'SECURITY_FILTERING_BY_FP_ENABLED',
           format: Boolean,
         },
