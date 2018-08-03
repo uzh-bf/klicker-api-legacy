@@ -1,4 +1,4 @@
-const { requireAuth } = require('./services/auth')
+const { requireAuth } = require('./services/accounts')
 const { requestPresignedURL } = require('./resolvers/files')
 const {
   allQuestions,

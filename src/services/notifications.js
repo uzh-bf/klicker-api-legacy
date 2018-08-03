@@ -1,11 +1,14 @@
 // TODO: extract emails into separate service
 const rp = require('request-promise')
 
-const cfg = require('../klicker.conf.js')
+const CFG = require('../klicker.conf.js')
 
-const SLACK_CFG = cfg.get('services.slack')
+const SLACK_CFG = CFG.get('services.slack')
 
-// slack integration
+/**
+ * Send a slack notification (if enabled)
+ * @param {String} text The contents to be sent to slack
+ */
 async function sendSlackNotification(text) {
   // check if slack integration is appropriately configured
   if (process.env.NODE_ENV === 'production' && SLACK_CFG.enabled) {

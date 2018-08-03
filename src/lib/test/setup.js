@@ -1,5 +1,5 @@
 const { QuestionModel, QuestionInstanceModel, SessionModel, TagModel, UserModel, FileModel } = require('../../models')
-const AuthService = require('../../services/auth')
+const AccountService = require('../../services/accounts')
 const QuestionService = require('../../services/questions')
 const { createContentState } = require('../../lib/draft')
 const { QUESTION_TYPES } = require('../../constants')
@@ -29,7 +29,7 @@ const setupTestEnv = async ({ email, password, shortname }) => {
   }
 
   // sign up a fresh user
-  return AuthService.signup(email, password, shortname, 'IBF Test', 'Testing')
+  return AccountService.signup(email, password, shortname, 'IBF Test', 'Testing')
 }
 
 // prepare a new session instance
@@ -70,9 +70,7 @@ const initializeDb = async ({ mongoose, email, shortname, withLogin = false, wit
   await setupTestEnv({ email, password: 'somePassword', shortname })
 
   if (withLogin) {
-    const result = {
-      userId: await AuthService.login(null, email, 'somePassword'),
-    }
+    const result = { userId: await AccountService.login(null, email, 'somePassword') }
 
     if (withQuestions) {
       result.questions = {

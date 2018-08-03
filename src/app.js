@@ -42,7 +42,7 @@ if (SERVICES_CFG.sentry.enabled) {
   Raven = require('raven')
 }
 
-const AuthService = require('./services/auth')
+const AccountService = require('./services/accounts')
 const { resolvers, typeDefs } = require('./schema')
 const { getRedis } = require('./redis')
 const { exceptTest } = require('./lib/utils')
@@ -115,7 +115,7 @@ let middleware = [
     credentialsRequired: false,
     requestProperty: 'auth',
     secret: APP_CFG.secret,
-    getToken: AuthService.getToken,
+    getToken: AccountService.getToken,
   }),
 ]
 

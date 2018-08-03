@@ -1,7 +1,6 @@
 const crypto = require('crypto')
 
 const cfg = require('../klicker.conf.js')
-const AuthService = require('../services/auth')
 const AccountService = require('../services/accounts')
 const { UserModel } = require('../models')
 
@@ -22,19 +21,19 @@ const hmacQuery = (parentValue, args, { auth }) =>
 
 /* ----- mutations ----- */
 const createUserMutation = (parentValue, { email, password, shortname, institution, useCase }) =>
-  AuthService.signup(email, password, shortname, institution, useCase)
+  AccountService.signup(email, password, shortname, institution, useCase)
 
 const modifyUserMutation = (parentValue, { user: { email, shortname, institution, useCase } }, { auth }) =>
   AccountService.updateAccountData({ userId: auth.sub, email, shortname, institution, useCase })
 
-const loginMutation = (parentValue, { email, password }, { res }) => AuthService.login(res, email, password)
+const loginMutation = (parentValue, { email, password }, { res }) => AccountService.login(res, email, password)
 
-const logoutMutation = (parentValue, args, { res }) => AuthService.logout(res)
+const logoutMutation = (parentValue, args, { res }) => AccountService.logout(res)
 
-const requestPasswordMutation = (parentValue, { email }, { res }) => AuthService.requestPassword(res, email)
+const requestPasswordMutation = (parentValue, { email }, { res }) => AccountService.requestPassword(res, email)
 
 const changePasswordMutation = (parentValue, { newPassword }, { auth }) =>
-  AuthService.changePassword(auth.sub, newPassword)
+  AccountService.changePassword(auth.sub, newPassword)
 
 module.exports = {
   // queries

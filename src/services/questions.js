@@ -158,6 +158,12 @@ const createQuestion = async ({ title, type, content, options, solution, files, 
   return newQuestion
 }
 
+/**
+ *
+ * @param {*} questionId
+ * @param {*} userId
+ * @param {*} param2
+ */
 const modifyQuestion = async (questionId, userId, { title, tags, content, options, solution, files }) => {
   const promises = []
 
@@ -293,6 +299,11 @@ const modifyQuestion = async (questionId, userId, { title, tags, content, option
   return question
 }
 
+/**
+ *
+ * @param {*} questionIds
+ * @param {*} userId
+ */
 const archiveQuestions = async (questionIds, userId) => {
   // get the question instance from the DB
   const questions = await QuestionModel.find({
