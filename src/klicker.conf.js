@@ -3,13 +3,28 @@ const convict = require('convict')
 
 module.exports = convict({
   app: {
+    domain: {
+      default: 'localhost',
+      env: 'APP_DOMAIN',
+      format: 'url',
+    },
     gzip: {
       default: true,
       env: 'APP_GZIP',
       format: Boolean,
     },
+    https: {
+      default: false,
+      env: 'APP_HTTPS',
+      format: Boolean,
+    },
+    path: {
+      default: undefined,
+      env: 'APP_PATH',
+      format: String,
+    },
     port: {
-      default: 3000,
+      default: 4000,
       env: 'APP_PORT',
       format: 'port',
     },
@@ -49,6 +64,39 @@ module.exports = convict({
       },
     },
   },
+  email: {
+    from: {
+      default: 'klicker@localhost',
+      env: 'EMAIL_FROM',
+      format: 'email',
+    },
+    host: {
+      default: undefined,
+      env: 'EMAIL_HOST',
+      format: 'url',
+    },
+    port: {
+      default: 587,
+      env: 'EMAIL_PORT',
+      format: 'port',
+    },
+    user: {
+      default: undefined,
+      env: 'EMAIL_USER',
+      format: String,
+    },
+    password: {
+      default: undefined,
+      env: 'EMAIL_PASSWORD',
+      format: String,
+      sensitive: true,
+    },
+    secure: {
+      default: false,
+      env: 'EMAIL_SECURE',
+      format: Boolean,
+    },
+  },
   env: {
     arg: 'nodeEnv',
     default: 'development',
@@ -83,10 +131,35 @@ module.exports = convict({
     },
   },
   s3: {
-    rootUrl: {
+    accessKey: {
       default: undefined,
-      env: 'S3_ROOT_URL',
+      env: 'S3_ACCESS_KEY',
+      format: String,
+    },
+    bucket: {
+      default: undefined,
+      env: 'S3_BUCKET',
+      format: String,
+    },
+    enabled: {
+      default: false,
+      env: 'S3_ENABLED',
+      format: Boolean,
+    },
+    endpoint: {
+      default: undefined,
+      env: 'S3_ENDPOINT',
       format: 'url',
+    },
+    region: {
+      default: 'eu-central-1',
+      env: 'S3_REGION',
+      format: String,
+    },
+    secretKey: {
+      default: undefined,
+      env: 'S3_SECRET_KEY',
+      format: String,
     },
   },
   security: {
@@ -97,7 +170,7 @@ module.exports = convict({
         format: Boolean,
       },
       origin: {
-        default: 'localhost:4000',
+        default: 'http://localhost:3000',
         env: 'SECURITY_CORS_ORIGIN',
         format: 'url',
       },
@@ -122,6 +195,32 @@ module.exports = convict({
         default: undefined,
         env: 'SECURITY_EXPECT_CT_REPORT_URI',
         format: 'url',
+      },
+    },
+    filtering: {
+      byIP: {
+        enabled: {
+          default: false,
+          env: 'SECURITY_FILTERING_BY_IP_ENABLED',
+          format: Boolean,
+        },
+        strict: {
+          default: false,
+          env: 'SECURITY_FILTERING_BY_IP_STRICT',
+          format: Boolean,
+        },
+      },
+      byFP: {
+        enabled: {
+          default: false,
+          env: 'SECURITY_FILTERING_BY_FP_ENABLED',
+          format: Boolean,
+        },
+        strict: {
+          default: false,
+          env: 'SECURITY_FILTERING_BY_FP_STRICT',
+          format: Boolean,
+        },
       },
     },
     frameguard: {
@@ -211,9 +310,21 @@ module.exports = convict({
         format: 'url',
       },
       serviceName: {
-        default: undefined,
+        default: 'klicker-api',
         env: 'SERVICES_APM_SERVICE_NAME',
         format: String,
+      },
+    },
+    apolloEngine: {
+      apiKey: {
+        default: undefined,
+        env: 'SERVICES_APOLLO_ENGINE_API_KEY',
+        format: String,
+      },
+      enabled: {
+        default: false,
+        env: 'SERVICES_APOLLO_ENGINE_ENABLED',
+        format: Boolean,
       },
     },
     sentry: {
@@ -225,6 +336,18 @@ module.exports = convict({
       dsn: {
         default: undefined,
         env: 'SERVICES_SENTRY_DSN',
+        format: 'url',
+      },
+    },
+    slack: {
+      enabled: {
+        default: false,
+        env: 'SERVICES_SLACK_ENABLED',
+        format: Boolean,
+      },
+      webhook: {
+        default: undefined,
+        env: 'SERVICES_SLACK_WEBHOOK',
         format: 'url',
       },
     },

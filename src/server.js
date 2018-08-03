@@ -9,8 +9,10 @@ const cfg = require('./klicker.conf.js')
 // fail early if anything is invalid
 cfg.validate({ allowed: 'strict' })
 
+const APP_CFG = cfg.get('app')
+const CACHE_CFG = cfg.get('cache')
+
 const isDev = process.env.NODE_ENV === 'development'
-const hasRedis = cfg.get('cache.redis.enabled')
 
 // initialize APM if so configured
 if (cfg.get('services.apm.enabled')) {
@@ -26,7 +28,7 @@ if (cfg.get('services.apm.enabled')) {
 const { app, apollo } = require('./app')
 
 let redis
-if (hasRedis) {
+if (CACHE_CFG.redis.enabled) {
   const { getRedis } = require('./redis')
 
   // get the redis singleton
@@ -37,12 +39,10 @@ if (hasRedis) {
 const httpServer = createServer(app)
 apollo.installSubscriptionHandlers(httpServer)
 
-httpServer.listen(process.env.PORT, err => {
+httpServer.listen(APP_CFG.port, err => {
   if (err) throw err
 
-  console.log(
-    `[klicker-api] GraphQL ready on http://${process.env.APP_DOMAIN}:${process.env.PORT}${process.env.APP_PATH}!`
-  )
+  console.log(`[klicker-api] GraphQL ready on http://${APP_CFG.domain}:${APP_CFG.port}/${APP_CFG.path || ''}!`)
 })
 
 const shutdown = async () => {
@@ -51,7 +51,7 @@ const shutdown = async () => {
   await mongoose.disconnect()
   console.log('[mongodb] Disconnected')
 
-  if (hasRedis) {
+  if (CACHE_CFG.redis.enabled) {
     await redis.disconnect()
     console.log('[redis] Disconnected')
   }

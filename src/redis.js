@@ -1,13 +1,15 @@
 const Redis = require('ioredis')
 
 // import the configuration
-const cfg = require('./klicker.conf.js')
+const CFG = require('./klicker.conf.js')
+
+const CACHE_CFG = CFG.get('cache')
 
 const newRedis = (db = 0) => {
   // otherwise initialize a new redis client for the respective url and database
-  if (cfg.get('cache.redis.enabled') && process.env.NODE_ENV !== 'test') {
+  if (CACHE_CFG.redis.enabled && process.env.NODE_ENV !== 'test') {
     try {
-      const { host, password, port } = cfg.get('cache.redis')
+      const { host, password, port } = CACHE_CFG.redis
       const newClient = new Redis({ db, family: 4, host, password, port })
 
       console.log(`[redis] Connected to db ${db}`)

@@ -20,16 +20,21 @@ const morgan = require('morgan')
 const RateLimit = require('express-rate-limit')
 
 // import the configuration
-const cfg = require('./klicker.conf.js')
+const CFG = require('./klicker.conf.js')
+
+const APP_CFG = CFG.get('app')
+const MONGO_CFG = CFG.get('mongo')
+const SECURITY_CFG = CFG.get('security')
+const SERVICES_CFG = CFG.get('services')
 
 // initialize APM if so configured
 let apm
-if (cfg.get('services.apm.enabled')) {
+if (SERVICES_CFG.apm.enabled) {
   apm = require('elastic-apm-node')
 }
 
 let Raven
-if (cfg.get('services.sentry.enabled')) {
+if (SERVICES_CFG.sentry.enabled) {
   Raven = require('raven')
 }
 
@@ -42,25 +47,24 @@ const { createLoaders } = require('./lib/loaders')
 // connect to mongodb
 // use username and password authentication if passed in the environment
 // otherwise assume that no authentication needed (e.g. docker)
-const mongoCfg = cfg.get('mongo')
 const mongoConfig = {
   keepAlive: true,
   reconnectTries: Number.MAX_VALUE,
   reconnectInterval: 1000,
 }
-if (mongoCfg.user && mongoCfg.password) {
+if (MONGO_CFG.user && MONGO_CFG.password) {
   mongoose.connect(
-    `mongodb://${mongoCfg.user}:${mongoCfg.password}@${mongoCfg.url}`,
+    `mongodb://${MONGO_CFG.user}:${MONGO_CFG.password}@${MONGO_CFG.url}`,
     mongoConfig
   )
 } else {
   mongoose.connect(
-    `mongodb://${mongoCfg.url}`,
+    `mongodb://${MONGO_CFG.url}`,
     mongoConfig
   )
 }
 
-if (mongoCfg.debug) {
+if (MONGO_CFG.debug) {
   // activate mongoose debug mode (log all queries)
   mongoose.set('debug', true)
 }
@@ -81,7 +85,7 @@ const app = express()
 
 // if the server is behind a proxy, set the APP_PROXY env to true
 // this will make express trust the X-* proxy headers and set corresponding req.ip
-if (cfg.get('app.trustProxy')) {
+if (APP_CFG.trustProxy) {
   app.enable('trust proxy')
 }
 
@@ -94,10 +98,8 @@ let middleware = [
   }),
   // setup CORS
   cors({
-    // HACK: temporarily always allow sending credentials over CORS
-    // credentials: dev, // allow passing credentials over CORS in dev mode
-    credentials: cfg.get('security.cors.credentials'),
-    origin: cfg.get('security.cors.origin'),
+    credentials: SECURITY_CFG.cors.credentials,
+    origin: SECURITY_CFG.cors.origin,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   }),
   // enable cookie parsing
@@ -108,7 +110,7 @@ let middleware = [
   expressJWT({
     credentialsRequired: false,
     requestProperty: 'auth',
-    secret: cfg.get('app.secret'),
+    secret: APP_CFG.secret,
     getToken: AuthService.getToken,
   }),
 ]
@@ -122,7 +124,7 @@ if (process.env.NODE_ENV !== 'test') {
 if (isProd) {
   if (Raven) {
     // if a sentry dsn is set, configure raven
-    Raven.config(cfg.get('services.sentry.dsn'), {
+    Raven.config(SERVICES_CFG.sentry.dsn, {
       environment: process.env.NODE_ENV,
     }).install()
     middleware = [Raven.requestHandler(), compression(), ...middleware, Raven.errorHandler()]
@@ -156,8 +158,8 @@ if (isProd) {
   })
 
   // add a rate limiting middleware
-  if (cfg.get('security.rateLimit.enabled')) {
-    const { windowMs, max, delayAfter, delayMs } = cfg('security.rateLimit')
+  if (SECURITY_CFG.rateLimit.enabled) {
+    const { windowMs, max, delayAfter, delayMs } = SECURITY_CFG.rateLimit
     // basic rate limiting configuration
     const limiterSettings = {
       windowMs, // in a 5 minute window
@@ -225,6 +227,9 @@ const apollo = new ApolloServer({
       loaders: createLoaders(req.auth),
       res,
     }
+  },
+  engine: SERVICES_CFG.apolloEngine.enabled && {
+    apiKey: SERVICES_CFG.apolloEngine.apiKey,
   },
   formatError: e => {
     console.log(pe.render(e))
