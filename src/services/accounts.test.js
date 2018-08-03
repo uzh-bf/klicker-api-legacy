@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const { UserInputError } = require('apollo-server-express')
+const { ForbiddenError, UserInputError } = require('apollo-server-express')
 const mongoose = require('mongoose')
 const JWT = require('jsonwebtoken')
 
@@ -10,6 +10,8 @@ const AccountService = require('./accounts')
 const { initializeDb, cleanupUser } = require('../lib/test/setup')
 const { Errors } = require('../constants')
 const { UserModel } = require('../models')
+
+const { ObjectId } = mongoose.Types
 
 const appSecret = process.env.APP_SECRET
 
@@ -29,6 +31,7 @@ describe('AccountService', () => {
         email: 'testaccounts3@bf.uzh.ch',
         shortname: 'accnts3',
         withLogin: true,
+        withQuestions: true,
       }))
     })
 
@@ -139,6 +142,38 @@ describe('AccountService', () => {
           shortname: 'accnts4',
           useCase: 'something4',
         })
+      })
+    })
+
+    let deletionToken
+    describe('requestAccountDeletion', () => {
+      it('throws for an invalid user', async () => {
+        await expect(AccountService.requestAccountDeletion(ObjectId())).rejects.toThrow(
+          new UserInputError(Errors.INVALID_USER)
+        )
+      })
+
+      it('generates a valid deletion JWT', async () => {
+        deletionToken = await AccountService.requestAccountDeletion(userId)
+        expect(JWT.verify(deletionToken, appSecret)).toBeTruthy()
+      })
+    })
+
+    describe('resolveAccountDeletion', () => {
+      it('throws when passed an invalid deletion token', async () => {
+        await expect(AccountService.resolveAccountDeletion(userId, 'invalidToken')).rejects.toThrow(
+          new ForbiddenError(Errors.INVALID_DELETION_TOKEN)
+        )
+      })
+
+      it('throws when users in deletion and auth token do not match', async () => {
+        await expect(AccountService.resolveAccountDeletion('someOtherUserId', deletionToken)).rejects.toThrow(
+          new ForbiddenError(Errors.INVALID_DELETION_TOKEN)
+        )
+      })
+
+      it('correctly performs account deletion', async () => {
+        await AccountService.resolveAccountDeletion(userId, deletionToken)
       })
     })
   })

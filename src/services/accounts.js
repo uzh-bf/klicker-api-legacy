@@ -1,21 +1,16 @@
-const fs = require('fs')
-const path = require('path')
-const handlebars = require('handlebars')
 const bcrypt = require('bcryptjs')
 const JWT = require('jsonwebtoken')
-const nodemailer = require('nodemailer')
 const _get = require('lodash/get')
 const { isLength, isEmail, normalizeEmail } = require('validator')
-const { AuthenticationError, UserInputError } = require('apollo-server-express')
+const { AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express')
 
 const CFG = require('../klicker.conf.js')
 const validators = require('../lib/validators')
-const { UserModel } = require('../models')
-const { sendSlackNotification } = require('./notifications')
+const { QuestionInstanceModel, TagModel, FileModel, SessionModel, QuestionModel, UserModel } = require('../models')
+const { sendEmailNotification, sendSlackNotification, compileEmailTemplate } = require('./notifications')
 const { Errors } = require('../constants')
 
 const APP_CFG = CFG.get('app')
-const EMAIL_CFG = CFG.get('email')
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -252,7 +247,7 @@ const signup = async (email, password, shortname, institution, useCase, { isAAI,
   if (newUser) {
     // send a slack notification (if configured)
     sendSlackNotification(
-      `[auth] New user has registered: ${normalizedEmail}, ${shortname}, ${institution}, ${useCase || '-'}`
+      `[accounts] New user has registered: ${normalizedEmail}, ${shortname}, ${institution}, ${useCase || '-'}`
     )
 
     // return the data of the newly created user
@@ -281,7 +276,7 @@ const login = async (res, email, password) => {
 
   // check whether the user exists and hashed passwords match
   if (!user || !bcrypt.compareSync(password, user.password)) {
-    sendSlackNotification(`[auth] Login failed for ${email}`)
+    sendSlackNotification(`[accounts] Login failed for ${email}`)
 
     throw new AuthenticationError('INVALID_LOGIN')
   }
@@ -375,73 +370,105 @@ const requestPassword = async (res, email) => {
     expiresIn: '1d',
   })
 
-  // create reusable transporter object using the default SMTP transport
-  const { host, port, secure, user: emailUser, password: pass } = EMAIL_CFG
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user: emailUser, pass },
+  // load the template source and compile it
+  const html = compileEmailTemplate('passwordReset', {
+    email: user.email,
+    jwt,
   })
 
-  // load the template source and compile it
-  const source = fs.readFileSync(path.join(__dirname, 'emails', 'passwordReset.hbs'), 'utf8')
-  const template = handlebars.compile(source)
-
-  // send mail with defined transport object
-  if (process.env.NODE_ENV !== 'test') {
-    try {
-      await transporter.sendMail({
-        // bcc: 'roland.schlaefli@bf.uzh.ch',
-        from: EMAIL_CFG.from,
-        to: user.email,
-        subject: 'Klicker UZH - Password Reset',
-        html: template({
-          email: user.email,
-          jwt,
-        }),
-      })
-
-      // notify slack that a password has been requested
-      sendSlackNotification(`[auth] Password has been requested for: ${user.email}`)
-    } catch (e) {
-      return 'PASSWORD_RESET_FAILED'
-    }
+  // send a password reset email
+  try {
+    sendEmailNotification({
+      html,
+      subject: 'Klicker UZH - Password Reset',
+      to: user.email,
+    })
+  } catch (e) {
+    return 'PASSWORD_RESET_FAILED'
   }
+
+  // log the password request to slack
+  sendSlackNotification(`[accounts] Password has been requested for: ${user.email}`)
 
   return 'PASSWORD_RESET_SENT'
 }
 
 /**
  * Request account deletion
- * Send a deletion token to the stored email
  * @param {ID} userId
  */
 const requestAccountDeletion = async userId => {
   // get the user from the database
   const user = await UserModel.findById(userId)
+  if (!user) {
+    throw new UserInputError(Errors.INVALID_USER)
+  }
+
+  // log the account deletion request to slack
+  sendSlackNotification(`[accounts] Account deletion has been requested for: ${user.email}`)
 
   // generate a jwt that is valid for account deletion
   const jwt = JWT.sign(generateJwtSettings(user, ['delete']), process.env.APP_SECRET, {
     expiresIn: '1d',
   })
 
-  console.log(jwt)
-
-  // TODO: send the token via email
-  // TODO:
+  return jwt
 }
 
 /**
- * Perform account deletion
+ * Perform all steps needed to fully delete an account
+ * @param {*} userId
+ */
+const performAccountDeletion = async userId => {
+  // get the user from the database
+  const user = await UserModel.findById(userId)
+  if (!user) {
+    throw new UserInputError(Errors.INVALID_USER)
+  }
+
+  sendSlackNotification(`[accounts] Account deletion will be performed for: ${user.email}`)
+
+  // perform the actual deletion
+  await Promise.all([
+    QuestionInstanceModel.remove({ user: userId }),
+    SessionModel.remove({ user: userId }),
+    QuestionModel.remove({ user: userId }),
+    TagModel.remove({ user: userId }),
+    FileModel.remove({ user: userId }),
+    UserModel.findByIdAndRemove(userId),
+  ])
+
+  sendSlackNotification(`[accounts] Account deletion has been performed for: ${user.email}`)
+}
+
+/**
+ * Resolve account deletion requests
  * Validate the deletion token previosuly sent to the stored email
  * @param {ID} userId
  * @param {String} deletionToken
  */
-const performAccountDeletion = async (userId, deletionToken) => {
-  // TODO: validate the deletion token
-  // TODO: perform account deletion
-  console.log(userId, deletionToken)
+const resolveAccountDeletion = async (userId, deletionToken) => {
+  // validate the deletion token
+  try {
+    JWT.verify(deletionToken, APP_CFG.secret)
+  } catch (e) {
+    throw new ForbiddenError(Errors.INVALID_DELETION_TOKEN)
+  }
+
+  // decode the valid deletion token
+  const { sub, scope } = JWT.decode(deletionToken)
+
+  // ensure that the delete scope is available
+  // and that the user to be deleted and the subject
+  // of the deletion token are the same
+  if (!scope.includes('delete') || sub !== userId) {
+    throw new ForbiddenError(Errors.INVALID_DELETION_TOKEN)
+  }
+
+  // perform the actual account deletion procedures
+  await performAccountDeletion(sub)
+
+  return 'ACCOUNT_DELETED'
 }
 
 module.exports = {
@@ -457,5 +484,5 @@ module.exports = {
   changePassword,
   requestPassword,
   requestAccountDeletion,
-  performAccountDeletion,
+  resolveAccountDeletion,
 }
