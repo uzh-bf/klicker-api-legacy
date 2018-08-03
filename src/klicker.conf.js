@@ -177,7 +177,7 @@ module.exports = convict({
     },
     expectCt: {
       enabled: {
-        default: true,
+        default: false,
         env: 'SECURITY_EXPECT_CT_ENABLED',
         format: Boolean,
       },
