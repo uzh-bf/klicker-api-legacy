@@ -32,6 +32,7 @@ module.exports = convict({
       default: undefined,
       env: 'APP_SECRET',
       format: String,
+      sensitive: true,
     },
     trustProxy: {
       default: false,
@@ -84,6 +85,7 @@ module.exports = convict({
       default: undefined,
       env: 'EMAIL_USER',
       format: String,
+      sensitive: true,
     },
     password: {
       default: undefined,
@@ -118,6 +120,7 @@ module.exports = convict({
       default: undefined,
       env: 'MONGO_URL',
       format: 'url',
+      sensitive: true,
     },
     user: {
       default: undefined,
@@ -128,6 +131,7 @@ module.exports = convict({
       default: undefined,
       env: 'MONGO_PASSWORD',
       format: String,
+      sensitive: true,
     },
   },
   s3: {
@@ -135,6 +139,7 @@ module.exports = convict({
       default: undefined,
       env: 'S3_ACCESS_KEY',
       format: String,
+      sensitive: true,
     },
     bucket: {
       default: undefined,
@@ -160,6 +165,7 @@ module.exports = convict({
       default: undefined,
       env: 'S3_SECRET_KEY',
       format: String,
+      sensitive: true,
     },
   },
   security: {
@@ -320,6 +326,7 @@ module.exports = convict({
         default: undefined,
         env: 'SERVICES_APOLLO_ENGINE_API_KEY',
         format: String,
+        sensitive: true,
       },
       enabled: {
         default: false,
@@ -337,6 +344,7 @@ module.exports = convict({
         default: undefined,
         env: 'SERVICES_SENTRY_DSN',
         format: 'url',
+        sensitive: true,
       },
     },
     slack: {
@@ -349,6 +357,7 @@ module.exports = convict({
         default: undefined,
         env: 'SERVICES_SLACK_WEBHOOK',
         format: 'url',
+        sensitive: true,
       },
     },
   },

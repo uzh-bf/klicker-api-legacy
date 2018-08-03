@@ -22,6 +22,10 @@ const RateLimit = require('express-rate-limit')
 // import the configuration
 const CFG = require('./klicker.conf.js')
 
+// log the configuration
+console.log('[klicker-api] Successfully loaded configuration')
+console.log(CFG.toString())
+
 const APP_CFG = CFG.get('app')
 const MONGO_CFG = CFG.get('mongo')
 const SECURITY_CFG = CFG.get('security')
