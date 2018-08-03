@@ -34,8 +34,8 @@ LABEL name="klicker-api"
 LABEL version=$VERSION
 
 # expose the main application port
-EXPOSE 3000
+EXPOSE 4000
 
 # setup a HEALTHCHECK
 HEALTHCHECK --interval=5m --timeout=3s \
-  CMD curl -f http://localhost:3000/ || exit 1
+  CMD curl -f http://localhost:3000/.well-known/apollo/server-health || exit 1

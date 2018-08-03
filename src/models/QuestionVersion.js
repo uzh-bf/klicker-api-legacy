@@ -13,13 +13,17 @@ const QuestionSolution = new mongoose.Schema({
 
 module.exports = new mongoose.Schema({
   // content for draft.js editor state (added 01.05.18)
-  content: { type: String, required: true },
+  content: { type: String },
 
   // "text-only" version of the above content
   description: { type: String, required: true },
 
+  // question options and the corresponding solutions
   options: { type: QuestionOptions, required: true },
   solution: { type: QuestionSolution, required: false },
+
+  // the file urls that are associated with this question version
+  files: [{ type: ObjectId, ref: 'File' }],
 
   instances: [{ type: ObjectId, ref: 'QuestionInstance' }],
 

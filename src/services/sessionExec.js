@@ -2,15 +2,14 @@ const md5 = require('md5')
 const _isNumber = require('lodash/isNumber')
 const { ForbiddenError, UserInputError } = require('apollo-server-express')
 
-const { QuestionInstanceModel, UserModel } = require('../models')
+const CFG = require('../klicker.conf.js')
+const { QuestionInstanceModel, UserModel, FileModel } = require('../models')
 const { QUESTION_GROUPS, QUESTION_TYPES } = require('../constants')
 const { getRedis } = require('../redis')
 const { getRunningSession } = require('./sessionMgr')
-const {
-  pubsub,
-  CONFUSION_ADDED,
-  FEEDBACK_ADDED,
-} = require('../resolvers/subscriptions')
+const { pubsub, CONFUSION_ADDED, FEEDBACK_ADDED } = require('../resolvers/subscriptions')
+
+const FILTERING_CFG = CFG.get('security.filtering')
 
 // initialize redis if available
 const redis = getRedis(2)
@@ -33,9 +32,7 @@ const addFeedback = async ({ sessionId, content }) => {
   // extract the saved feedback and convert it to a plain object
   // then readd the mongo _id field under the id key and publish the result
   // this is needed as redis swallows the _id field and the client could break!
-  const savedFeedback = session.feedbacks[
-    session.feedbacks.length - 1
-  ].toObject()
+  const savedFeedback = session.feedbacks[session.feedbacks.length - 1].toObject()
   pubsub.publish(FEEDBACK_ADDED, {
     [FEEDBACK_ADDED]: { ...savedFeedback, id: savedFeedback._id },
     sessionId,
@@ -54,9 +51,7 @@ const deleteFeedback = async ({ sessionId, feedbackId, userId }) => {
     throw new ForbiddenError('UNAUTHORIZED')
   }
 
-  session.feedbacks = session.feedbacks.filter(
-    feedback => feedback.id !== feedbackId,
-  )
+  session.feedbacks = session.feedbacks.filter(feedback => feedback.id !== feedbackId)
 
   // save the updated session
   await session.save()
@@ -83,9 +78,7 @@ const addConfusionTS = async ({ sessionId, difficulty, speed }) => {
   // extract the saved confusion timestep and convert it to a plain object
   // then readd the mongo _id field under the id key and publish the result
   // this is needed as redis swallows the _id field and the client could break!
-  const savedConfusion = session.confusionTS[
-    session.confusionTS.length - 1
-  ].toObject()
+  const savedConfusion = session.confusionTS[session.confusionTS.length - 1].toObject()
   pubsub.publish(CONFUSION_ADDED, {
     [CONFUSION_ADDED]: { ...savedConfusion, id: savedConfusion._id },
     sessionId,
@@ -96,9 +89,7 @@ const addConfusionTS = async ({ sessionId, difficulty, speed }) => {
 }
 
 // add a response to an active question instance
-const addResponse = async ({
-  ip, fp, instanceId, response,
-}) => {
+const addResponse = async ({ ip, fp, instanceId, response }) => {
   // response object to save
   const saveResponse = {
     createdAt: Date.now(),
@@ -108,7 +99,7 @@ const addResponse = async ({
   // if redis is available, save the ip, fp and response under the key of the corresponding instance
   // also check if any matching response (ip or fp) is already in the database.
   // TODO: results should still be written to the database? but responses will not be saved seperately!
-  if (redis && (process.env.APP_FILTERING_IP || process.env.APP_FILTERING_FP)) {
+  if (redis && (FILTERING_CFG.byIP.enabled || FILTERING_CFG.byFP.enabled)) {
     // prepare a redis pipeline
     const pipeline = redis.pipeline()
 
@@ -121,12 +112,12 @@ const addResponse = async ({
     }
 
     // if ip filtering is enabled, try adding the ip to redis
-    if (process.env.APP_FILTERING_IP) {
+    if (FILTERING_CFG.byIP.enabled) {
       pipeline.sadd(`${instanceId}:ip`, ip)
     }
 
     // if fingerprinting is enabled, try adding the fingerprint to redis
-    if (process.env.APP_FILTERING_FP) {
+    if (FILTERING_CFG.byFP.enabled) {
       pipeline.sadd(`${instanceId}:fp`, fp)
     }
 
@@ -134,11 +125,11 @@ const addResponse = async ({
 
     // if ip filtering is enabled, parse the results
     let startIndex = 0
-    if (process.env.APP_FILTERING_IP) {
+    if (FILTERING_CFG.byIP.enabled) {
       const ipUnique = results[0][1]
 
       // if filtering is strict, drop on non unique
-      if (process.env.APP_FILTERING_IP_STRICT && !ipUnique) {
+      if (FILTERING_CFG.byIP.strict && !ipUnique) {
         dropResponse()
       }
 
@@ -150,11 +141,11 @@ const addResponse = async ({
     }
 
     // if fp filtering is enabled, parse the results
-    if (process.env.APP_FILTERING_FP) {
+    if (FILTERING_CFG.byFP.enabled) {
       const fpUnique = results[startIndex][1]
 
       // if filtering is strict, drop on non unique
-      if (process.env.APP_FILTERING_FP_STRICT && !fpUnique) {
+      if (FILTERING_CFG.byFP.strict && !fpUnique) {
         dropResponse()
       }
 
@@ -196,15 +187,13 @@ const addResponse = async ({
     // if it is the very first response, initialize results
     if (!instance.results) {
       instance.results = {
-        CHOICES: new Array(
-          currentVersion.options[questionType].choices.length,
-        ).fill(+0),
+        CHOICES: new Array(currentVersion.options[questionType].choices.length).fill(+0),
         totalParticipants: 0,
       }
     }
 
     // for each choice given, update the results
-    response.choices.forEach((responseIndex) => {
+    response.choices.forEach(responseIndex => {
       instance.results.CHOICES[responseIndex] += 1
     })
     instance.results.totalParticipants += 1
@@ -276,32 +265,30 @@ const joinSession = async ({ shortname }) => {
     },
   ])
 
-  const {
-    id, activeInstances, settings, feedbacks,
-  } = user.runningSession
+  const { id, activeInstances, settings, feedbacks } = user.runningSession
 
   return {
     id,
     settings,
     // map active instances to be in the correct format
-    activeQuestions: activeInstances.map((instance) => {
-      const { id: instanceId, question } = instance
-      const version = question.versions[instance.version]
+    activeInstances: activeInstances.map(({ id: instanceId, question, version: instanceVersion }) => {
+      const version = question.versions[instanceVersion]
+
+      // get the files that correspond to the current question version
+      const files = FileModel.find({ _id: { $in: version.files } })
 
       return {
-        id: question.id,
-        instanceId,
+        questionId: question.id,
+        id: instanceId,
         title: question.title,
         type: question.type,
         content: version.content,
         description: version.description,
         options: version.options,
+        files,
       }
     }),
-    feedbacks:
-      settings.isFeedbackChannelActive && settings.isFeedbackChannelPublic
-        ? feedbacks
-        : null,
+    feedbacks: settings.isFeedbackChannelActive && settings.isFeedbackChannelPublic ? feedbacks : null,
   }
 }
 

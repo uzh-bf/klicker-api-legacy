@@ -1,22 +1,11 @@
 /* eslint-disable global-require */
-require('dotenv').config()
 
 const isProd = process.env.NODE_ENV === 'production'
-
-// initialize APM if so configured
-let apm
-if (process.env.APM_SERVER_URL) {
-  apm = require('elastic-apm-node')
-}
-
-let Raven
-if (process.env.SENTRY_DSN) {
-  Raven = require('raven')
-}
 
 // base packages
 const mongoose = require('mongoose')
 const express = require('express')
+const PrettyError = require('pretty-error')
 const { ApolloServer } = require('apollo-server-express')
 mongoose.Promise = require('bluebird')
 
@@ -30,23 +19,34 @@ const helmet = require('helmet')
 const morgan = require('morgan')
 const RateLimit = require('express-rate-limit')
 
+// import the configuration
+const CFG = require('./klicker.conf.js')
+
+// log the configuration
+console.log('[klicker-api] Successfully loaded configuration')
+console.log(CFG.toString())
+
+const APP_CFG = CFG.get('app')
+const MONGO_CFG = CFG.get('mongo')
+const SECURITY_CFG = CFG.get('security')
+const SERVICES_CFG = CFG.get('services')
+
+// initialize APM if so configured
+let apm
+if (SERVICES_CFG.apm.enabled) {
+  apm = require('elastic-apm-node')
+}
+
+let Raven
+if (SERVICES_CFG.sentry.enabled) {
+  Raven = require('raven')
+}
+
 const AuthService = require('./services/auth')
 const { resolvers, typeDefs } = require('./schema')
 const { getRedis } = require('./redis')
 const { exceptTest } = require('./lib/utils')
 const { createLoaders } = require('./lib/loaders')
-
-// require important environment variables to be present
-// otherwise exit the application
-const appSettings = ['APP_DOMAIN', 'PORT', 'APP_SECRET', 'MONGO_URL', 'ORIGIN']
-appSettings.forEach((envVar) => {
-  if (!process.env[envVar]) {
-    exceptTest(() => console.warn(
-      `> Error: Please pass ${envVar} as an environment variable.`,
-    ))
-    process.exit(1)
-  }
-})
 
 // connect to mongodb
 // use username and password authentication if passed in the environment
@@ -56,21 +56,19 @@ const mongoConfig = {
   reconnectTries: Number.MAX_VALUE,
   reconnectInterval: 1000,
 }
-if (process.env.MONGO_USER && process.env.MONGO_PASSWORD) {
+if (MONGO_CFG.user && MONGO_CFG.password) {
   mongoose.connect(
-    `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${
-      process.env.MONGO_URL
-    }`,
-    mongoConfig,
+    `mongodb://${MONGO_CFG.user}:${MONGO_CFG.password}@${MONGO_CFG.url}`,
+    mongoConfig
   )
 } else {
   mongoose.connect(
-    `mongodb://${process.env.MONGO_URL}`,
-    mongoConfig,
+    `mongodb://${MONGO_CFG.url}`,
+    mongoConfig
   )
 }
 
-if (process.env.MONGO_DEBUG) {
+if (MONGO_CFG.debug) {
   // activate mongoose debug mode (log all queries)
   mongoose.set('debug', true)
 }
@@ -79,16 +77,19 @@ mongoose.connection
   .once('open', () => {
     exceptTest(() => console.log('> Connection to MongoDB established.'))
   })
-  .on('error', (error) => {
+  .on('error', error => {
     exceptTest(() => console.warn('> Warning: ', error))
   })
+
+// initialize a connection to redis
+const redis = getRedis(1)
 
 // initialize an express server
 const app = express()
 
 // if the server is behind a proxy, set the APP_PROXY env to true
 // this will make express trust the X-* proxy headers and set corresponding req.ip
-if (process.env.APP_PROXY) {
+if (APP_CFG.trustProxy) {
   app.enable('trust proxy')
 }
 
@@ -101,10 +102,8 @@ let middleware = [
   }),
   // setup CORS
   cors({
-    // HACK: temporarily always allow sending credentials over CORS
-    // credentials: dev, // allow passing credentials over CORS in dev mode
-    credentials: true,
-    origin: process.env.ORIGIN,
+    credentials: SECURITY_CFG.cors.credentials,
+    origin: SECURITY_CFG.cors.origin,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   }),
   // enable cookie parsing
@@ -115,25 +114,24 @@ let middleware = [
   expressJWT({
     credentialsRequired: false,
     requestProperty: 'auth',
-    secret: process.env.APP_SECRET,
+    secret: APP_CFG.secret,
     getToken: AuthService.getToken,
   }),
 ]
 
+// add the morgan logging middleware
+if (process.env.NODE_ENV !== 'test') {
+  middleware.push(morgan(isProd ? 'combined' : 'dev'))
+}
+
 // add production middlewares
 if (isProd) {
-  // add the morgan logging middleware in production
-  middleware.push(morgan('combined'))
-
-  if (process.env.SENTRY_DSN) {
+  if (Raven) {
     // if a sentry dsn is set, configure raven
-    Raven.config(process.env.SENTRY_DSN).install()
-    middleware = [
-      Raven.requestHandler(),
-      compression(),
-      ...middleware,
-      Raven.errorHandler(),
-    ]
+    Raven.config(SERVICES_CFG.sentry.dsn, {
+      environment: process.env.NODE_ENV,
+    }).install()
+    middleware = [Raven.requestHandler(), compression(), ...middleware, Raven.errorHandler()]
   } else {
     middleware = [compression(), ...middleware]
   }
@@ -142,7 +140,17 @@ if (isProd) {
   middleware.push((req, res, next) => {
     // set the APM transaction name
     if (apm) {
-      apm.setTransactionName(`${req.body.operationName}`)
+      // if the transaction is a single operation
+      if (req.body.operationName) {
+        apm.setTransactionName(req.body.operationName)
+      } else if (Array.isArray(req.body)) {
+        // if the transaction is a batch of operations
+        const operationsConcat = req.body
+          .map(o => o.operationName)
+          .sort()
+          .join('/')
+        apm.setTransactionName(operationsConcat)
+      }
 
       // if the request is authenticated, set the user context
       if (req.auth) {
@@ -154,44 +162,42 @@ if (isProd) {
   })
 
   // add a rate limiting middleware
-  if (process.env.APP_RATE_LIMITING) {
+  if (SECURITY_CFG.rateLimit.enabled) {
+    const { windowMs, max, delayAfter, delayMs } = SECURITY_CFG.rateLimit
     // basic rate limiting configuration
     const limiterSettings = {
-      windowMs: 5 * 60 * 1000, // in a 5 minute window
-      max: 1000, // limit to 200 requests
-      delayAfter: 200, // start delaying responses after 100 requests
-      delayMs: 50, // delay responses by 250ms * (numResponses - delayAfter)
+      windowMs, // in a 5 minute window
+      max, // limit to 200 requests
+      delayAfter, // start delaying responses after 100 requests
+      delayMs, // delay responses by 250ms * (numResponses - delayAfter)
       keyGenerator: req => `${req.auth ? req.auth.sub : req.ip}`,
-      onLimitReached: req => exceptTest(() => {
-        const error = `> Rate-Limited a Request from ${req.ip} ${req.auth
-          .sub || 'anon'}!`
+      onLimitReached: req =>
+        exceptTest(() => {
+          const error = `> Rate-Limited a Request from ${req.ip} ${req.auth.sub || 'anon'}!`
 
-        console.error(error)
+          console.error(error)
 
-        if (apm) {
-          apm.captureError(error)
-        }
+          if (apm) {
+            apm.captureError(error)
+          }
 
-        if (Raven) {
-          Raven.captureException(error)
-        }
-      }),
+          if (Raven) {
+            Raven.captureException(error)
+          }
+        }),
     }
 
     // if redis is available, use it to centrally store rate limiting dataconst
-    const redis = getRedis(1)
     let limiter
     if (redis) {
       const RedisStore = require('rate-limit-redis')
       limiter = new RateLimit({
         ...limiterSettings,
-        store:
-          redis
-          && new RedisStore({
-            client: redis,
-            expiry: 5 * 60,
-            prefix: 'rl-api:',
-          }),
+        store: new RedisStore({
+          client: redis,
+          expiry: Math.round(windowMs / 1000),
+          prefix: 'rl-api:',
+        }),
       })
     } else {
       // if redis is not available, setup basic rate limiting with in-memory store
@@ -204,6 +210,9 @@ if (isProd) {
 
 // inject the middleware into express
 app.use(middleware)
+
+// instantiate pretty error
+const pe = new PrettyError()
 
 // setup a new apollo server instance
 const apollo = new ApolloServer({
@@ -223,6 +232,40 @@ const apollo = new ApolloServer({
       res,
     }
   },
+  engine: SERVICES_CFG.apolloEngine.enabled && {
+    apiKey: SERVICES_CFG.apolloEngine.apiKey,
+  },
+  formatError: e => {
+    console.log(pe.render(e))
+
+    if (isProd && Raven) {
+      if (e.path || e.name !== 'GraphQLError') {
+        Raven.captureException(e, {
+          tags: { graphql: 'exec_error' },
+          extra: {
+            source: e.source && e.source.body,
+            positions: e.locations,
+            path: e.path,
+          },
+        })
+      } else {
+        Raven.captureMessage(`GraphQLWrongQuery: ${e.message}`, {
+          tags: { graphql: 'wrong_query' },
+          extra: {
+            source: e.source && e.source.body,
+            positions: e.locations,
+            path: e.path,
+          },
+        })
+      }
+    }
+
+    return e
+    /* return {
+      message: e.message,
+      stack: isDev ? e.stack && e.stack.split('\n') : null,
+    } */
+  },
 })
 
 // apply the apollo middleware to express
@@ -230,6 +273,21 @@ apollo.applyMiddleware({
   app,
   cors: false,
   bodyParserConfig: false,
+  onHealthCheck: async () => {
+    // check connection to mongo
+    if (!mongoose.connection.readyState) {
+      console.log('[klicker-react] MongoDB connection failure...')
+      throw new Error('MONGODB_CONNECTION_ERROR')
+    }
+
+    // check connection to redis
+    if (redis && redis.status !== 'ready') {
+      console.log('[klicker-react] Redis connection failure...')
+      throw new Error('REDIS_CONNECTION_ERROR')
+    }
+
+    // TODO any other checks that should be performed?
+  },
 })
 
 module.exports = { app, apollo }

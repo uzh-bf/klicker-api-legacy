@@ -19,14 +19,14 @@ describe('QuestionService', () => {
   let userId
 
   beforeAll(async () => {
-    ({ userId } = await initializeDb({
+    ;({ userId } = await initializeDb({
       mongoose,
       email: 'testquestions@bf.uzh.ch',
       shortname: 'questi',
       withLogin: true,
     }))
   })
-  afterAll((done) => {
+  afterAll(done => {
     mongoose.disconnect(done)
     userId = undefined
   })
@@ -52,7 +52,7 @@ describe('QuestionService', () => {
         QuestionService.createQuestion({
           ...question,
           tags: [],
-        }),
+        })
       ).rejects.toEqual(new Error('NO_TAGS_SPECIFIED'))
     })
 
@@ -61,7 +61,7 @@ describe('QuestionService', () => {
         QuestionService.createQuestion({
           ...question,
           options: undefined,
-        }),
+        })
       ).rejects.toEqual(new Error('NO_OPTIONS_SPECIFIED'))
     })
 
@@ -70,7 +70,7 @@ describe('QuestionService', () => {
         QuestionService.createQuestion({
           ...question,
           solution: { SC: [true] },
-        }),
+        })
       ).rejects.toEqual(new Error('INVALID_SOLUTION'))
     })
 
@@ -179,46 +179,29 @@ describe('QuestionService', () => {
 
   describe('modifyQuestion', () => {
     it('allows modifying the question title', async () => {
-      const modifiedQuestion = await QuestionService.modifyQuestion(
-        questions.SC.id,
-        questions.SC.user,
-        {
-          title: 'modified title',
-        },
-      )
+      const modifiedQuestion = await QuestionService.modifyQuestion(questions.SC.id, questions.SC.user, {
+        title: 'modified title',
+      })
 
       expect(modifiedQuestion).toMatchSnapshot()
     })
 
     it('allows modifying the question tags', async () => {
-      const modifiedQuestion = await QuestionService.modifyQuestion(
-        questions.SC.id,
-        questions.SC.user,
-        {
-          tags: ['ABCD', 'XYZ'],
-        },
-      )
+      const modifiedQuestion = await QuestionService.modifyQuestion(questions.SC.id, questions.SC.user, {
+        tags: ['ABCD', 'XYZ'],
+      })
 
       expect(modifiedQuestion).toMatchSnapshot()
     })
 
     it('allows creating a new question version', async () => {
-      const modifiedQuestion = await QuestionService.modifyQuestion(
-        questions.SC.id,
-        questions.SC.user,
-        {
-          content: createContentState(
-            'This is the new description for version 2',
-          ),
-          options: {
-            choices: [
-              { correct: true, name: 'option3' },
-              { correct: false, name: 'option4' },
-            ],
-            randomized: true,
-          },
+      const modifiedQuestion = await QuestionService.modifyQuestion(questions.SC.id, questions.SC.user, {
+        content: createContentState('This is the new description for version 2'),
+        options: {
+          choices: [{ correct: true, name: 'option3' }, { correct: false, name: 'option4' }],
+          randomized: true,
         },
-      )
+      })
 
       expect(modifiedQuestion).toMatchSnapshot()
     })
@@ -228,7 +211,7 @@ describe('QuestionService', () => {
     it('allows archiving a question', async () => {
       const archivedQuestions = await QuestionService.archiveQuestions(
         [questions.SC.id, questions.MC.id, questions.FREE.id],
-        questions.SC.user,
+        questions.SC.user
       )
       expect(archivedQuestions).toMatchSnapshot()
     })
@@ -236,7 +219,7 @@ describe('QuestionService', () => {
     it('allows unarchiving a question', async () => {
       const unarchivedQuestions = await QuestionService.archiveQuestions(
         [questions.SC.id, questions.MC.id],
-        questions.SC.user,
+        questions.SC.user
       )
       expect(unarchivedQuestions).toMatchSnapshot()
     })

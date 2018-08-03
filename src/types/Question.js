@@ -1,13 +1,7 @@
 /* eslint-disable no-use-before-define */
 
 // HACK: export before require such that circular dependencies can be handled
-module.exports = () => [
-  Question,
-  QuestionInstance,
-  Tag,
-  FREEQuestionOptions,
-  SCQuestionOptions,
-]
+module.exports = () => [Question, QuestionInstance, Tag, FREEQuestionOptions, SCQuestionOptions]
 
 const Tag = require('./Tag')
 const QuestionInstance = require('./QuestionInstance')
@@ -65,6 +59,7 @@ const Question = `
     options: QuestionOptionsInput!
     solution: Question_SolutionInput
 
+    files: [FileInput!]
     tags: [ID!]!
   }
   input QuestionModifyInput {
@@ -73,6 +68,7 @@ const Question = `
     options: QuestionOptionsInput
     solution: Question_SolutionInput
 
+    files: [FileInput!]
     tags: [ID!]
   }
   type Question {
@@ -92,13 +88,14 @@ const Question = `
   }
   type Question_Public {
     id: ID!
-    instanceId: ID!
+    questionId: ID!
     title: String!
     type: Question_Type!
     content: String
     description: String!
     options: Question_Options
     solution: Question_Solution
+    files: [File_Public!]
   }
   type Question_PublicEvaluation {
     id: ID!
@@ -117,6 +114,7 @@ const Question = `
     solution: Question_Solution
 
     instances: [QuestionInstance!]!
+    files: [File!]!
 
     createdAt: String!
     updatedAt: String!
@@ -125,5 +123,6 @@ const Question = `
     id: ID!
     description: String!
     options: Question_Options_Public
+    files: [File_Public!]!
   }
 `

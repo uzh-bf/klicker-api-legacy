@@ -40,6 +40,7 @@ const User = new mongoose.Schema({
   isAAI: { type: Boolean, default: false },
   isMigrated: { type: Boolean, default: false },
 
+  files: [{ type: ObjectId, ref: 'File ' }],
   tags: [{ type: ObjectId, ref: 'Tag' }],
   questions: [{ type: ObjectId, ref: 'Question' }],
   sessions: [{ type: ObjectId, ref: 'Session' }],
@@ -54,7 +55,7 @@ const User = new mongoose.Schema({
   deletionRequestedAt: { type: Date },
 })
 
-User.pre('save', (next) => {
+User.pre('save', next => {
   // ensure the email is properly normalized
   if (this.email) {
     this.email = normalizeEmail(this.email)

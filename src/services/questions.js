@@ -3,11 +3,16 @@ const _isNumber = require('lodash/isNumber')
 const { ContentState, convertToRaw } = require('draft-js')
 const { ForbiddenError, UserInputError } = require('apollo-server-express')
 
-const { QuestionModel, TagModel, UserModel } = require('../models')
+const { QuestionModel, TagModel, UserModel, FileModel } = require('../models')
 const { QUESTION_GROUPS, QUESTION_TYPES } = require('../constants')
 const { convertToPlainText } = require('../lib/draft')
 
-// process tags when editing or creating a question
+/**
+ * Process tags when editing or creating a question
+ * @param {*} existingTags
+ * @param {*} newTags
+ * @param {*} userId
+ */
 const processTags = (existingTags, newTags, userId) => {
   // get references for the already existing tags
   const reusableTags = existingTags.filter(tag => newTags.includes(tag.name))
@@ -31,16 +36,38 @@ const processTags = (existingTags, newTags, userId) => {
   }
 }
 
-// create a new question
-const createQuestion = async ({
-  title,
-  type,
-  content,
-  options,
-  solution,
-  tags,
-  userId,
-}) => {
+/**
+ *
+ * @param {*} files
+ * @param {*} userId
+ */
+const processFiles = (files = [], userId) => {
+  // extract the ids of already existing files
+  const existingFileIds = files.filter(file => file.id).map(file => file.id)
+
+  // create models for entirely new files
+  const createdFiles = files.filter(file => !file.id).map(
+    ({ name, originalName, type }) =>
+      new FileModel({
+        name,
+        originalName,
+        type,
+        user: userId,
+      })
+  )
+
+  return {
+    createdFiles,
+    createdFileIds: createdFiles.map(file => file.id),
+    existingFileIds,
+  }
+}
+
+/**
+ * Create a new question
+ * @param {*} param0
+ */
+const createQuestion = async ({ title, type, content, options, solution, files, tags, userId }) => {
   // if no tags have been assigned, throw
   if (!tags || tags.length === 0) {
     throw new UserInputError('NO_TAGS_SPECIFIED')
@@ -73,11 +100,9 @@ const createQuestion = async ({
       const isMinNum = !options.restrictions.min || _isNumber(options.restrictions.min)
       const isMaxNum = !options.restrictions.max || _isNumber(options.restrictions.max)
       if (
-        !isMinNum
-        || !isMaxNum
-        || (options.restrictions.min
-          && options.restrictions.max
-          && options.restrictions.max <= options.restrictions.min)
+        !isMinNum ||
+        !isMaxNum ||
+        (options.restrictions.min && options.restrictions.max && options.restrictions.max <= options.restrictions.min)
       ) {
         throw new UserInputError('INVALID_RESTRICTIONS')
       }
@@ -87,11 +112,10 @@ const createQuestion = async ({
   const user = await UserModel.findById(userId).populate(['tags'])
 
   // process tags
-  const { allTagIds, allTags, createdTagIds } = processTags(
-    user.tags,
-    tags,
-    userId,
-  )
+  const { allTagIds, allTags, createdTagIds } = processTags(user.tags, tags, userId)
+
+  // process files
+  const { createdFiles, createdFileIds } = processFiles(files, userId)
 
   // create a new question
   // pass the list of tag ids for reference
@@ -108,35 +132,33 @@ const createQuestion = async ({
         options: QUESTION_GROUPS.WITH_OPTIONS.includes(type) && {
           [type]: options,
         },
+        files: createdFileIds,
         solution,
       },
     ],
   })
 
-  const allTagsUpdate = allTags.map((tag) => {
+  const allTagsUpdate = allTags.map(tag => {
     tag.questions.push(newQuestion.id)
     return tag.save()
   })
 
+  const allFilesSave = createdFiles.map(file => file.save())
+
   // push the new question and possibly tags into the user model
   user.questions.push(newQuestion.id)
   user.tags = user.tags.concat(createdTagIds)
+  user.files = user.files.concat(createdFileIds)
   user.updatedAt = Date.now()
 
   // wait until the question and user both have been saved
-  await Promise.all([newQuestion.save(), user.save(), ...allTagsUpdate])
+  await Promise.all([newQuestion.save(), user.save(), Promise.all(allTagsUpdate), Promise.all(allFilesSave)])
 
   // return the new questions data
   return newQuestion
 }
 
-const modifyQuestion = async (
-  questionId,
-  userId,
-  {
-    title, tags, content, options, solution,
-  },
-) => {
+const modifyQuestion = async (questionId, userId, { title, tags, content, options, solution, files }) => {
   const promises = []
 
   // check if both content and options are set for a new version
@@ -159,9 +181,9 @@ const modifyQuestion = async (
   }
 
   if (
-    QUESTION_GROUPS.CHOICES.includes(question.type)
-    && solution
-    && options.choices.length !== solution[question.type].length
+    QUESTION_GROUPS.CHOICES.includes(question.type) &&
+    solution &&
+    options.choices.length !== solution[question.type].length
   ) {
     throw new UserInputError('INVALID_SOLUTION')
   }
@@ -171,16 +193,16 @@ const modifyQuestion = async (
     question.title = title
   }
 
+  // find the corresponding user and corresponding tags
+  const user = await UserModel.findById(userId).populate(['tags'])
+
   // if tags have been changed
   if (tags) {
-    // find the corresponding user and corresponding tags
-    const user = await UserModel.findById(userId).populate(['tags'])
-
     // process tags
     const { allTags, allTagIds } = processTags(user.tags, tags, userId)
 
     // update all tags to contain the question
-    const allTagsUpdate = allTags.map((tag) => {
+    const allTagsUpdate = allTags.map(tag => {
       // if the tag doesn't already contain the question, add it
       if (!tag.questions.includes(questionId)) {
         tag.questions.push(questionId)
@@ -189,10 +211,8 @@ const modifyQuestion = async (
       return tag.save()
     })
 
-    const oldTags = question.tags.filter(
-      prevTag => !allTagIds.includes(prevTag.id),
-    )
-    const oldTagsUpdate = oldTags.map((tag) => {
+    const oldTags = question.tags.filter(prevTag => !allTagIds.includes(prevTag.id))
+    const oldTagsUpdate = oldTags.map(tag => {
       // remove the current question from any old tag
       tag.questions = tag.questions.filter(({ id }) => id !== question.id) // eslint-disable-line
 
@@ -206,7 +226,7 @@ const modifyQuestion = async (
     user.tags = Array.from(new Set([...user.tags, ...allTags]))
 
     // add the tag updates to promises
-    promises.concat(user.save(), allTagsUpdate, oldTagsUpdate)
+    promises.push(allTagsUpdate, oldTagsUpdate)
   }
 
   // migrate old question versions without content field
@@ -229,23 +249,44 @@ const modifyQuestion = async (
   }
 
   // TODO: ensure that content is not empty
-  // if content and options are set, add a new version
-  if (content && options) {
+  // if content and options, or files, are set, add a new version
+  if ((content && options) || files) {
+    // extract the last version of the question
+    const lastVersion = question.versions[question.versions.length - 1]
+
+    // process files
+    const { createdFiles, createdFileIds, existingFileIds } = processFiles(files, userId)
+
+    // replace the files of the user
+    if (files) {
+      user.files = Array.from(new Set([...user.files, ...createdFileIds]))
+      promises.push(createdFiles.map(file => file.save()))
+    }
+
+    // push a new version into the question model
     question.versions.push({
-      content,
-      description: convertToPlainText(content),
-      options: QUESTION_GROUPS.WITH_OPTIONS.includes(question.type) && {
-        // HACK: manually ensure randomized is default set to false
-        // TODO: mongoose should do this..?
-        [question.type]: QUESTION_GROUPS.CHOICES.includes(question.type)
-          ? { randomized: false, ...options }
-          : options,
-      },
-      solution,
+      content: content || lastVersion.content,
+      description: content ? convertToPlainText(content) : lastVersion.description,
+      options: options
+        ? QUESTION_GROUPS.WITH_OPTIONS.includes(question.type) && {
+            // HACK: manually ensure randomized is default set to false
+            // TODO: mongoose should do this..?
+            [question.type]: QUESTION_GROUPS.CHOICES.includes(question.type)
+              ? { randomized: false, ...options }
+              : options,
+          }
+        : lastVersion.options,
+      files: files ? existingFileIds.concat(createdFileIds) : lastVersion.files,
+      solution: solution || lastVersion.solution,
     })
   }
 
   promises.push(question.save())
+
+  // if tags or files have been changed, save the user
+  if (tags || files) {
+    promises.push(user.save())
+  }
 
   await Promise.all(promises)
 
@@ -261,7 +302,7 @@ const archiveQuestions = async (questionIds, userId) => {
 
   // set the questions to be archived if it does not yet have the attribute
   // otherwise invert the previously set value
-  const promises = questions.map((question) => {
+  const promises = questions.map(question => {
     // eslint-disable-next-line no-param-reassign
     question.isArchived = !question.isArchived
     return question.save()

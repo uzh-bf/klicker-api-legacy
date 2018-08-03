@@ -8,18 +8,22 @@ const _get = require('lodash/get')
 const { isLength, isEmail, normalizeEmail } = require('validator')
 const { AuthenticationError, UserInputError } = require('apollo-server-express')
 
+const CFG = require('../klicker.conf.js')
 const { UserModel } = require('../models')
 const { sendSlackNotification } = require('./notifications')
 const { Errors } = require('../constants')
+const { checkAvailability } = require('./accounts')
 
-const dev = process.env.NODE_ENV !== 'production'
+const APP_CFG = CFG.get('app')
+const EMAIL_CFG = CFG.get('email')
+const isDev = process.env.NODE_ENV !== 'production'
 
 const AUTH_COOKIE_SETTINGS = {
-  domain: process.env.APP_DOMAIN,
+  domain: APP_CFG.domain,
   httpOnly: true,
   maxAge: 86400000,
-  path: process.env.APP_PATH ? `${process.env.APP_PATH}/graphql` : '/graphql',
-  secure: !dev && process.env.APP_HTTPS,
+  path: APP_CFG.path ? `${APP_CFG.path}/graphql` : '/graphql',
+  secure: !isDev && APP_CFG.https,
 }
 
 const generateJwtSettings = (user, scope = ['user']) => ({
@@ -30,7 +34,7 @@ const generateJwtSettings = (user, scope = ['user']) => ({
 })
 
 // check whether an authentication object is valid
-const isAuthenticated = (auth) => {
+const isAuthenticated = auth => {
   if (auth && auth.sub) {
     return true
   }
@@ -41,11 +45,6 @@ const isAuthenticated = (auth) => {
 // wraps a graphql resolver
 const requireAuth = wrapped => (parentValue, args, context) => {
   if (!isAuthenticated(context.auth)) {
-    // redirect the user to the login page
-    if (process.env.NODE_ENV !== 'test') {
-      context.res.redirect('/user/login')
-    }
-
     throw new AuthenticationError('INVALID_LOGIN')
   }
   return wrapped(parentValue, args, context)
@@ -67,13 +66,9 @@ const isValidJWT = (jwt, secret) => {
 }
 
 // extract JWT from header or cookie
-const getToken = (req) => {
+const getToken = req => {
   // try to parse an authorization cookie
-  if (
-    req.cookies
-    && req.cookies.jwt
-    && isValidJWT(req.cookies.jwt, process.env.APP_SECRET)
-  ) {
+  if (req.cookies && req.cookies.jwt && isValidJWT(req.cookies.jwt, APP_CFG.secret)) {
     return req.cookies.jwt
   }
 
@@ -81,7 +76,7 @@ const getToken = (req) => {
   if (req.headers.authorization) {
     const split = req.headers.authorization.split(' ')
 
-    if (split[0] === 'Bearer' && isValidJWT(split[1], process.env.APP_SECRET)) {
+    if (split[0] === 'Bearer' && isValidJWT(split[1], APP_CFG.secret)) {
       return split[1]
     }
   }
@@ -89,7 +84,7 @@ const getToken = (req) => {
   // if no token was found, but would be needed
   // additionally look for a token in the GraphQL variables (for normal and batch requests)
   const inlineJWT = _get(req, 'body.variables.jwt') || _get(req, 'body[0].variables.jwt')
-  if (inlineJWT && isValidJWT(inlineJWT, process.env.APP_SECRET)) {
+  if (inlineJWT && isValidJWT(inlineJWT, APP_CFG.secret)) {
     return inlineJWT
   }
 
@@ -100,14 +95,7 @@ const getToken = (req) => {
 // signup a new user
 // make this an async function such that it returns a promise
 // we can later use this promise as a return value for resolvers or similar
-const signup = async (
-  email,
-  password,
-  shortname,
-  institution,
-  useCase,
-  { isAAI, isActive } = {},
-) => {
+const signup = async (email, password, shortname, institution, useCase, { isAAI, isActive } = {}) => {
   // TODO: activation of new accounts (send an email)
 
   if (!isEmail(email)) {
@@ -120,6 +108,16 @@ const signup = async (
 
   // normalize the email address
   const normalizedEmail = normalizeEmail(email)
+
+  // check for the availability of the normalized email and the chosen shortname
+  // throw an error if a matching account already exists
+  const availability = await checkAvailability({ email: normalizedEmail, shortname })
+  if (availability.email === false) {
+    throw new UserInputError(Errors.EMAIL_NOT_AVAILABLE)
+  }
+  if (availability.shortname === false) {
+    throw new UserInputError(Errors.SHORTNAME_NOT_AVAILABLE)
+  }
 
   // generate a salt with bcrypt using 10 rounds
   // hash and salt the password
@@ -139,8 +137,7 @@ const signup = async (
   if (newUser) {
     // send a slack notification (if configured)
     sendSlackNotification(
-      `[auth] New user has registered: ${normalizedEmail}, ${shortname}, ${institution}, ${useCase
-        || '-'}`,
+      `[auth] New user has registered: ${normalizedEmail}, ${shortname}, ${institution}, ${useCase || '-'}`
     )
 
     // return the data of the newly created user
@@ -174,7 +171,7 @@ const login = async (res, email, password) => {
   // generate a JWT for future authentication
   // expiresIn: one day equals 86400 seconds
   // TODO: add more necessary properties for the JWT
-  const jwt = JWT.sign(generateJwtSettings(user), process.env.APP_SECRET, {
+  const jwt = JWT.sign(generateJwtSettings(user), APP_CFG.secret, {
     expiresIn: '1d',
   })
 
@@ -194,7 +191,7 @@ const login = async (res, email, password) => {
     { email },
     {
       $currentDate: { lastLoginAt: true, updatedAt: true },
-    },
+    }
   )
 
   // resolve with data about the user
@@ -202,7 +199,7 @@ const login = async (res, email, password) => {
 }
 
 // log the user out (remove the cookie and redirect)
-const logout = async (res) => {
+const logout = async res => {
   if (res && res.cookie) {
     res.cookie('jwt', null, {
       ...AUTH_COOKIE_SETTINGS,
@@ -251,26 +248,21 @@ const requestPassword = async (res, email) => {
   }
 
   // generate a temporary JWT for password reset
-  const jwt = JWT.sign(generateJwtSettings(user), process.env.APP_SECRET, {
+  const jwt = JWT.sign(generateJwtSettings(user), APP_CFG.secret, {
     expiresIn: '1d',
   })
 
   // create reusable transporter object using the default SMTP transport
+  const { host, port, secure, user: emailUser, password: pass } = EMAIL_CFG
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT || 587,
-    secure: process.env.EMAIL_SECURE || false, // true for 465, false for other ports
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASS, // generated ethereal password
-    },
+    host,
+    port,
+    secure,
+    auth: { user: emailUser, pass },
   })
 
   // load the template source and compile it
-  const source = fs.readFileSync(
-    path.join(__dirname, 'emails', 'passwordReset.hbs'),
-    'utf8',
-  )
+  const source = fs.readFileSync(path.join(__dirname, 'emails', 'passwordReset.hbs'), 'utf8')
   const template = handlebars.compile(source)
 
   // send mail with defined transport object
@@ -278,7 +270,7 @@ const requestPassword = async (res, email) => {
     try {
       await transporter.sendMail({
         // bcc: 'roland.schlaefli@bf.uzh.ch',
-        from: process.env.EMAIL_FROM,
+        from: EMAIL_CFG.from,
         to: user.email,
         subject: 'Klicker UZH - Password Reset',
         html: template({
@@ -288,9 +280,7 @@ const requestPassword = async (res, email) => {
       })
 
       // notify slack that a password has been requested
-      sendSlackNotification(
-        `[auth] Password has been requested for: ${user.email}`,
-      )
+      sendSlackNotification(`[auth] Password has been requested for: ${user.email}`)
     } catch (e) {
       return 'PASSWORD_RESET_FAILED'
     }
@@ -304,18 +294,14 @@ const requestPassword = async (res, email) => {
  * Send a deletion token to the stored email
  * @param {*} userId
  */
-const requestAccountDeletion = async (userId) => {
+const requestAccountDeletion = async userId => {
   // get the user from the database
   const user = await UserModel.findById(userId)
 
   // generate a jwt that is valid for account deletion
-  const jwt = JWT.sign(
-    generateJwtSettings(user, ['delete']),
-    process.env.APP_SECRET,
-    {
-      expiresIn: '1d',
-    },
-  )
+  const jwt = JWT.sign(generateJwtSettings(user, ['delete']), process.env.APP_SECRET, {
+    expiresIn: '1d',
+  })
 
   console.log(jwt)
 
