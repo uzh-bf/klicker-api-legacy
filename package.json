@@ -7,7 +7,7 @@
   "license": "AGPL-3.0",
   "dependencies": {
     "apollo-server-express": "2.0.0",
-    "aws-sdk": "2.285.1",
+    "aws-sdk": "2.286.2",
     "bcryptjs": "2.4.3",
     "bluebird": "3.5.1",
     "body-parser": "1.18.3",
@@ -27,7 +27,7 @@
     "graphql": "0.13.2",
     "graphql-redis-subscriptions": "1.5.0",
     "graphql-subscriptions": "0.5.8",
-    "graphql-tools": "3.1.0",
+    "graphql-tools": "3.1.1",
     "handlebars": "4.0.11",
     "helmet": "3.13.0",
     "ioredis": "3.2.2",
@@ -49,7 +49,7 @@
     "subscriptions-transport-ws": "0.9.14",
     "uuid": "3.3.2",
     "v8n": "1.2.0",
-    "validator": "10.4.0"
+    "validator": "10.5.0"
   },
   "devDependencies": {
     "babel-eslint": "8.2.6",
