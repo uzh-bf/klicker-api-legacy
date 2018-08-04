@@ -7,7 +7,7 @@ const JWT = require('jsonwebtoken')
 mongoose.Promise = require('bluebird')
 
 const AccountService = require('./accounts')
-const { initializeDb, cleanupUser } = require('../lib/test/setup')
+const { initializeDb } = require('../lib/test/setup')
 const { Errors } = require('../constants')
 const { UserModel } = require('../models')
 
@@ -28,15 +28,14 @@ describe('AccountService', () => {
       })
       ;({ userId } = await initializeDb({
         mongoose,
-        email: 'testaccounts3@bf.uzh.ch',
-        shortname: 'accnts3',
+        email: 'testaccounts@bf.uzh.ch',
+        shortname: 'accnts',
         withLogin: true,
         withQuestions: true,
       }))
     })
 
     afterAll(async done => {
-      await cleanupUser(userId)
       mongoose.disconnect(done)
       userId = undefined
     })

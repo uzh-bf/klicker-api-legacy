@@ -404,13 +404,30 @@ const requestAccountDeletion = async userId => {
     throw new UserInputError(Errors.INVALID_USER)
   }
 
-  // log the account deletion request to slack
-  sendSlackNotification(`[accounts] Account deletion has been requested for: ${user.email}`)
-
   // generate a jwt that is valid for account deletion
   const jwt = JWT.sign(generateJwtSettings(user, ['delete']), process.env.APP_SECRET, {
     expiresIn: '1d',
   })
+
+  // load the template source and compile it
+  const html = compileEmailTemplate('deletionRequest', {
+    email: user.email,
+    jwt,
+  })
+
+  // send an account deletion email
+  try {
+    sendEmailNotification({
+      html,
+      subject: 'Klicker UZH - Account Deletion Request',
+      to: user.email,
+    })
+  } catch (e) {
+    console.log(e)
+  }
+
+  // log the account deletion request to slack
+  sendSlackNotification(`[accounts] Account deletion has been requested for: ${user.email}`)
 
   return jwt
 }

@@ -14,10 +14,10 @@ const SLACK_CFG = CFG.get('services.slack')
  * @param {String} text The contents to be sent to slack
  */
 async function sendSlackNotification(text) {
+  console.log(text)
+
   // check if slack integration is appropriately configured
   if (process.env.NODE_ENV === 'production' && SLACK_CFG.enabled) {
-    // console.log(`> Sending slack notification: ${text}`)
-
     return rp({
       method: 'POST',
       uri: SLACK_CFG.webhook,
@@ -32,16 +32,16 @@ async function sendSlackNotification(text) {
 }
 
 /**
- * Prepare a nodemailer transporter
+ * Create a reusable nodemailer transporter using the default SMTP transport
  */
 function prepareEmailTransporter() {
-  // create reusable transporter object using the default SMTP transport
   const { host, port, secure, user, password: pass } = EMAIL_CFG
   return nodemailer.createTransport({
     host,
     port,
     secure,
-    auth: { user, pass },
+    auth: user && pass ? { user, pass } : undefined,
+    requiresAuth: user && pass,
   })
 }
 
@@ -65,7 +65,11 @@ async function sendEmailNotification({ to, subject, html }) {
     const transporter = prepareEmailTransporter()
 
     // send the email
-    await transporter.sendMail({ from: EMAIL_CFG.from, to, subject, html })
+    try {
+      await transporter.sendMail({ from: EMAIL_CFG.from, to, subject, html })
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
 
