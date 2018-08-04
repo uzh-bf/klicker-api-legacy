@@ -8,15 +8,27 @@ const { QUESTION_TYPES } = require('../../constants')
  * Cleanup all data belonging to a user
  * @param {*} user The id of the user
  */
-const cleanupUser = async user => {
-  await Promise.all([
-    QuestionInstanceModel.remove({ user }),
-    SessionModel.remove({ user }),
-    QuestionModel.remove({ user }),
-    TagModel.remove({ user }),
-    FileModel.remove({ user }),
-    UserModel.findByIdAndRemove(user),
-  ])
+const cleanupUser = async ({ email, userId }) => {
+  if (userId) {
+    await Promise.all([
+      QuestionInstanceModel.remove({ user: userId }),
+      SessionModel.remove({ user: userId }),
+      QuestionModel.remove({ user: userId }),
+      TagModel.remove({ user: userId }),
+      FileModel.remove({ user: userId }),
+      UserModel.findByIdAndRemove(userId),
+    ])
+  } else {
+    const user = await UserModel.findOne({ email })
+    await Promise.all([
+      QuestionInstanceModel.remove({ user: user.id }),
+      SessionModel.remove({ user: user.id }),
+      QuestionModel.remove({ user: user.id }),
+      TagModel.remove({ user: user.id }),
+      FileModel.remove({ user: user.id }),
+      UserModel.findByIdAndRemove(user.id),
+    ])
+  }
 }
 
 const setupTestEnv = async ({ email, password, shortname }) => {
@@ -25,7 +37,7 @@ const setupTestEnv = async ({ email, password, shortname }) => {
 
   // if the user already exists, delete everything associated
   if (user) {
-    await cleanupUser(user.id)
+    await cleanupUser({ userId: user.id })
   }
 
   // sign up a fresh user
