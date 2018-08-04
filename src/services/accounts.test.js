@@ -161,13 +161,13 @@ describe('AccountService', () => {
     describe('resolveAccountDeletion', () => {
       it('throws when passed an invalid deletion token', async () => {
         await expect(AccountService.resolveAccountDeletion(userId, 'invalidToken')).rejects.toThrow(
-          new ForbiddenError(Errors.INVALID_DELETION_TOKEN)
+          new ForbiddenError(Errors.INVALID_TOKEN)
         )
       })
 
       it('throws when users in deletion and auth token do not match', async () => {
         await expect(AccountService.resolveAccountDeletion('someOtherUserId', deletionToken)).rejects.toThrow(
-          new ForbiddenError(Errors.INVALID_DELETION_TOKEN)
+          new ForbiddenError(Errors.INVALID_TOKEN)
         )
       })
 

@@ -113,6 +113,18 @@ const getToken = req => {
 }
 
 /**
+ * Generate a token that is scoped for a specific use case
+ * @param {*} userId The subject of the new token
+ * @param {*} shortname The shortname to be included in the token
+ * @param {*} scope The scope the new token should be usable for
+ * @param {*} expiresIn The expiration of the new token
+ */
+const generateScopedToken = (user, scope, expiresIn = '1w') =>
+  JWT.sign(generateJwtSettings(user, [scope]), APP_CFG.secret, {
+    expiresIn,
+  })
+
+/**
  * Verify an arbitrary JWT for validity and correct scoping
  * @param {*} token The JWT to be evaluated
  * @param {*} wantedScope The scope that the JWT should have to pass
@@ -273,9 +285,8 @@ const signup = async (email, password, shortname, institution, useCase, { isAAI,
       `[accounts] New user has registered: ${normalizedEmail}, ${shortname}, ${institution}, ${useCase || '-'}`
     )
 
-    const jwt = JWT.sign(generateJwtSettings(newUser, ['activate']), APP_CFG.secret, {
-      expiresIn: '1w',
-    })
+    // generate a token scoped for user account activation
+    const jwt = generateScopedToken(newUser, 'activate')
 
     // load the template source and compile it
     const html = compileEmailTemplate('accountActivation', {
@@ -339,7 +350,7 @@ const login = async (res, email, password) => {
 
   const invalidLogin = () => {
     sendSlackNotification(`[accounts] Login failed for ${email}`)
-    throw new AuthenticationError('INVALID_LOGIN')
+    throw new AuthenticationError(Errors.INVALID_LOGIN)
   }
 
   // check whether the user exists
@@ -349,7 +360,7 @@ const login = async (res, email, password) => {
 
   // check whether the account is already active
   if (!user.isActive) {
-    throw new AuthenticationError('ACCOUNT_NOT_ACTIVATED')
+    throw new AuthenticationError(Errors.ACCOUNT_NOT_ACTIVATED)
   }
 
   // check if hashed passwords match
@@ -475,9 +486,7 @@ const requestAccountDeletion = async userId => {
   }
 
   // generate a jwt that is valid for account deletion
-  const jwt = JWT.sign(generateJwtSettings(user, ['delete']), process.env.APP_SECRET, {
-    expiresIn: '1d',
-  })
+  const jwt = generateScopedToken(user, 'delete', '1d')
 
   // load the template source and compile it
   const html = compileEmailTemplate('deletionRequest', {
@@ -559,4 +568,5 @@ module.exports = {
   requestAccountDeletion,
   resolveAccountDeletion,
   activateAccount,
+  generateScopedToken,
 }
