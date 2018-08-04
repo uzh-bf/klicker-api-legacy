@@ -44,6 +44,7 @@ const {
   checkAvailability,
   requestAccountDeletion,
   resolveAccountDeletion,
+  activateAccount,
 } = require('./resolvers/users')
 const { files } = require('./resolvers/files')
 const { confusionAdded, feedbackAdded } = require('./resolvers/subscriptions')
@@ -75,6 +76,7 @@ const typeDefs = [
   }
 
   type Mutation {
+    activateAccount(activationToken: String!): String!
     activateNextBlock: Session!
     addConfusionTS(fp: ID, sessionId: ID!, difficulty: Int!, speed: Int!): String!
     addFeedback(fp: ID, sessionId: ID!, content: String!): String!
@@ -125,6 +127,7 @@ const resolvers = {
     user: requireAuth(authUser),
   },
   Mutation: {
+    activateAccount,
     archiveQuestions: requireAuth(archiveQuestions),
     addFeedback,
     deleteFeedback: requireAuth(deleteFeedback),

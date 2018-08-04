@@ -43,6 +43,8 @@ const requestAccountDeletionMutation = (parentValue, args, { auth }) => {
 const resolveAccountDeletionMutation = (parentValue, { deletionToken }, { auth }) =>
   AccountService.resolveAccountDeletion(auth.sub, deletionToken)
 
+const activateAccountMutation = (parentValue, { activationToken }) => AccountService.activateAccount(activationToken)
+
 module.exports = {
   // queries
   authUser: authUserByIDQuery,
@@ -59,4 +61,5 @@ module.exports = {
   requestPassword: requestPasswordMutation,
   requestAccountDeletion: requestAccountDeletionMutation,
   resolveAccountDeletion: resolveAccountDeletionMutation,
+  activateAccount: activateAccountMutation,
 }

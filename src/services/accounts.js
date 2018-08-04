@@ -113,6 +113,31 @@ const getToken = req => {
 }
 
 /**
+ * Verify an arbitrary JWT for validity and correct scoping
+ * @param {*} token The JWT to be evaluated
+ * @param {*} wantedScope The scope that the JWT should have to pass
+ * @param {*} userId The userId that the JWT should be related to
+ */
+const verifyToken = (token, wantedScope, userId) => {
+  // validate the token
+  try {
+    JWT.verify(token, APP_CFG.secret)
+  } catch (e) {
+    throw new ForbiddenError(Errors.INVALID_TOKEN)
+  }
+
+  // decode the valid token
+  const { sub, scope } = JWT.decode(token)
+
+  // ensure that the wanted scope is available
+  if ((wantedScope && !scope.includes(wantedScope)) || (userId && sub !== userId)) {
+    throw new ForbiddenError(Errors.INVALID_TOKEN)
+  }
+
+  return sub
+}
+
+/**
  * Check the availability of fields with uniqueness constraints
  * @param {String} email
  * @param {String} shortname
@@ -206,8 +231,6 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
  * @param {Boolean} isActive Whether the user is initially active
  */
 const signup = async (email, password, shortname, institution, useCase, { isAAI, isActive } = {}) => {
-  // TODO: activation of new accounts (send an email)
-
   if (!isEmail(email)) {
     throw new UserInputError(Errors.INVALID_EMAIL)
   }
@@ -250,11 +273,49 @@ const signup = async (email, password, shortname, institution, useCase, { isAAI,
       `[accounts] New user has registered: ${normalizedEmail}, ${shortname}, ${institution}, ${useCase || '-'}`
     )
 
+    const jwt = JWT.sign(generateJwtSettings(newUser, ['activate']), APP_CFG.secret, {
+      expiresIn: '1w',
+    })
+
+    // load the template source and compile it
+    const html = compileEmailTemplate('accountActivation', {
+      email: normalizedEmail,
+      jwt,
+    })
+
+    // send an account activation email
+    try {
+      sendEmailNotification({
+        html,
+        subject: 'Klicker UZH - Account Activation',
+        to: normalizedEmail,
+      })
+    } catch (e) {
+      sendSlackNotification(`[accounts] Activation email could not be sent to ${normalizedEmail}`)
+    }
+
     // return the data of the newly created user
     return newUser
   }
 
   throw new UserInputError('SIGNUP_FAILED')
+}
+
+/**
+ * Activate a newly created user account
+ * @param {String} email The email of the account that should be activated
+ * @param {String} activationToken The activation token to be verified
+ */
+const activateAccount = async activationToken => {
+  // verify the token and extract the userId of the account
+  const userId = verifyToken(activationToken, 'activate')
+
+  // activate the user account
+  await UserModel.findByIdAndUpdate(userId, {
+    isActive: true,
+  })
+
+  return 'ACCOUNT_ACTIVATED'
 }
 
 /**
@@ -272,20 +333,34 @@ const login = async (res, email, password) => {
   const normalizedEmail = normalizeEmail(email)
 
   // look for a single user with the given email
-  const user = await UserModel.findOne({ email: normalizedEmail })
+  const user = await UserModel.findOne({
+    email: normalizedEmail,
+  })
 
-  // check whether the user exists and hashed passwords match
-  if (!user || !bcrypt.compareSync(password, user.password)) {
+  const invalidLogin = () => {
     sendSlackNotification(`[accounts] Login failed for ${email}`)
-
     throw new AuthenticationError('INVALID_LOGIN')
   }
 
+  // check whether the user exists
+  if (!user) {
+    invalidLogin()
+  }
+
+  // check whether the account is already active
+  if (!user.isActive) {
+    throw new AuthenticationError('ACCOUNT_NOT_ACTIVATED')
+  }
+
+  // check if hashed passwords match
+  if (!bcrypt.compareSync(password, user.password)) {
+    invalidLogin()
+  }
+
   // generate a JWT for future authentication
-  // expiresIn: one day equals 86400 seconds
   // TODO: add more necessary properties for the JWT
   const jwt = JWT.sign(generateJwtSettings(user), APP_CFG.secret, {
-    expiresIn: '1d',
+    expiresIn: '1w',
   })
 
   // set a cookie with the generated JWT
@@ -294,12 +369,7 @@ const login = async (res, email, password) => {
   }
 
   // update the last login date
-  await UserModel.findOneAndUpdate(
-    { email },
-    {
-      $currentDate: { lastLoginAt: true, updatedAt: true },
-    }
-  )
+  await UserModel.findOneAndUpdate({ email: normalizedEmail }, { $currentDate: { lastLoginAt: true, updatedAt: true } })
 
   // resolve with data about the user
   return user.id
@@ -465,25 +535,11 @@ const performAccountDeletion = async userId => {
  * @param {String} deletionToken
  */
 const resolveAccountDeletion = async (userId, deletionToken) => {
-  // validate the deletion token
-  try {
-    JWT.verify(deletionToken, APP_CFG.secret)
-  } catch (e) {
-    throw new ForbiddenError(Errors.INVALID_DELETION_TOKEN)
-  }
-
-  // decode the valid deletion token
-  const { sub, scope } = JWT.decode(deletionToken)
-
-  // ensure that the delete scope is available
-  // and that the user to be deleted and the subject
-  // of the deletion token are the same
-  if (!scope.includes('delete') || sub !== userId) {
-    throw new ForbiddenError(Errors.INVALID_DELETION_TOKEN)
-  }
+  // verify the deletion token and extract the user id
+  const userToDelete = verifyToken(deletionToken, 'delete', userId)
 
   // perform the actual account deletion procedures
-  await performAccountDeletion(sub)
+  await performAccountDeletion(userToDelete)
 
   return 'ACCOUNT_DELETED'
 }
@@ -502,4 +558,5 @@ module.exports = {
   requestPassword,
   requestAccountDeletion,
   resolveAccountDeletion,
+  activateAccount,
 }
