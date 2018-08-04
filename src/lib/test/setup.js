@@ -31,7 +31,7 @@ const cleanupUser = async ({ email, userId }) => {
   }
 }
 
-const setupTestEnv = async ({ email, password, shortname }) => {
+const setupTestEnv = async ({ email, password, shortname, isActive = true }) => {
   // find the id of the user to reset
   const user = await UserModel.findOne({ email })
 
@@ -41,7 +41,7 @@ const setupTestEnv = async ({ email, password, shortname }) => {
   }
 
   // sign up a fresh user
-  return AccountService.signup(email, password, shortname, 'IBF Test', 'Testing')
+  return AccountService.signup(email, password, shortname, 'IBF Test', 'Testing', { isActive })
 }
 
 // prepare a new session instance
@@ -69,7 +69,14 @@ const prepareSessionFactory = SessionMgrService => async (
   })
 }
 
-const initializeDb = async ({ mongoose, email, shortname, withLogin = false, withQuestions = false }) => {
+const initializeDb = async ({
+  mongoose,
+  email,
+  shortname,
+  withLogin = false,
+  withQuestions = false,
+  isActive = true,
+}) => {
   await mongoose.connect(
     `mongodb://${process.env.MONGO_URL}`,
     {
@@ -79,7 +86,7 @@ const initializeDb = async ({ mongoose, email, shortname, withLogin = false, wit
     }
   )
 
-  await setupTestEnv({ email, password: 'somePassword', shortname })
+  const createdUser = await setupTestEnv({ email, password: 'somePassword', shortname, isActive })
 
   if (withLogin) {
     const result = { userId: await AccountService.login(null, email, 'somePassword') }
@@ -169,7 +176,7 @@ const initializeDb = async ({ mongoose, email, shortname, withLogin = false, wit
     return result
   }
 
-  return null
+  return { userId: createdUser.id, email, shortname }
 }
 
 module.exports = {
