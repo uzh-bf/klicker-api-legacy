@@ -1,8 +1,11 @@
 const request = require('supertest')
 const mongoose = require('mongoose')
+const JWT = require('jsonwebtoken')
 
 const Queries = require('./queries/index')
 const Mutations = require('./mutations/index')
+const AccountService = require('../services/accounts')
+const { UserModel } = require('../models')
 const { app } = require('../app')
 const { initializeDb } = require('../lib/test/setup')
 const { createContentState } = require('../lib/draft')
@@ -55,23 +58,27 @@ describe('Integration', () => {
     authCookie = null
   })
 
+  const login = async password => {
+    // send a login request
+    const response = await sendQuery({
+      query: Mutations.LoginMutation,
+      variables: {
+        email: 'testintegration@bf.uzh.ch',
+        password,
+      },
+    })
+
+    const data = ensureNoErrors(response)
+    expect(data).toBeTruthy()
+
+    // save the authorization cookie
+    authCookie = response.header['set-cookie']
+    expect(authCookie.length).toEqual(1)
+  }
+
   describe('Login', () => {
     it('works with valid credentials', async () => {
-      // send a login request
-      const response = await sendQuery({
-        query: Mutations.LoginMutation,
-        variables: {
-          email: 'testintegration@bf.uzh.ch',
-          password: 'somePassword',
-        },
-      })
-
-      const data = ensureNoErrors(response)
-      expect(data).toBeTruthy()
-
-      // save the authorization cookie
-      authCookie = response.header['set-cookie']
-      expect(authCookie.length).toEqual(1)
+      await login('somePassword')
     })
   })
 
@@ -1160,6 +1167,48 @@ describe('Integration', () => {
       // expect the response to contain "INVALID_LOGIN"
       // expect(response2.body.errors).toMatchSnapshot()
       expect(response2.body.errors[0].message).toEqual('INVALID_LOGIN')
+    })
+  })
+
+  describe('Account Deletion', () => {
+    beforeAll(async () => {
+      await login('someOtherPassword')
+    })
+
+    it('can request a deletion token email', async () => {
+      const { requestAccountDeletion } = ensureNoErrors(
+        await sendQuery({ query: Mutations.RequestAccountDeletionMutation }, authCookie)
+      )
+      expect(requestAccountDeletion).toEqual('ACCOUNT_DELETION_EMAIL_SENT')
+    })
+
+    it('can perform a full account deletion', async () => {
+      // extract the jwt from the authCookie
+      const jwt = authCookie[0].split('=')[1]
+      console.log(jwt)
+
+      // decode the authentication cookie
+      const { sub, scope } = JWT.decode(jwt)
+      console.log(sub, scope)
+
+      // precompute a valid deletion token
+      const deletionToken = AccountService.requestAccountDeletion(sub)
+      console.log(deletionToken)
+
+      // perform account deletion
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ResolveAccountDeletionMutation,
+            variables: { deletionToken },
+          },
+          authCookie
+        )
+      )
+      console.log(data)
+
+      // verify that the user has been deleted
+      expect(await UserModel.count({ id: sub })).toEqual(0)
     })
   })
 })
