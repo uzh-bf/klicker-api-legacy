@@ -19,9 +19,8 @@ const AddResponseMutation = loadAsString('./AddResponseMutation.graphql')
 const ActivateNextBlockMutation = loadAsString('./ActivateNextBlockMutation.graphql')
 const RequestPasswordMutation = loadAsString('./RequestPasswordMutation.graphql')
 const ChangePasswordMutation = loadAsString('./ChangePasswordMutation.graphql')
-const DeleteQuestionMutation = loadAsString('./DeleteQuestionMutation.graphql')
-const DeleteSessionMutation = loadAsString('./DeleteSessionMutation.graphql')
-const DeleteUserMutation = loadAsString('./DeleteUserMutation.graphql')
+const DeleteQuestionsMutation = loadAsString('./DeleteQuestionsMutation.graphql')
+const DeleteSessionsMutation = loadAsString('./DeleteSessionsMutation.graphql')
 const ModifyUserMutation = loadAsString('./ModifyUserMutation.graphql')
 const RequestAccountDeletionMutation = loadAsString('./RequestAccountDeletionMutation.graphql')
 const ResolveAccountDeletionMutation = loadAsString('./ResolveAccountDeletionMutation.graphql')
@@ -56,9 +55,8 @@ module.exports = {
   ActivateNextBlockMutation,
   RequestPasswordMutation,
   ChangePasswordMutation,
-  DeleteQuestionMutation,
-  DeleteSessionMutation,
-  DeleteUserMutation,
+  DeleteQuestionsMutation,
+  DeleteSessionsMutation,
   ModifyUserMutation,
   RequestAccountDeletionMutation,
   ResolveAccountDeletionMutation,

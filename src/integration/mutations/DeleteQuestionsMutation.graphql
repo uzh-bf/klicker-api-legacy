@@ -1,0 +1,3 @@
+mutation DeleteQuestions($questionIds: [ID!]!) {
+  deleteQuestions(ids: $questionIds)
+}
