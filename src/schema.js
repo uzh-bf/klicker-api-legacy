@@ -42,6 +42,8 @@ const {
   requestPassword,
   hmac,
   checkAvailability,
+  requestAccountDeletion,
+  resolveAccountDeletion,
 } = require('./resolvers/users')
 const { files } = require('./resolvers/files')
 const { confusionAdded, feedbackAdded } = require('./resolvers/subscriptions')
@@ -90,6 +92,8 @@ const typeDefs = [
     modifySession(id: ID!, session: SessionModifyInput!): Session!
     modifyUser(user: User_Modify!): User!
     pauseSession(id: ID!): Session!
+    requestAccountDeletion: String!
+    resolveAccountDeletion(deletionToken: String!): String!
     requestPassword(email: String!): String!
     requestPresignedURL(fileType: String!): File_PresignedURL!
     startSession(id: ID!): Session!
@@ -137,6 +141,8 @@ const resolvers = {
     modifySession: requireAuth(modifySession),
     modifyUser: requireAuth(modifyUser),
     pauseSession: requireAuth(pauseSession),
+    requestAccountDeletion: requireAuth(requestAccountDeletion),
+    resolveAccountDeletion: requireAuth(resolveAccountDeletion),
     requestPassword,
     requestPresignedURL: requireAuth(requestPresignedURL),
     startSession: requireAuth(startSession),
