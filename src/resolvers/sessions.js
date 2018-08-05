@@ -138,6 +138,9 @@ const updateSessionSettingsMutation = (parentValue, { sessionId, settings }, { a
     shortname: auth.shortname,
   })
 
+const deleteSessionsMutation = (parentValue, { sessionIds }, { auth }) =>
+  SessionMgrService.deleteSessions({ userId: auth.sub, sessionIds })
+
 module.exports = {
   // queries
   allSessions: allSessionsQuery,
@@ -160,4 +163,5 @@ module.exports = {
   addConfusionTS: addConfusionTSMutation,
   updateSessionSettings: updateSessionSettingsMutation,
   joinSession: joinSessionQuery,
+  deleteSessions: deleteSessionsMutation,
 }

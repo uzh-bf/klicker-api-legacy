@@ -8,6 +8,7 @@ const {
   question,
   modifyQuestion,
   archiveQuestions,
+  deleteQuestions,
 } = require('./resolvers/questions')
 const { questionInstancesByPV, addResponse, responsesByPV, resultsByPV } = require('./resolvers/questionInstances')
 const {
@@ -29,6 +30,7 @@ const {
   runtimeByPV,
   session,
   modifySession,
+  deleteSessions,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -87,6 +89,8 @@ const typeDefs = [
     createSession(session: SessionInput!): Session!
     createUser(email: String!, password: String!, shortname: String!, institution: String!, useCase: String): User!
     deleteFeedback(sessionId: ID!, feedbackId: ID!): Session!
+    deleteQuestions(questionIds: [ID!]!): String!
+    deleteSessions(sessionIds: [ID!]!): String!
     endSession(id: ID!): Session!
     login(email: String!, password: String!): ID!
     logout: String!
@@ -137,6 +141,8 @@ const resolvers = {
     createQuestion: requireAuth(createQuestion),
     createSession: requireAuth(createSession),
     createUser,
+    deleteQuestions: requireAuth(deleteQuestions),
+    deleteSessions: requireAuth(deleteSessions),
     endSession: requireAuth(endSession),
     login,
     logout,
