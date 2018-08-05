@@ -6,7 +6,7 @@ const { QuestionModel } = require('../models')
 const allQuestionsQuery = async (parentValue, args, { auth, loaders }) => {
   // get all the questions for the given user
   const results = await QuestionModel.find({
-    isDeleted: false || undefined,
+    isDeleted: false,
     user: auth.sub,
   }).sort({
     createdAt: -1,

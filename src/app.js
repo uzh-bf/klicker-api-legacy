@@ -75,10 +75,10 @@ if (MONGO_CFG.debug) {
 
 mongoose.connection
   .once('open', () => {
-    exceptTest(() => console.log('> Connection to MongoDB established.'))
+    console.log('[mongo] Connection to MongoDB established.')
   })
   .on('error', error => {
-    exceptTest(() => console.warn('> Warning: ', error))
+    throw new Error(`[mongo] Could not connect to MongoDB: ${error}`)
   })
 
 // initialize a connection to redis
