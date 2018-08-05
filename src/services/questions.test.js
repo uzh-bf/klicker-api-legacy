@@ -209,18 +209,18 @@ describe('QuestionService', () => {
 
   describe('archiveQuestion', () => {
     it('allows archiving a question', async () => {
-      const archivedQuestions = await QuestionService.archiveQuestions(
-        [questions.SC.id, questions.MC.id, questions.FREE.id],
-        questions.SC.user
-      )
+      const archivedQuestions = await QuestionService.archiveQuestions({
+        ids: [questions.SC.id, questions.MC.id, questions.FREE.id],
+        userId: questions.SC.user,
+      })
       expect(archivedQuestions).toMatchSnapshot()
     })
 
     it('allows unarchiving a question', async () => {
-      const unarchivedQuestions = await QuestionService.archiveQuestions(
-        [questions.SC.id, questions.MC.id],
-        questions.SC.user
-      )
+      const unarchivedQuestions = await QuestionService.archiveQuestions({
+        ids: [questions.SC.id, questions.MC.id],
+        userId: questions.SC.user,
+      })
       expect(unarchivedQuestions).toMatchSnapshot()
     })
   })
@@ -229,7 +229,7 @@ describe('QuestionService', () => {
     it('performs soft-deletion on useds question', async () => {
       // perform the deletion
       const result = await QuestionService.deleteQuestions({
-        questionIds: [questions.SC.id],
+        ids: [questions.SC.id],
         userId,
       })
       expect(result).toEqual('DELETION_SUCCESSFUL')

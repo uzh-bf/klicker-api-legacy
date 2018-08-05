@@ -303,10 +303,10 @@ const modifyQuestion = async (questionId, userId, { title, tags, content, option
  * @param {*} questionIds
  * @param {*} userId
  */
-const archiveQuestions = async (questionIds, userId) => {
+const archiveQuestions = async ({ ids, userId }) => {
   // get the question instance from the DB
   const questions = await QuestionModel.find({
-    _id: { $in: questionIds },
+    _id: { $in: ids },
     user: userId,
   })
 
@@ -325,11 +325,11 @@ const archiveQuestions = async (questionIds, userId) => {
  * Delete a question from the database
  * @param {*} param0
  */
-const deleteQuestions = async ({ questionIds, userId }) => {
+const deleteQuestions = async ({ ids, userId }) => {
   // perform soft deletion on all the specified questions
   await QuestionModel.updateMany(
     {
-      _id: { $in: questionIds },
+      _id: { $in: ids },
       user: userId,
     },
     {

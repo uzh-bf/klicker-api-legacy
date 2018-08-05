@@ -31,9 +31,11 @@ const createQuestionMutation = (parentValue, { question }, { auth }) =>
 const modifyQuestionMutation = (parentValue, { id, question }, { auth }) =>
   QuestionService.modifyQuestion(id, auth.sub, question)
 
-const archiveQuestionsMutation = (parentValue, { ids }, { auth }) => QuestionService.archiveQuestions(ids, auth.sub)
+const archiveQuestionsMutation = (parentValue, { ids }, { auth }) =>
+  QuestionService.archiveQuestions({ ids, userId: auth.sub })
 
-const deleteQuestionsMutation = (parentValue, { ids }, { auth }) => QuestionService.deleteQuestions(ids, auth.sub)
+const deleteQuestionsMutation = (parentValue, { ids }, { auth }) =>
+  QuestionService.deleteQuestions({ ids, userId: auth.sub })
 
 module.exports = {
   // queries

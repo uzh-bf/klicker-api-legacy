@@ -457,13 +457,9 @@ const activateNextBlock = async ({ userId, shortname }) => {
  * Delete a session
  * @param {*} param0
  */
-const deleteSessions = async ({ userId, sessionIds }) => {
+const deleteSessions = async ({ userId, ids }) => {
   // get the session from the database
-  const sessions = await SessionModel.find({ _id: { $in: sessionIds }, user: userId })
-
-  if (!sessions) {
-    throw new ForbiddenError('SESSIONS_NOT_FOUND')
-  }
+  const sessions = await SessionModel.find({ _id: { $in: ids }, user: userId })
 
   await Promise.all(
     sessions.map(session => {

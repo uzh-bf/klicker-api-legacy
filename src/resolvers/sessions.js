@@ -138,8 +138,8 @@ const updateSessionSettingsMutation = (parentValue, { sessionId, settings }, { a
     shortname: auth.shortname,
   })
 
-const deleteSessionsMutation = (parentValue, { sessionIds }, { auth }) =>
-  SessionMgrService.deleteSessions({ userId: auth.sub, sessionIds })
+const deleteSessionsMutation = (parentValue, { ids }, { auth }) =>
+  SessionMgrService.deleteSessions({ userId: auth.sub, ids })
 
 module.exports = {
   // queries

@@ -421,7 +421,7 @@ describe('SessionMgrService', () => {
 
       // perform the session deletion
       const result = await SessionMgrService.deleteSessions({
-        sessionIds: [preparedSession.id],
+        ids: [preparedSession.id],
         userId,
       })
       expect(result).toEqual('DELETION_SUCCESSFUL')
