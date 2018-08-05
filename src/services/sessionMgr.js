@@ -459,12 +459,13 @@ const activateNextBlock = async ({ userId, shortname }) => {
  */
 const deleteSessions = async ({ userId, ids }) => {
   // get the session from the database
-  const sessions = await SessionModel.find({ _id: { $in: ids }, user: userId })
+  const sessions = await SessionModel.find({ _id: { $in: ids }, user: userId }).populate('blocks.instances')
 
   await Promise.all(
     sessions.map(session => {
       // compute the list of question instances used in this session
-      const instanceIds = session.blocks.reduce((acc, block) => [...acc, ...block.instances], [])
+      const instances = session.blocks.reduce((acc, block) => [...acc, ...block.instances], [])
+      const instanceIds = instances.map(instance => instance.id)
 
       // delete the session and all related question instances
       // remove the session from the user model
@@ -474,6 +475,13 @@ const deleteSessions = async ({ userId, ids }) => {
           _id: { $in: instanceIds },
           user: userId,
         }),
+        Promise.all(
+          instances.map(instance =>
+            QuestionModel.findByIdAndUpdate(instance.question, {
+              $pull: { instances: instance.id },
+            })
+          )
+        ),
         UserModel.findByIdAndUpdate(userId, { $pullAll: { sessions: [session.id] } }),
       ])
     })
