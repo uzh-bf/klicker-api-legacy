@@ -119,7 +119,6 @@ const createSession = async ({ name, questionBlocks = [], userId }) => {
       { _id: userId },
       {
         $push: { sessions: newSession.id },
-        $currentDate: { updatedAt: true },
       }
     ),
   ])
@@ -281,7 +280,6 @@ const sessionAction = async ({ sessionId, userId, shortname }, actionType) => {
   // update the runningSession of the user depending on the action taken
   const updatedUser = UserModel.findByIdAndUpdate(userId, {
     runningSession: actionType === SESSION_ACTIONS.START ? session.id : null,
-    $currentDate: { updatedAt: true },
   })
 
   const promises = [session.save(), updatedUser]
@@ -459,25 +457,31 @@ const activateNextBlock = async ({ userId, shortname }) => {
  * Delete a session
  * @param {*} param0
  */
-const deleteSession = async ({ userId, sessionId }) => {
+const deleteSessions = async ({ userId, sessionIds }) => {
   // get the session from the database
-  const session = await SessionModel.findOne({ _id: sessionId, user: userId })
+  const sessions = await SessionModel.find({ _id: { $in: sessionIds }, user: userId })
 
-  if (!session) {
-    throw new ForbiddenError('SESSION_NOT_FOUND')
+  if (!sessions) {
+    throw new ForbiddenError('SESSIONS_NOT_FOUND')
   }
 
-  // compute the list of question instances used in this session
-  const instanceIds = session.blocks.reduce((acc, block) => [...acc, ...block.instances], [])
+  await Promise.all(
+    sessions.map(session => {
+      // compute the list of question instances used in this session
+      const instanceIds = session.blocks.reduce((acc, block) => [...acc, ...block.instances], [])
 
-  // delete the session and all related question instances
-  await Promise.all([
-    SessionModel.deleteOne({ _id: sessionId, user: userId }),
-    QuestionInstanceModel.deleteMany({
-      _id: { $in: instanceIds },
-      user: userId,
-    }),
-  ])
+      // delete the session and all related question instances
+      // remove the session from the user model
+      return Promise.all([
+        SessionModel.deleteOne({ _id: session.id, user: userId }),
+        QuestionInstanceModel.deleteMany({
+          _id: { $in: instanceIds },
+          user: userId,
+        }),
+        UserModel.findByIdAndUpdate(userId, { $pullAll: { sessions: [session.id] } }),
+      ])
+    })
+  )
 
   return 'DELETION_SUCCESSFUL'
 }
@@ -491,5 +495,5 @@ module.exports = {
   activateNextBlock,
   getRunningSession,
   pauseSession,
-  deleteSession,
+  deleteSessions,
 }

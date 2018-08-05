@@ -104,7 +104,6 @@ const addConfusionTS = async ({ sessionId, difficulty, speed }) => {
 const addResponse = async ({ ip, fp, instanceId, response }) => {
   // response object to save
   const saveResponse = {
-    createdAt: Date.now(),
     value: response,
   }
 

@@ -1,7 +1,7 @@
 const _isNumber = require('lodash/isNumber')
 // TODO: find a way to use draft.js without needing react and react-dom
 const { ContentState, convertToRaw } = require('draft-js')
-const { ForbiddenError, UserInputError } = require('apollo-server-express')
+const { UserInputError } = require('apollo-server-express')
 
 const { QuestionModel, TagModel, UserModel, FileModel } = require('../models')
 const { QUESTION_GROUPS, QUESTION_TYPES } = require('../constants')
@@ -149,7 +149,6 @@ const createQuestion = async ({ title, type, content, options, solution, files, 
   user.questions.push(newQuestion.id)
   user.tags = user.tags.concat(createdTagIds)
   user.files = user.files.concat(createdFileIds)
-  user.updatedAt = Date.now()
 
   // wait until the question and user both have been saved
   await Promise.all([newQuestion.save(), user.save(), Promise.all(allTagsUpdate), Promise.all(allFilesSave)])
@@ -326,16 +325,17 @@ const archiveQuestions = async (questionIds, userId) => {
  * Delete a question from the database
  * @param {*} param0
  */
-const deleteQuestion = async ({ questionId, userId }) => {
-  // get the question from the database
-  const question = await QuestionModel.findOne({
-    _id: questionId,
-    user: userId,
-  })
-
-  if (!question) {
-    throw new ForbiddenError('QUESTION_NOT_FOUND')
-  }
+const deleteQuestions = async ({ questionIds, userId }) => {
+  // perform soft deletion on all the specified questions
+  await QuestionModel.updateMany(
+    {
+      _id: { $in: questionIds },
+      user: userId,
+    },
+    {
+      isDeleted: true,
+    }
+  )
 
   // if the question has not been used anywhere, perform hard deletion
   /* if (question.instances.length === 0) {
@@ -344,11 +344,6 @@ const deleteQuestion = async ({ questionId, userId }) => {
     return 'DELETION_SUCCESSFUL'
   } */
 
-  // if the question has already been used (there are instances)
-  // perform soft deletion by setting the isDeleted flag
-  question.isDeleted = true
-  await question.save()
-
   return 'DELETION_SUCCESSFUL'
 }
 
@@ -356,5 +351,5 @@ module.exports = {
   createQuestion,
   modifyQuestion,
   archiveQuestions,
-  deleteQuestion,
+  deleteQuestions,
 }

@@ -225,11 +225,11 @@ describe('QuestionService', () => {
     })
   })
 
-  describe('deleteQuestion', () => {
-    it('performs soft-deletion on a used question', async () => {
+  describe('deleteQuestions', () => {
+    it('performs soft-deletion on useds question', async () => {
       // perform the deletion
-      const result = await QuestionService.deleteQuestion({
-        questionId: questions.SC.id,
+      const result = await QuestionService.deleteQuestions({
+        questionIds: [questions.SC.id],
         userId,
       })
       expect(result).toEqual('DELETION_SUCCESSFUL')

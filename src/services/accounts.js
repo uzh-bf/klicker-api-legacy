@@ -380,7 +380,7 @@ const login = async (res, email, password) => {
   }
 
   // update the last login date
-  await UserModel.findOneAndUpdate({ email: normalizedEmail }, { $currentDate: { lastLoginAt: true, updatedAt: true } })
+  await UserModel.findOneAndUpdate({ email: normalizedEmail }, { $currentDate: { lastLoginAt: true } })
 
   // resolve with data about the user
   return user.id

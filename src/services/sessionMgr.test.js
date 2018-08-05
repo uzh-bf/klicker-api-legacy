@@ -3,7 +3,7 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 
 const SessionMgrService = require('./sessionMgr')
-const { QuestionInstanceModel, SessionModel } = require('../models')
+const { QuestionInstanceModel, SessionModel, UserModel } = require('../models')
 const { initializeDb, prepareSessionFactory } = require('../lib/test/setup')
 const { sessionSerializer, questionInstanceSerializer } = require('../lib/test/serializers')
 
@@ -417,9 +417,11 @@ describe('SessionMgrService', () => {
         expect(matchingInstances).toEqual(1)
       })
 
+      const userBefore = await UserModel.findById(userId)
+
       // perform the session deletion
-      const result = await SessionMgrService.deleteSession({
-        sessionId: preparedSession.id,
+      const result = await SessionMgrService.deleteSessions({
+        sessionIds: [preparedSession.id],
         userId,
       })
       expect(result).toEqual('DELETION_SUCCESSFUL')
@@ -437,6 +439,9 @@ describe('SessionMgrService', () => {
         })
         expect(matchingInstances).toEqual(0)
       })
+
+      const userAfter = await UserModel.findById(userId)
+      expect(userAfter.sessions.length).toEqual(userBefore.sessions.length - 1)
     })
   })
 })
