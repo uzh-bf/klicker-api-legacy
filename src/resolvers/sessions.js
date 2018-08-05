@@ -81,27 +81,23 @@ const startSessionMutation = (parentValue, { id }, { auth }) =>
   SessionMgrService.startSession({
     id,
     userId: auth.sub,
-    shortname: auth.shortname,
   })
 
 const activateNextBlockMutation = (parentValue, args, { auth }) =>
   SessionMgrService.activateNextBlock({
     userId: auth.sub,
-    shortname: auth.shortname,
   })
 
 const pauseSessionMutation = (parentValue, { id }, { auth }) =>
   SessionMgrService.pauseSession({
     id,
     userId: auth.sub,
-    shortname: auth.shrotname,
   })
 
 const endSessionMutation = (parentValue, { id }, { auth }) =>
   SessionMgrService.endSession({
     id,
     userId: auth.sub,
-    shortname: auth.shortname,
   })
 
 const addFeedbackMutation = async (parentValue, { fp, sessionId, content }, { ip }) => {

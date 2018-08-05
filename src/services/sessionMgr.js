@@ -201,7 +201,7 @@ const modifySession = async ({ id, name, questionBlocks, userId }) => {
  * @param {*} param0
  * @param {*} actionType
  */
-const sessionAction = async ({ sessionId, userId, shortname }, actionType) => {
+const sessionAction = async ({ sessionId, userId }, actionType) => {
   // get the current user instance
   const user = await UserModel.findById(userId)
   const session = await SessionModel.findById(sessionId)
@@ -286,12 +286,12 @@ const sessionAction = async ({ sessionId, userId, shortname }, actionType) => {
 
   // if redis is in use, cleanup the page cache
   if (redisCache) {
-    promises.push(cleanCache(shortname))
+    promises.push(cleanCache(user.shortname))
   }
 
   await Promise.all(promises)
 
-  sendSlackNotification(`[sessions] ${actionType} session at /join/${shortname}`)
+  sendSlackNotification(`[sessions] ${actionType} session at /join/${user.shortname}`)
 
   return session
 }

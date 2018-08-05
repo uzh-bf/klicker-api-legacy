@@ -1,3 +1,3 @@
-mutation DeleteSessions($sessionIds: [ID!]!) {
-  deleteSessions(ids: $sessionIds)
+mutation DeleteSessions($ids: [ID!]!) {
+  deleteSessions(ids: $ids)
 }

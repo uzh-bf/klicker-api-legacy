@@ -1170,6 +1170,40 @@ describe('Integration', () => {
     })
   })
 
+  describe('Entity Deletion', () => {
+    it('allows deletion of sessions', async () => {
+      const { deleteSessions } = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.DeleteSessionsMutation,
+            variables: {
+              ids: [sessionId],
+            },
+          },
+          authCookie
+        )
+      )
+
+      expect(deleteSessions).toEqual('DELETION_SUCCESSFUL')
+    })
+
+    it('allows deletion of questions', async () => {
+      const { deleteQuestions } = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.DeleteQuestionsMutation,
+            variables: {
+              ids: [questions.FREE_RANGE, questions.MC],
+            },
+          },
+          authCookie
+        )
+      )
+
+      expect(deleteQuestions).toEqual('DELETION_SUCCESSFUL')
+    })
+  })
+
   describe('Logout', () => {
     it('works', async () => {
       const response = await sendQuery(

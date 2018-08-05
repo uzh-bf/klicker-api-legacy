@@ -89,8 +89,8 @@ const typeDefs = [
     createSession(session: SessionInput!): Session!
     createUser(email: String!, password: String!, shortname: String!, institution: String!, useCase: String): User!
     deleteFeedback(sessionId: ID!, feedbackId: ID!): Session!
-    deleteQuestions(questionIds: [ID!]!): String!
-    deleteSessions(sessionIds: [ID!]!): String!
+    deleteQuestions(ids: [ID!]!): String!
+    deleteSessions(ids: [ID!]!): String!
     endSession(id: ID!): Session!
     login(email: String!, password: String!): ID!
     logout: String!
