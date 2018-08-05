@@ -6,6 +6,7 @@ const handlebars = require('handlebars')
 
 const CFG = require('../klicker.conf.js')
 
+const APP_CFG = CFG.get('app')
 const EMAIL_CFG = CFG.get('email')
 const SLACK_CFG = CFG.get('services.slack')
 
@@ -52,7 +53,10 @@ function prepareEmailTransporter() {
 function compileEmailTemplate(templateName, templateParams) {
   const source = fs.readFileSync(path.join(__dirname, 'emails', `${templateName}.hbs`), 'utf8')
   const template = handlebars.compile(source)
-  return template(templateParams)
+  return template({
+    baseUrl: `${APP_CFG.secure ? 'https' : 'http'}://${APP_CFG.domain}`,
+    ...templateParams,
+  })
 }
 
 /**
