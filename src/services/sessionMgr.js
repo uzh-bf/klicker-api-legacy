@@ -104,7 +104,7 @@ const createSession = async ({ name, questionBlocks = [], userId }) => {
   // create a new session model
   // pass in the list of blocks created above
   const newSession = new SessionModel({
-    id: sessionId,
+    _id: sessionId,
     name,
     blocks,
     user: userId,
