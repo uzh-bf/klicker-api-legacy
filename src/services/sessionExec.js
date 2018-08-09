@@ -262,6 +262,29 @@ const addResponse = async ({ ip, fp, instanceId, response }) => {
 }
 
 /**
+ * Remove a response from an active question instance
+ * @param {*} param0
+ */
+const deleteResponse = async ({ userId, instanceId, response }) => {
+  // find the specified question instance
+  // only find instances that are open
+  const instance = await QuestionInstanceModel.findOne({
+    _id: instanceId,
+    user: userId,
+  }).populate('question')
+
+  // if the instance is closed, don't allow adding any responses
+  if (!instance) {
+    throw new ForbiddenError('NO_INSTANCE_FOUND')
+  }
+
+  const questionType = instance.question.type
+  const currentVersion = instance.question.versions[instance.version]
+
+  console.log(response, questionType, currentVersion)
+}
+
+/**
  * Prepare data needed for participating in a session
  * @param {*} param0
  */
@@ -310,6 +333,7 @@ const joinSession = async ({ shortname }) => {
 module.exports = {
   getRunningSession,
   addResponse,
+  deleteResponse,
   addConfusionTS,
   addFeedback,
   deleteFeedback,
