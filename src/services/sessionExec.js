@@ -304,9 +304,11 @@ const deleteResponse = async ({ userId, instanceId, response }) => {
   const resultKey = md5(response)
 
   // remove the responses with the corresponding result key
-  delete instance.results.FREE[resultKey]
-  instance.results.totalParticipants -= 1
-  instance.markModified('results')
+  if (instance.results.FREE[resultKey]) {
+    delete instance.results.FREE[resultKey]
+    instance.results.totalParticipants -= 1
+  }
+  instance.markModified('results.FREE')
 
   await instance.save()
 }
