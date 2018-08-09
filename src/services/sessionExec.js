@@ -288,15 +288,26 @@ const deleteResponse = async ({ userId, instanceId, response }) => {
     user: userId,
   }).populate('question')
 
-  // if the instance is closed, don't allow adding any responses
-  if (!instance) {
-    throw new ForbiddenError('NO_INSTANCE_FOUND')
+  // if the instance does not exist, throw
+  if (!instance || !instance.results) {
+    throw new ForbiddenError('INVALID_INSTANCE')
   }
 
   const questionType = instance.question.type
-  const currentVersion = instance.question.versions[instance.version]
 
-  console.log(response, questionType, currentVersion)
+  // ensure that this operation is only executed on free response questions
+  if (!QUESTION_GROUPS.FREE.includes(questionType)) {
+    throw new ForbiddenError('OPERATION_INCOMPATIBLE')
+  }
+
+  // hash the response value to get a unique identifier
+  const resultKey = md5(response)
+
+  // remove the responses with the corresponding result key
+  delete instance.results.FREE[resultKey]
+  instance.markModified('results.FREE')
+
+  await instance.save()
 }
 
 /**
