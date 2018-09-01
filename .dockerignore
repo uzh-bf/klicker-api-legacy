@@ -1,9 +1,1 @@
-*
-
-!src/
-!.env
-!entrypoint.sh
-!LICENSE.md
-!package.json
-!yarn.lock
-!process.json
+node_modules/

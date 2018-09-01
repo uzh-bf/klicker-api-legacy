@@ -1,0 +1,6 @@
+*
+
+!src/
+!LICENSE.md
+!package.json
+!yarn.lock

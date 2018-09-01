@@ -1,7 +1,9 @@
 version: '3'
 services:
-  api-dev:
-    build: .
+  api-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     environment:
       APP_DOMAIN: localhost
       APP_HTTPS:
@@ -11,9 +13,6 @@ services:
       MONGO_URL: klicker:klicker@mongodb:27017/klicker?authSource=admin
     ports:
       - 4000:4000
-    volumes:
-      - .:/app
-      - /app/node_modules
 
   redis:
     image: redis:3-32bit@sha256:93edc9db0f556427241131b726e5036f56f38a4ecbf4d75eedc3e43faeb1bd17
