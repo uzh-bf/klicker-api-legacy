@@ -11,10 +11,10 @@ RUN set -x && apk add --no-cache tini
 # switch to the node user (uid 1000)
 # non-root as provided by the base image
 USER 1000
-WORKDIR $APP_DIR
 
 # inject the application dependencies
 COPY --chown=1000:0 package.json yarn.lock $APP_DIR/
+WORKDIR $APP_DIR
 
 # update permissions for klicker dir
 # install yarn packages
