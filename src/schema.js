@@ -1,3 +1,5 @@
+const { GraphQLDate, GraphQLTime, GraphQLDateTime } = require('graphql-iso-date')
+
 const { requireAuth } = require('./services/accounts')
 const { requestPresignedURL } = require('./resolvers/files')
 const {
@@ -62,6 +64,10 @@ const { allTypes } = require('./types')
 // remaining types / input types go into types/
 const typeDefs = [
   `
+  scalar Date
+  scalar Time
+  scalar DateTime
+
   schema {
     query: Query
     mutation: Mutation
@@ -123,6 +129,9 @@ const typeDefs = [
 // define graphql resolvers for schema above
 // everything imported from their respective modules in resolvers/
 const resolvers = {
+  Date: GraphQLDate,
+  Time: GraphQLTime,
+  DateTime: GraphQLDateTime,
   // map queries and mutations
   Query: {
     allQuestions: requireAuth(allQuestions),
