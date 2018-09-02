@@ -2,7 +2,9 @@ version: '3'
 
 services:
   api-dev:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     environment:
       APP_DOMAIN: localhost
       APP_SECRET: hello-world
