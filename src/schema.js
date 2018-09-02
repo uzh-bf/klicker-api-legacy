@@ -28,7 +28,6 @@ const {
   joinSession,
   runningSession,
   sessionByPV,
-  sessionIdByPV,
   sessionsByPV,
   startSession,
   updateSessionSettings,
@@ -205,9 +204,9 @@ const resolvers = {
   },
   QuestionInstance: {
     question: questionByPV,
-    session: sessionIdByPV,
     responses: responsesByPV,
     results: resultsByPV,
+    session: pv => String(pv.session), // HACK: fix broken ID coercion of graphql 14.0.0
   },
   QuestionInstance_Public: {
     question: questionByPV,
