@@ -21,7 +21,7 @@ RUN set -x && yarn install --frozen-lockfile
 
 # run the application in development mode
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["yarn", "dev"]
+CMD ["yarn", "dev", "-L"]
 
 # expose the main application port
 EXPOSE 4000
