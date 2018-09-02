@@ -16,8 +16,7 @@ USER 1000
 COPY --chown=1000:0 package.json yarn.lock $APP_DIR/
 WORKDIR $APP_DIR
 
-# update permissions for klicker dir
-# install yarn packages
+# install yarn packages for the specified environment
 RUN set -x && yarn install --frozen-lockfile
 
 # run the application in development mode
