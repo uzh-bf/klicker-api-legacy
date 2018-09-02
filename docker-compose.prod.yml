@@ -1,4 +1,5 @@
 version: '3'
+
 services:
   api-prod:
     build:
@@ -6,18 +7,21 @@ services:
       dockerfile: Dockerfile.prod
     environment:
       APP_DOMAIN: localhost
-      APP_HTTPS:
       APP_SECRET: hello-world
       CACHE_REDIS_ENABLED: 'true'
       CACHE_REDIS_HOST: redis
       MONGO_URL: klicker:klicker@mongodb:27017/klicker?authSource=admin
     ports:
       - 4000:4000
+    networks:
+      - klicker-prod
 
   redis:
     image: redis:3-32bit@sha256:93edc9db0f556427241131b726e5036f56f38a4ecbf4d75eedc3e43faeb1bd17
     ports:
       - 6379:6379
+    networks:
+      - klicker-prod
 
   mongodb:
     image: mongo:3.2
@@ -26,15 +30,9 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: klicker
     ports:
       - 27017:27017
+    networks:
+      - klicker-prod
 
-# minio:
-#   image: minio/minio:latest@sha256:ed0c464a66ac1f56b77607320c74de4190cd6121b70ffbc1e387f2a4955dd334
-#   volumes:
-#     - minio-data:/data
-#   ports:
-#     - "9000:9000"
-#   environment:
-#     MINIO_ACCESS_KEY: klicker
-#     MINIO_SECRET_KEY: secret123
-#   command: server /data
-# volumes: minio-data
+networks:
+  klicker-prod:
+    driver: bridge

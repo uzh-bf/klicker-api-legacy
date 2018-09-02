@@ -1,10 +1,10 @@
 version: '3'
+
 services:
   api-dev:
     build: .
     environment:
       APP_DOMAIN: localhost
-      APP_HTTPS:
       APP_SECRET: hello-world
       CACHE_REDIS_ENABLED: 'true'
       CACHE_REDIS_HOST: redis
@@ -12,13 +12,17 @@ services:
     ports:
       - 4000:4000
     volumes:
-      - .:/app
-      - /app/node_modules
+      - './.env:/app/.env:ro'
+      - './src:/app/src:ro'
+    networks:
+      - klicker-dev
 
   redis:
     image: redis:3-32bit@sha256:93edc9db0f556427241131b726e5036f56f38a4ecbf4d75eedc3e43faeb1bd17
     ports:
       - 6379:6379
+    networks:
+      - klicker-dev
 
   mongodb:
     image: mongo:3.2
@@ -27,6 +31,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: klicker
     ports:
       - 27017:27017
+    networks:
+      - klicker-dev
+
+networks:
+  klicker-dev:
+    driver: bridge
 
 # minio:
 #   image: minio/minio:latest@sha256:ed0c464a66ac1f56b77607320c74de4190cd6121b70ffbc1e387f2a4955dd334
