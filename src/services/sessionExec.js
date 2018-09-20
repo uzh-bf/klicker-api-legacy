@@ -13,6 +13,7 @@ const FILTERING_CFG = CFG.get('security.filtering')
 
 // initialize redis if available
 const redis = getRedis(2)
+const responseCache = getRedis(3)
 
 /**
  * Add a new feedback to a session
@@ -107,10 +108,86 @@ const addResponse = async ({ ip, fp, instanceId, response }) => {
     value: response,
   }
 
+  // if a redis cache is available, use it to store results and responses during execution of a session
+  if (responseCache) {
+    const instanceInfo = await responseCache.hgetall(`instance:${instanceId}:info`)
+
+    // ensure that the instance targeted is actually running
+    // this approach allows us to not have to fetch the instance from the database at all
+    if (instanceInfo.status !== 'OPEN') {
+      throw new ForbiddenError('INSTANCE_CLOSED')
+    }
+
+    // prepare a redis transaction pipeline to batch all actions into an atomic transaction
+    const transaction = responseCache.multi()
+    if (QUESTION_GROUPS.CHOICES.includes(instanceInfo.type)) {
+      // if the response doesn't contain any valid choices, throw
+      if (!response.choices || !response.choices.length > 0) {
+        throw new UserInputError('INVALID_RESPONSE')
+      }
+
+      // if the response contains multiple choices for a SC question
+      if (instanceInfo.type === QUESTION_TYPES.SC && response.choices.length > 1) {
+        throw new UserInputError('TOO_MANY_CHOICES')
+      }
+
+      // for each choice in the response, increment the corresponding hash key
+      response.choices.forEach(choiceIndex => {
+        transaction.hincrby(`instance:${instanceId}:results`, choiceIndex, 1)
+      })
+    } else if (QUESTION_GROUPS.FREE.includes(instanceInfo.type)) {
+      // validate that a response value has been passed and that it is not extremely long
+      if (!response.value || response.value.length > 1000) {
+        throw new UserInputError('INVALID_RESPONSE')
+      }
+
+      // validate whether the numerical answer respects the defined ranges
+      if (instanceInfo.type === QUESTION_TYPES.FREE_RANGE) {
+        // create a new base validator
+        // disallow NaN by passing false
+        const baseValidator = v8n().number(false)
+
+        try {
+          baseValidator.check(+response.value)
+        } catch (e) {
+          throw new UserInputError('INVALID_RESPONSE')
+        }
+
+        let rangeValidator = baseValidator
+        const { min, max } = instanceInfo
+        if (min) {
+          rangeValidator = rangeValidator.greaterThanOrEqual(min)
+        }
+        if (max) {
+          rangeValidator = rangeValidator.lessThanOrEqual(max)
+        }
+
+        try {
+          rangeValidator.check(+response.value)
+        } catch (e) {
+          throw new UserInputError('RESPONSE_OUT_OF_RANGE')
+        }
+      }
+
+      // hash the response value to get a unique identifier
+      const resultKey = md5(response.value)
+
+      // hash the open response value and add it to the redis hash
+      // or increment if the hashed value already exists in the cache
+      transaction.hincrby(`instance:${instanceId}:results`, resultKey, 1)
+    }
+
+    // increment the number of participants by one
+    transaction.hincrby(`instance:${instanceId}:results`, 'participants', 1)
+
+    // as we are based on redis, leave early (no db access at all)
+    return transaction.exec()
+  }
+
   // if redis is available, save the ip, fp and response under the key of the corresponding instance
   // also check if any matching response (ip or fp) is already in the database.
   // TODO: results should still be written to the database? but responses will not be saved seperately!
-  if (redis && (FILTERING_CFG.byIP.enabled || FILTERING_CFG.byFP.enabled)) {
+  /* if (redis && (FILTERING_CFG.byIP.enabled || FILTERING_CFG.byFP.enabled)) {
     // prepare a redis pipeline
     const pipeline = redis.pipeline()
 
@@ -166,7 +243,7 @@ const addResponse = async ({ ip, fp, instanceId, response }) => {
 
     // add the response to the redis database
     redis.rpush(`${instanceId}:responses`, JSON.stringify(saveResponse))
-  }
+  } */
 
   // find the specified question instance
   // only find instances that are open

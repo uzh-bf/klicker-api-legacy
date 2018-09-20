@@ -6,11 +6,19 @@ const { ObjectId } = mongoose.Types
 const { sendSlackNotification } = require('./notifications')
 const { QuestionInstanceModel, SessionModel, UserModel, QuestionModel } = require('../models')
 const { getRedis } = require('../redis')
-const { SESSION_STATUS, QUESTION_BLOCK_STATUS, SESSION_ACTIONS, Errors } = require('../constants')
+const {
+  QUESTION_TYPES,
+  QUESTION_GROUPS,
+  SESSION_STATUS,
+  QUESTION_BLOCK_STATUS,
+  SESSION_ACTIONS,
+  Errors,
+} = require('../constants')
 const { logDebug } = require('../lib/utils')
 
 const redisCache = getRedis()
 const redisControl = getRedis(2)
+const responseCache = getRedis(3)
 
 /**
  * If redis is in use, unlink the cached /join/:shortname pages
@@ -391,7 +399,57 @@ const activateNextBlock = async ({ userId }) => {
       const nextBlock = runningSession.blocks[nextBlockIndex]
 
       // update the instances in the new active block to be open
-      await QuestionInstanceModel.update({ _id: { $in: nextBlock.instances } }, { isOpen: true }, { multi: true })
+      const instancePromises = nextBlock.instances.map(async instanceId => {
+        const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
+
+        // set the instances to be open
+        instance.isOpen = true
+
+        // if a response cache is available, hydrate it with the newly activated instances
+        if (responseCache) {
+          const initializeResponseCache = responseCache.pipeline()
+
+          // extract relevant information from the question entity
+          const { question } = instance
+          const questionVersion = question.versions[instance.version]
+
+          // set the instance status, opening the instance for responses
+          initializeResponseCache.hmset(`instance:${instance.id}:info`, 'status', 'OPEN', 'type', question.type)
+          initializeResponseCache.hset(`instance:${instance.id}:results`, 'participants', 0)
+
+          // TODO: temporarily save responses to redis
+
+          // include the min/max restrictions in the cache for FREE_RANGE questions
+          if (question.type === QUESTION_TYPES.FREE_RANGE) {
+            initializeResponseCache.hmset(
+              `instance:${instance.id}:info`,
+              'min',
+              questionVersion.restrictions.min,
+              'max',
+              questionVersion.restrictions.max
+            )
+          }
+
+          // initialize results hash for SC and MC questions
+          // FREE and FREE_RANGE will be initialized at runtime
+          if (QUESTION_GROUPS.CHOICES.includes(question.type)) {
+            // extract the options of the question
+            const options = questionVersion.options.SC || questionVersion.options.mapBlocks
+
+            // initialize all response counts to 0
+            options.choices.forEach((_, index) => {
+              initializeResponseCache.hset(`instance:${instance.id}:results`, index, 0)
+            })
+          }
+
+          promises.push(initializeResponseCache.exec())
+        }
+
+        return instance.save()
+      })
+
+      // push the update promises to the list of all promises
+      promises.concat(instancePromises)
 
       // set the status of the instances in the next block to active
       runningSession.blocks[nextBlockIndex].status = QUESTION_BLOCK_STATUS.ACTIVE
@@ -406,7 +464,31 @@ const activateNextBlock = async ({ userId }) => {
       const previousBlock = runningSession.blocks[prevBlockIndex]
 
       // update the instances in the currently active block to be closed
-      await QuestionInstanceModel.update({ _id: { $in: previousBlock.instances } }, { isOpen: false }, { multi: true })
+      const instancePromises = previousBlock.instances.map(async instanceId => {
+        const instance = await QuestionInstanceModel.findById(instanceId)
+
+        // set the instances to be open
+        instance.isOpen = false
+
+        // if a response cache is available, perform cleanup procedures
+        if (responseCache) {
+          const initializeResponseCache = responseCache.pipeline()
+
+          // remove the instance status from redis
+          // this will prevent any further responses
+          initializeResponseCache.del(`instance:${instance.id}:status`)
+
+          // extract the results from redis and persist them to mongo
+          initializeResponseCache.set(`instance:${instance.id}:results`, 'TEST')
+
+          promises.push(initializeResponseCache.exec())
+        }
+
+        return instance.save()
+      })
+
+      // push the update promises to the list of all promises
+      promises.concat(instancePromises)
 
       runningSession.activeInstances = []
 
