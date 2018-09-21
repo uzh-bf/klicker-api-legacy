@@ -474,46 +474,40 @@ const activateNextBlock = async ({ userId }) => {
         const { question } = instance
 
         // setup a transaction for result extraction from redis
-        const transaction = await responseCache
+        const redisResults = (await responseCache
           .multi()
           .hgetall(`instance:${instance.id}:results`)
-          .hgetall(`instance:${instance.id}:responseHashes`)
           .del(`instance:${instance.id}:info`, `instance:${instance.id}:results`, `instance:${instance.id}:responses`)
-          .exec()
-        console.log(transaction)
-
-        const redisResults = transaction[0][1]
-        console.log('redisResults', redisResults)
+          .exec())[0][1]
 
         if (QUESTION_GROUPS.CHOICES.includes(question.type)) {
+          // calculate the number of choices available
           const numChoices = Object.keys(redisResults).length - 1
-          console.log('numChoices', numChoices)
 
-          const CHOICES = new Array(numChoices).fill(0).map((_, i) => +redisResults[i])
-          console.log('CHOICES', CHOICES)
-
+          // hydrate the instance results
           instance.results = {
-            CHOICES,
+            CHOICES: new Array(numChoices).fill(0).map((_, i) => +redisResults[i]),
             totalParticipants: redisResults.participants,
           }
         } else if (QUESTION_GROUPS.FREE.includes(question.type)) {
-          const responseHashes = transaction[1][1]
-          console.log('responseHashes', responseHashes)
+          // extract the response hashes from redis
+          const responseHashes = (await responseCache
+            .multi()
+            .hgetall(`instance:${instance.id}:responseHashes`)
+            .del(`instance:${instance.id}:responseHashes`)
+            .exec())[0][1]
 
+          // extract the total number of participants
           const totalParticipants = redisResults.participants
           delete redisResults.participants
 
-          const FREE = _mapValues(redisResults, (val, key) => ({ count: +val, value: responseHashes[key] }))
-          console.log('FREE', FREE)
-
+          // hydrate the instance results
           instance.results = {
-            FREE,
+            FREE: _mapValues(redisResults, (val, key) => ({ count: +val, value: responseHashes[key] })),
             totalParticipants,
           }
         }
       }
-
-      console.log(instance.results)
 
       return instance.save()
     })
