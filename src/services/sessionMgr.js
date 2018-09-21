@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const { ForbiddenError } = require('apollo-server-express')
+const _mapValues = require('lodash/mapValues')
 
 const { ObjectId } = mongoose.Types
 
@@ -387,140 +388,161 @@ const activateNextBlock = async ({ userId }) => {
   const prevBlockIndex = runningSession.activeBlock
   const nextBlockIndex = runningSession.activeBlock + 1
 
-  if (nextBlockIndex < runningSession.blocks.length) {
-    if (runningSession.activeInstances.length === 0) {
-      // if there are no active instances, activate the next block
-      runningSession.activeStep += 1
+  if (runningSession.activeInstances.length === 0) {
+    // if there are no active instances, activate the next block
+    runningSession.activeStep += 1
 
-      // increase the index of the currently active block
-      runningSession.activeBlock += 1
+    // increase the index of the currently active block
+    runningSession.activeBlock += 1
 
-      // find the next block for the running session
-      const nextBlock = runningSession.blocks[nextBlockIndex]
+    // find the next block for the running session
+    const nextBlock = runningSession.blocks[nextBlockIndex]
 
-      // update the instances in the new active block to be open
-      const instancePromises = nextBlock.instances.map(async instanceId => {
-        const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
+    // update the instances in the new active block to be open
+    const instancePromises = nextBlock.instances.map(async instanceId => {
+      const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
 
-        // set the instances to be open
-        instance.isOpen = true
+      // set the instances to be open
+      instance.isOpen = true
 
-        // if a response cache is available, hydrate it with the newly activated instances
-        if (responseCache) {
-          const initializeResponseCache = responseCache.pipeline()
+      // if a response cache is available, hydrate it with the newly activated instances
+      if (responseCache) {
+        const initializeResponseCache = responseCache.pipeline()
 
-          // extract relevant information from the question entity
-          const { question } = instance
-          const questionVersion = question.versions[instance.version]
+        // extract relevant information from the question entity
+        const { question } = instance
+        const questionVersion = question.versions[instance.version]
 
-          // set the instance status, opening the instance for responses
-          initializeResponseCache.hmset(`instance:${instance.id}:info`, 'status', 'OPEN', 'type', question.type)
-          initializeResponseCache.hset(`instance:${instance.id}:results`, 'participants', 0)
+        // set the instance status, opening the instance for responses
+        initializeResponseCache.hmset(`instance:${instance.id}:info`, 'status', 'OPEN', 'type', question.type)
+        initializeResponseCache.hset(`instance:${instance.id}:results`, 'participants', 0)
 
-          // TODO: temporarily save responses to redis
-
-          // include the min/max restrictions in the cache for FREE_RANGE questions
-          if (question.type === QUESTION_TYPES.FREE_RANGE) {
-            initializeResponseCache.hmset(
-              `instance:${instance.id}:info`,
-              'min',
-              questionVersion.restrictions.min,
-              'max',
-              questionVersion.restrictions.max
-            )
-          }
-
-          // initialize results hash for SC and MC questions
-          // FREE and FREE_RANGE will be initialized at runtime
-          if (QUESTION_GROUPS.CHOICES.includes(question.type)) {
-            // extract the options of the question
-            const options = questionVersion.options.SC || questionVersion.options.mapBlocks
-
-            // initialize all response counts to 0
-            options.choices.forEach((_, index) => {
-              initializeResponseCache.hset(`instance:${instance.id}:results`, index, 0)
-            })
-          }
-
-          promises.push(initializeResponseCache.exec())
+        // include the min/max restrictions in the cache for FREE_RANGE questions
+        if (question.type === QUESTION_TYPES.FREE_RANGE && questionVersion.restrictions) {
+          initializeResponseCache.hmset(
+            `instance:${instance.id}:info`,
+            'min',
+            questionVersion.restrictions.min,
+            'max',
+            questionVersion.restrictions.max
+          )
         }
 
-        return instance.save()
-      })
+        // initialize results hash for SC and MC questions
+        // FREE and FREE_RANGE will be initialized at runtime
+        if (QUESTION_GROUPS.CHOICES.includes(question.type)) {
+          // extract the options of the question
+          const options = questionVersion.options.SC || questionVersion.options.MC
 
-      // push the update promises to the list of all promises
-      promises.concat(instancePromises)
-
-      // set the status of the instances in the next block to active
-      runningSession.blocks[nextBlockIndex].status = QUESTION_BLOCK_STATUS.ACTIVE
-
-      // set the instances of the next block to be the users active instances
-      runningSession.activeInstances = nextBlock.instances
-    } else if (runningSession.activeBlock >= 0) {
-      // if there are active instances, close them
-      runningSession.activeStep += 1
-
-      // find the currently active block
-      const previousBlock = runningSession.blocks[prevBlockIndex]
-
-      // update the instances in the currently active block to be closed
-      const instancePromises = previousBlock.instances.map(async instanceId => {
-        const instance = await QuestionInstanceModel.findById(instanceId)
-
-        // set the instances to be open
-        instance.isOpen = false
-
-        // if a response cache is available, perform cleanup procedures
-        if (responseCache) {
-          const initializeResponseCache = responseCache.pipeline()
-
-          // remove the instance status from redis
-          // this will prevent any further responses
-          initializeResponseCache.del(`instance:${instance.id}:status`)
-
-          // extract the results from redis and persist them to mongo
-          initializeResponseCache.set(`instance:${instance.id}:results`, 'TEST')
-
-          promises.push(initializeResponseCache.exec())
+          // initialize all response counts to 0
+          options.choices.forEach((_, index) => {
+            initializeResponseCache.hset(`instance:${instance.id}:results`, index, 0)
+          })
         }
 
-        return instance.save()
-      })
-
-      // push the update promises to the list of all promises
-      promises.concat(instancePromises)
-
-      runningSession.activeInstances = []
-
-      // set the status of the previous block to executed
-      runningSession.blocks[prevBlockIndex].status = QUESTION_BLOCK_STATUS.EXECUTED
-
-      // if redis is available, cleanup the instance data from the previous block
-      if (redisControl) {
-        // calculate the keys to be unlinked
-        const keys = previousBlock.instances.reduce(
-          (prevKeys, instanceId) => [...prevKeys, `${instanceId}:fp`, `${instanceId}:ip`, `${instanceId}:responses`],
-          []
-        )
-
-        logDebug(() => console.log('[redis] Cleaning up participant data for instances:', keys))
-
-        // unlink the keys from the redis store
-        // const unlinkKeys = await redis.unlink(keys)
-        // TODO: use unlink with redis 4.x
-        await redisControl.del(keys)
-        // console.log(unlinkKeys)
-        // promises.push(unlinkKeys)
+        promises.push(initializeResponseCache.exec())
       }
-    }
-  } else {
-    // if the final block was reached above, reset the users active instances
+
+      return instance.save()
+    })
+
+    // push the update promises to the list of all promises
+    promises.concat(instancePromises)
+
+    // set the status of the instances in the next block to active
+    runningSession.blocks[nextBlockIndex].status = QUESTION_BLOCK_STATUS.ACTIVE
+
+    // set the instances of the next block to be the users active instances
+    runningSession.activeInstances = nextBlock.instances
+  } else if (runningSession.activeBlock >= 0) {
+    // if there are active instances, close them
+    runningSession.activeStep += 1
+
+    // find the currently active block
+    const previousBlock = runningSession.blocks[prevBlockIndex]
+
+    // update the instances in the currently active block to be closed
+    const instancePromises = previousBlock.instances.map(async instanceId => {
+      const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
+
+      // set the instances to be open
+      instance.isOpen = false
+
+      // if a response cache is available, perform cleanup procedures
+      if (responseCache) {
+        // extract relevant information from the question entity
+        const { question } = instance
+
+        // setup a transaction for result extraction from redis
+        const transaction = await responseCache
+          .multi()
+          .hgetall(`instance:${instance.id}:results`)
+          .hgetall(`instance:${instance.id}:responseHashes`)
+          .del(`instance:${instance.id}:info`, `instance:${instance.id}:results`, `instance:${instance.id}:responses`)
+          .exec()
+        console.log(transaction)
+
+        const redisResults = transaction[0][1]
+        console.log('redisResults', redisResults)
+
+        if (QUESTION_GROUPS.CHOICES.includes(question.type)) {
+          const numChoices = Object.keys(redisResults).length - 1
+          console.log('numChoices', numChoices)
+
+          const CHOICES = new Array(numChoices).fill(0).map((_, i) => +redisResults[i])
+          console.log('CHOICES', CHOICES)
+
+          instance.results = {
+            CHOICES,
+            totalParticipants: redisResults.participants,
+          }
+        } else if (QUESTION_GROUPS.FREE.includes(question.type)) {
+          const responseHashes = transaction[1][1]
+          console.log('responseHashes', responseHashes)
+
+          const totalParticipants = redisResults.participants
+          delete redisResults.participants
+
+          const FREE = _mapValues(redisResults, (val, key) => ({ count: +val, value: responseHashes[key] }))
+          console.log('FREE', FREE)
+
+          instance.results = {
+            FREE,
+            totalParticipants,
+          }
+        }
+      }
+
+      console.log(instance.results)
+
+      return instance.save()
+    })
+
+    // push the update promises to the list of all promises
+    promises.concat(instancePromises)
+
+    runningSession.activeInstances = []
 
     // set the status of the previous block to executed
     runningSession.blocks[prevBlockIndex].status = QUESTION_BLOCK_STATUS.EXECUTED
 
-    runningSession.activeInstances = []
-    runningSession.activeStep += 1
+    // if redis is available, cleanup the instance data from the previous block
+    if (redisControl) {
+      // calculate the keys to be unlinked
+      const keys = previousBlock.instances.reduce(
+        (prevKeys, instanceId) => [...prevKeys, `${instanceId}:fp`, `${instanceId}:ip`, `${instanceId}:responses`],
+        []
+      )
+
+      logDebug(() => console.log('[redis] Cleaning up participant data for instances:', keys))
+
+      // unlink the keys from the redis store
+      // const unlinkKeys = await redis.unlink(keys)
+      // TODO: use unlink with redis 4.x
+      await redisControl.del(keys)
+      // console.log(unlinkKeys)
+      // promises.push(unlinkKeys)
+    }
   }
 
   promises.concat([runningSession.save(), user.save()])

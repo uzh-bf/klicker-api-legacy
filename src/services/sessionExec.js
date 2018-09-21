@@ -175,6 +175,9 @@ const addResponse = async ({ ip, fp, instanceId, response }) => {
       // hash the open response value and add it to the redis hash
       // or increment if the hashed value already exists in the cache
       transaction.hincrby(`instance:${instanceId}:results`, resultKey, 1)
+
+      // cache the response value <-> hash mapping
+      transaction.hset(`instance:${instanceId}:responseHashes`, resultKey, response.value)
     }
 
     // increment the number of participants by one
