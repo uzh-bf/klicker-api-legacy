@@ -66,8 +66,6 @@
     "supertest": "3.3.0"
   },
   "scripts": {
-    "precommit": "lint-staged",
-    "prepush": "yarn run test --onlyChanged",
     "dev": "cross-env NODE_ENV=development nodemon -w \"src/**/*.js\" -w .env -w package.json -w yarn.lock src/server.js",
     "dev:inspect": "cross-env NODE_ENV=development nodemon -w \"src/**/*.js\" -w .env -w package.json -w yarn.lock --inspect src/server.js",
     "dev:ndb": "cross-env NODE_ENV=development ndb node src/server.js",
@@ -101,5 +99,11 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "yarn run test --onlyChanged"
+    }
   }
 }
