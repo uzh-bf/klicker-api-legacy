@@ -37,6 +37,30 @@ describe('SessionMgrService', () => {
     userId = undefined
   })
 
+  describe('choicesToResults', () => {
+    it('correctly aggregates SC/MC question results', () => {
+      const redisResult = {
+        '0': '1',
+        '3': '3',
+        '2': '1',
+        '1': '4',
+        participants: '9',
+      }
+
+      expect(SessionMgrService.choicesToResults(redisResult)).toMatchSnapshot()
+    })
+  })
+
+  describe('freeToResults', () => {
+    it('correctly aggregates FREE question results', () => {
+      const redisResult = {}
+    })
+
+    it('correctly aggregates FREE_RANGE question results', () => {
+      const redisResult = {}
+    })
+  })
+
   describe('createSession', () => {
     it('allows creating sessions without question blocks', async () => {
       const newSession = await SessionMgrService.createSession({
