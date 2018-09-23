@@ -6,6 +6,7 @@ const SessionMgrService = require('./sessionMgr')
 const { QuestionInstanceModel, SessionModel, UserModel } = require('../models')
 const { initializeDb, prepareSessionFactory } = require('../lib/test/setup')
 const { sessionSerializer, questionInstanceSerializer } = require('../lib/test/serializers')
+const { getRedis } = require('../redis')
 
 const { SESSION_STATUS, QUESTION_TYPES } = require('../constants')
 
@@ -17,6 +18,8 @@ expect.addSnapshotSerializer(sessionSerializer)
 expect.addSnapshotSerializer(questionInstanceSerializer)
 
 const prepareSession = prepareSessionFactory(SessionMgrService)
+
+const responseCache = getRedis(3)
 
 describe('SessionMgrService', () => {
   let sessionId
@@ -389,10 +392,18 @@ describe('SessionMgrService', () => {
       expect(session.activeBlock).toEqual(0)
       expect(session.activeStep).toEqual(1)
       // expect the session to have some active instances
-      expect(session.activeInstances.map(v => v.toString())).toEqual(session.blocks[0].instances.map(v => v.toString()))
+      // expect(session.activeInstances.map(v => v.toString())).toEqual(session.blocks[0].instances.map(v => v.toString()))
       // expect matching snapshots
       expect(session).toMatchSnapshot()
       expect(instances).toMatchSnapshot()
+
+      session.activeInstances.forEach(async instanceId => {
+        // expect that a redis object for the instance has been created
+        const redisObj = await responseCache.hgetall(`sesMgr-${instanceId}-info`)
+        console.log(redisObj)
+
+        expect(redisObj.isOpen).toEqual(true)
+      })
     })
 
     it('recognizes that the final block has been active', async () => {
