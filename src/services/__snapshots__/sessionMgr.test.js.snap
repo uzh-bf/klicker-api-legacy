@@ -128,7 +128,7 @@ Array [
     responses: []
 
     results: {
-      CHOICES: []
+      CHOICES: [0,0,0]
       FREE: undefined
     }
   ,

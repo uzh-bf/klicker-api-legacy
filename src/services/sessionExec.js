@@ -120,22 +120,6 @@ const addResponse = async ({ ip, fp, instanceId, response }) => {
   // prepare a redis transaction pipeline to batch all actions into an atomic transaction
   const transaction = responseCache.multi()
 
-  // if ip filtering is enabled, add the ip to the redis respondent set
-  if (FILTERING_CFG.byIP.enabled && ip) {
-    transaction.sadd(`instance:${instanceId}:ip`, ip)
-  }
-
-  // if fingerprinting is enabled, add the fingerprint to the redis respondent set
-  if (FILTERING_CFG.byFP.enabled && fp) {
-    transaction.sadd(`instance:${instanceId}:fp`, fp)
-  }
-
-  // increment the number of participants by one
-  transaction.hincrby(`instance:${instanceId}:results`, 'participants', 1)
-
-  // add the response to the list of responses
-  transaction.rpush(`instance:${instanceId}:responses`, JSON.stringify({ ip, fp, response }))
-
   if (QUESTION_GROUPS.CHOICES.includes(type)) {
     // if the response doesn't contain any valid choices, throw
     if (!response.choices || !response.choices.length > 0) {
@@ -194,6 +178,22 @@ const addResponse = async ({ ip, fp, instanceId, response }) => {
     // cache the response value <-> hash mapping
     transaction.hset(`instance:${instanceId}:responseHashes`, resultKey, response.value)
   }
+
+  // if ip filtering is enabled, add the ip to the redis respondent set
+  if (FILTERING_CFG.byIP.enabled && ip) {
+    transaction.sadd(`instance:${instanceId}:ip`, ip)
+  }
+
+  // if fingerprinting is enabled, add the fingerprint to the redis respondent set
+  if (FILTERING_CFG.byFP.enabled && fp) {
+    transaction.sadd(`instance:${instanceId}:fp`, fp)
+  }
+
+  // add the response to the list of responses
+  transaction.rpush(`instance:${instanceId}:responses`, JSON.stringify({ ip, fp, response }))
+
+  // increment the number of participants by one
+  transaction.hincrby(`instance:${instanceId}:results`, 'participants', 1)
 
   // as we are based on redis, leave early (no db access at all)
   return transaction.exec()
@@ -273,28 +273,39 @@ const deleteResponse = async ({ userId, instanceId, response }) => {
   }).populate('question')
 
   // if the instance does not exist, throw
-  if (!instance || !instance.results) {
+  if (!instance) {
     throw new ForbiddenError('INVALID_INSTANCE')
-  }
-
-  const questionType = instance.question.type
-
-  // ensure that this operation is only executed on free response questions
-  if (!QUESTION_GROUPS.FREE.includes(questionType)) {
-    throw new ForbiddenError('OPERATION_INCOMPATIBLE')
   }
 
   // hash the response value to get a unique identifier
   const resultKey = md5(response)
 
-  // remove the responses with the corresponding result key
-  if (instance.results.FREE[resultKey]) {
-    delete instance.results.FREE[resultKey]
-    instance.results.totalParticipants -= 1
-  }
-  instance.markModified('results.FREE')
+  // if the instance is not open, it must have been executed already
+  if (!instance.isOpen) {
+    if (!instance.results) {
+      throw new ForbiddenError('NO_RESULTS_AVAILABLE')
+    }
 
-  await instance.save()
+    const questionType = instance.question.type
+
+    // ensure that this operation is only executed on free response questions
+    if (!QUESTION_GROUPS.FREE.includes(questionType)) {
+      throw new ForbiddenError('OPERATION_INCOMPATIBLE')
+    }
+
+    // remove the responses with the corresponding result key
+    const result = instance.results.FREE[resultKey]
+    if (result) {
+      delete instance.results.FREE[resultKey]
+      instance.results.totalParticipants -= result.count
+    }
+    instance.markModified('results.FREE')
+
+    return instance.save()
+  }
+
+  // if the instance is open, the result needs to be removed from redis
+  return responseCache.hdel(`instance:${instanceId}:results`, resultKey)
 }
 
 /**
