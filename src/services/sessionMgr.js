@@ -161,13 +161,13 @@ const initializeResponseCache = async ({ id, question, version }) => {
   transaction.hset(`instance:${id}:results`, 'participants', 0)
 
   // include the min/max restrictions in the cache for FREE_RANGE questions
-  if (question.type === QUESTION_TYPES.FREE_RANGE && questionVersion.restrictions) {
+  if (question.type === QUESTION_TYPES.FREE_RANGE && questionVersion.options.FREE_RANGE.restrictions) {
     transaction.hmset(
       `instance:${id}:info`,
       'min',
-      questionVersion.restrictions.min,
+      questionVersion.options.FREE_RANGE.restrictions.min,
       'max',
-      questionVersion.restrictions.max
+      questionVersion.options.FREE_RANGE.restrictions.max
     )
   }
 
@@ -205,7 +205,7 @@ const computeInstanceResults = async ({ id, question }) => {
     .exec())[0][1]
 
   if (QUESTION_GROUPS.CHOICES.includes(question.type)) {
-    return choicesToResults()
+    return choicesToResults(redisResults)
   }
 
   if (QUESTION_GROUPS.FREE.includes(question.type)) {
@@ -561,7 +561,7 @@ const activateNextBlock = async ({ userId }) => {
       instance.isOpen = false
 
       // compute the instance results based on redis cache contents
-      instance.results = computeInstanceResults(instance)
+      instance.results = await computeInstanceResults(instance)
 
       return instance.save()
     })
