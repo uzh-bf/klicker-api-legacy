@@ -45,26 +45,26 @@ const setupTestEnv = async ({ email, password, shortname, isActive = true }) => 
 }
 
 // prepare a new session instance
-const prepareSessionFactory = SessionMgrService => async (
-  userId,
-  questions = [{ question: '59b1481857f3c34af09a4736', version: 0 }],
-  started = false
-) => {
-  if (started) {
-    const session = await SessionMgrService.createSession({
-      name: 'testing session',
-      questionBlocks: [{ questions }],
-      userId,
-    })
-    return SessionMgrService.startSession({
-      id: session.id,
-      userId,
-    })
-  }
+const prepareSessionFactory = SessionMgrService => async userId => {
+  const question = await QuestionService.createQuestion({
+    content: createContentState('test question'),
+    options: {
+      choices: [
+        { correct: false, name: 'option1' },
+        { correct: true, name: 'option2' },
+        { correct: false, name: 'option3' },
+      ],
+      randomized: true,
+    },
+    tags: ['TEST'],
+    title: 'test question',
+    type: QUESTION_TYPES.SC,
+    userId,
+  })
 
   return SessionMgrService.createSession({
     name: 'testing session',
-    questionBlocks: [{ questions }],
+    questionBlocks: [{ questions: [{ question: question.id, version: 0 }] }],
     userId,
   })
 }

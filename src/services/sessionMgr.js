@@ -103,6 +103,13 @@ const mapBlocks = ({ sessionId, questionBlocks, userId }) => {
  * @param {*} redisResults
  */
 const choicesToResults = redisResults => {
+  if (!redisResults) {
+    return {
+      CHOICES: [],
+      totalParticipants: 0,
+    }
+  }
+
   // calculate the number of choices available
   const numChoices = Object.keys(redisResults).length - 1
 
@@ -119,10 +126,17 @@ const choicesToResults = redisResults => {
  * @param {*} responseHashes
  */
 const freeToResults = (redisResults, responseHashes) => {
+  if (!redisResults) {
+    return {
+      FREE: [],
+      totalParticipants: 0,
+    }
+  }
+
   const results = redisResults
 
   // extract the total number of participants
-  const totalParticipants = redisResults.participants
+  const totalParticipants = results.participants
   delete results.participants
 
   // hydrate the instance results
@@ -525,7 +539,7 @@ const activateNextBlock = async ({ userId }) => {
     })
 
     // push the update promises to the list of all promises
-    promises.concat(instancePromises)
+    promises.push(Promise.all(instancePromises))
 
     // set the status of the instances in the next block to active
     runningSession.blocks[nextBlockIndex].status = QUESTION_BLOCK_STATUS.ACTIVE
@@ -553,34 +567,16 @@ const activateNextBlock = async ({ userId }) => {
     })
 
     // push the update promises to the list of all promises
-    promises.concat(instancePromises)
+    promises.push(Promise.all(instancePromises))
 
     // reset the activeInstances of the current session
     runningSession.activeInstances = []
 
     // set the status of the previous block to executed
     runningSession.blocks[prevBlockIndex].status = QUESTION_BLOCK_STATUS.EXECUTED
-
-    // if redis is available, cleanup the instance data from the previous block
-    /* if (redisControl) {
-      // calculate the keys to be unlinked
-      const keys = previousBlock.instances.reduce(
-        (prevKeys, instanceId) => [...prevKeys, `${instanceId}:fp`, `${instanceId}:ip`, `${instanceId}:responses`],
-        []
-      )
-
-      logDebug(() => console.log('[redis] Cleaning up participant data for instances:', keys))
-
-      // unlink the keys from the redis store
-      // const unlinkKeys = await redis.unlink(keys)
-      // TODO: use unlink with redis 4.x
-      await redisControl.del(keys)
-      // console.log(unlinkKeys)
-      // promises.push(unlinkKeys)
-    } */
   }
 
-  promises.concat([runningSession.save(), user.save()])
+  promises.push([runningSession.save(), user.save()])
   await Promise.all(promises)
 
   // if redis is in use, cleanup the page cache

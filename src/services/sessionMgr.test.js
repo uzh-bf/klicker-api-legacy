@@ -7,7 +7,6 @@ const { QuestionInstanceModel, SessionModel, UserModel } = require('../models')
 const { initializeDb, prepareSessionFactory } = require('../lib/test/setup')
 const { sessionSerializer, questionInstanceSerializer } = require('../lib/test/serializers')
 const { getRedis } = require('../redis')
-
 const { SESSION_STATUS, QUESTION_TYPES } = require('../constants')
 
 mongoose.Promise = Promise
@@ -41,6 +40,13 @@ describe('SessionMgrService', () => {
   })
 
   describe('choicesToResults', () => {
+    it('correctly handles inexistent results', () => {
+      expect(SessionMgrService.choicesToResults()).toEqual({
+        CHOICES: [],
+        totalParticipants: 0,
+      })
+    })
+
     it('correctly aggregates SC/MC question results', () => {
       const redisResult = {
         '0': '1',
@@ -55,12 +61,28 @@ describe('SessionMgrService', () => {
   })
 
   describe('freeToResults', () => {
-    it('correctly aggregates FREE question results', () => {
-      const redisResult = {}
+    it('correctly handles inexistent results', () => {
+      expect(SessionMgrService.freeToResults()).toEqual({
+        FREE: [],
+        totalParticipants: 0,
+      })
     })
 
-    it('correctly aggregates FREE_RANGE question results', () => {
-      const redisResult = {}
+    it('correctly aggregates FREE/FREE_RANGE question results', () => {
+      const redisResult = {
+        asdasd: 0,
+        asddddd: 1,
+        asdd: 3,
+        participants: 4,
+      }
+
+      const responseHashes = {
+        asdasd: 'hello world',
+        asddddd: 'blabla',
+        asdd: 'hehehe',
+      }
+
+      expect(SessionMgrService.freeToResults(redisResult, responseHashes)).toMatchSnapshot()
     })
   })
 
@@ -397,12 +419,10 @@ describe('SessionMgrService', () => {
       expect(session).toMatchSnapshot()
       expect(instances).toMatchSnapshot()
 
-      session.activeInstances.forEach(async instanceId => {
+      instances.forEach(async ({ id }) => {
         // expect that a redis object for the instance has been created
-        const redisObj = await responseCache.hgetall(`sesMgr-${instanceId}-info`)
-        console.log(redisObj)
-
-        expect(redisObj.isOpen).toEqual(true)
+        const instanceStatus = await responseCache.hget(`instance:${id}:info`, 'status')
+        expect(instanceStatus).toEqual('OPEN')
       })
     })
 
@@ -421,6 +441,12 @@ describe('SessionMgrService', () => {
       // expect matching snapshots
       expect(session).toMatchSnapshot()
       expect(instances).toMatchSnapshot()
+
+      // expect that the redis objects have been pruned
+      instances.forEach(async ({ id }) => {
+        const instanceExists = await responseCache.exists(`instance:${id}:info`)
+        expect(instanceExists).toBeFalsy()
+      })
     })
 
     afterAll(async () => {
