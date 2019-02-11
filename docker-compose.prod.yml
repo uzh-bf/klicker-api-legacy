@@ -24,7 +24,7 @@ services:
       - klicker-prod
 
   mongodb:
-    image: mongo:3.2
+    image: mongo:3.7
     environment:
       MONGO_INITDB_ROOT_USERNAME: klicker
       MONGO_INITDB_ROOT_PASSWORD: klicker
