@@ -7,7 +7,8 @@
   "bugs": "https://github.com/uzh-bf/klicker-uzh",
   "author": "Roland Schlaefli <roland.schlaefli@bf.uzh.ch>",
   "engines": {
-    "node": ">=8"
+    "node": ">=8",
+    "yarn": "YARN NO LONGER USED - use npm instead."
   },
   "license": "AGPL-3.0",
   "dependencies": {
