@@ -373,10 +373,6 @@ const joinSession = async ({ shortname }) => {
 const resetQuestionBlock = async ({ id, instanceIds }) => {
   const session = await getRunningSession(id)
   console.log(session)
-  // if the feedback channel is not activated, do not allow new additions
-  if (!session.settings.isFeedbackChannelActive) {
-    throw new ForbiddenError('SESSION_FEEDBACKS_DEACTIVATED')
-  }
 
   instanceIds.forEach(instanceId => {
     // responseCache.hgetall(instanceId)
