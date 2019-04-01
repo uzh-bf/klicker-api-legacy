@@ -366,6 +366,30 @@ const joinSession = async ({ shortname }) => {
   }
 }
 
+/**
+ * Resets a QuestionBlock in a running session
+ * @param {*} param0
+ */
+const resetQuestionBlock = async ({ id, instanceIds }) => {
+  const session = await getRunningSession(id)
+  console.log(session)
+  // if the feedback channel is not activated, do not allow new additions
+  if (!session.settings.isFeedbackChannelActive) {
+    throw new ForbiddenError('SESSION_FEEDBACKS_DEACTIVATED')
+  }
+
+  instanceIds.forEach(instanceId => {
+    // responseCache.hgetall(instanceId)
+    console.log(instanceId)
+    console.log(id)
+    // delete a QuestionBlock from the Cache
+    responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
+  })
+
+  // return the updated session
+  return session
+}
+
 module.exports = {
   getRunningSession,
   addResponse,
@@ -374,4 +398,5 @@ module.exports = {
   addFeedback,
   deleteFeedback,
   joinSession,
+  resetQuestionBlock,
 }
