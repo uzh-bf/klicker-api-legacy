@@ -3,7 +3,7 @@ const v8n = require('v8n')
 const { ForbiddenError, UserInputError } = require('apollo-server-express')
 
 const CFG = require('../klicker.conf.js')
-const { QuestionInstanceModel, UserModel, FileModel } = require('../models')
+const { QuestionInstanceModel, UserModel, FileModel, QuestionModel } = require('../models')
 const { QUESTION_GROUPS, QUESTION_TYPES } = require('../constants')
 const { getRedis } = require('../redis')
 const { getRunningSession } = require('./sessionMgr')
@@ -372,14 +372,39 @@ const joinSession = async ({ shortname }) => {
  */
 const resetQuestionBlock = async ({ id, instanceIds }) => {
   const session = await getRunningSession(id)
-  console.log(session)
+  instanceIds.forEach(async instanceId => {
+    const type = await responseCache.hget(`instance:${instanceId}:info`, 'type')
+    const questionInstance = await QuestionInstanceModel.findOne({ _id: instanceId })
+    const question = await QuestionModel.findOne({ _id: questionInstance.question })
+    if (type === QUESTION_TYPES.SC || type === QUESTION_TYPES.MC) {
+      let maxChoices = 0
+      if (type === QUESTION_TYPES.SC) {
+        maxChoices = question.versions[question.__v].options.SC.choices.length
+      } else {
+        maxChoices = question.versions[question.__v].options.MC.choices.length
+      }
+      for (let i = 0; i < maxChoices; i += 1) {
+        responseCache.hset(`instance:${instanceId}:results`, `${i}`, 0)
+      }
+      responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
+    }
 
-  instanceIds.forEach(instanceId => {
-    // responseCache.hgetall(instanceId)
-    console.log(instanceId)
-    console.log(id)
-    // delete a QuestionBlock from the Cache
-    responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
+    if (type === QUESTION_TYPES.FREE) {
+      const responseHashes = await responseCache.hgetall(`instance:${instanceId}:responseHashes`)
+      responseHashes.forEach(hash => {
+        responseCache.hset(`instance:${instanceId}:responseHashes`, `${hash}`, null)
+      })
+      await responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
+    }
+
+    if (type === QUESTION_TYPES.FREE_RANGE) {
+      const responseHashes = await responseCache.hgetall(`instance:${instanceId}:responseHashes`)
+
+      responseHashes.forEach(hash => {
+        responseCache.hset(`instance:${instanceId}:responseHashes`, `${hash}`, null)
+      })
+      responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
+    }
   })
 
   // return the updated session

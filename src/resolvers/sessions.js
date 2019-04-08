@@ -93,9 +93,9 @@ const pauseSessionMutation = (parentValue, { id }, { auth }) =>
     userId: auth.sub,
   })
 
-const resetQuestionBlockMutation = (parentValue, { sessionId, instanceIds }, { auth }) =>
+const resetQuestionBlockMutation = (parentValue, { id, instanceIds }, { auth }) =>
   SessionExecService.resetQuestionBlock({
-    sessionId,
+    id,
     instanceIds,
     userId: auth.sub,
   })
