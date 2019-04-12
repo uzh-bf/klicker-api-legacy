@@ -26,6 +26,7 @@ const {
   allSessions,
   createSession,
   pauseSession,
+  cancelSession,
   endSession,
   joinSession,
   runningSession,
@@ -110,6 +111,7 @@ const typeDefs = [
     modifySession(id: ID!, session: SessionModifyInput!): Session!
     modifyUser(user: User_Modify!): User!
     pauseSession(id: ID!): Session!
+    cancelSession(id: ID!): Session!
     requestAccountDeletion: String!
     resolveAccountDeletion(deletionToken: String!): String!
     requestPassword(email: String!): String!
@@ -166,6 +168,7 @@ const resolvers = {
     modifySession: requireAuth(modifySession),
     modifyUser: requireAuth(modifyUser),
     pauseSession: requireAuth(pauseSession),
+    cancelSession: requireAuth(cancelSession),
     requestAccountDeletion: requireAuth(requestAccountDeletion),
     resolveAccountDeletion: requireAuth(resolveAccountDeletion),
     requestPassword,
