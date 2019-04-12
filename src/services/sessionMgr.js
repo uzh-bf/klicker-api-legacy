@@ -617,6 +617,9 @@ const activateNextBlock = async ({ userId }) => {
     await cleanCache(shortname)
   }
 
+  // TODO: pubsub
+  //
+
   return user.runningSession
 }
 

@@ -82,13 +82,10 @@ const startSessionMutation = (parentValue, { id }, { auth }) =>
     userId: auth.sub,
   })
 
-const activateNextBlockMutation = (parentValue, args, { auth }) => {
+const activateNextBlockMutation = (parentValue, args, { auth }) =>
   SessionMgrService.activateNextBlock({
     userId: auth.sub,
   })
-
-  return 'SESSION_UPDATE'
-}
 
 const pauseSessionMutation = (parentValue, { id }, { auth }) =>
   SessionMgrService.pauseSession({
