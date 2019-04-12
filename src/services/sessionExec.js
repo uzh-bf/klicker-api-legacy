@@ -7,7 +7,7 @@ const { QuestionInstanceModel, UserModel, FileModel } = require('../models')
 const { QUESTION_GROUPS, QUESTION_TYPES } = require('../constants')
 const { getRedis } = require('../redis')
 const { getRunningSession } = require('./sessionMgr')
-const { pubsub, CONFUSION_ADDED, FEEDBACK_ADDED } = require('../resolvers/subscriptions')
+const { pubsub, CONFUSION_ADDED, FEEDBACK_ADDED, SESSION_UPDATE } = require('../resolvers/subscriptions')
 
 const FILTERING_CFG = CFG.get('security.filtering')
 
@@ -44,6 +44,50 @@ const addFeedback = async ({ sessionId, content }) => {
 
   // return the updated session
   return session
+}
+
+/**
+ * Update session
+ * @param {*} param0
+ */
+const updateSession = async ({ sessionId }) => {
+  const session = await getRunningSession(sessionId)
+
+  // extract the saved feedback and convert it to a plain object
+  // then readd the mongo _id field under the id key and publish the result
+  // this is needed as redis swallows the _id field and the client could break!
+  const savedFeedback = session.feedbacks[session.feedbacks.length - 1].toObject()
+  pubsub.publish(SESSION_UPDATE, {
+    [SESSION_UPDATE]: { ...savedFeedback, id: savedFeedback._id },
+    sessionId,
+  })
+
+  // return the updated session
+  const { id, activeInstances, settings, feedbacks } = session
+
+  return {
+    id,
+    settings,
+    // map active instances to be in the correct format
+    activeInstances: activeInstances.map(({ id: instanceId, question, version: instanceVersion }) => {
+      const version = question.versions[instanceVersion]
+
+      // get the files that correspond to the current question version
+      const files = FileModel.find({ _id: { $in: version.files } })
+
+      return {
+        questionId: question.id,
+        id: instanceId,
+        title: question.title,
+        type: question.type,
+        content: version.content,
+        description: version.description,
+        options: version.options,
+        files,
+      }
+    }),
+    feedbacks: settings.isFeedbackChannelActive && settings.isFeedbackChannelPublic ? feedbacks : null,
+  }
 }
 
 /**
@@ -374,4 +418,5 @@ module.exports = {
   addFeedback,
   deleteFeedback,
   joinSession,
+  updateSession,
 }
