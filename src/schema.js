@@ -26,6 +26,7 @@ const {
   allSessions,
   createSession,
   pauseSession,
+  cancelSession,
   endSession,
   joinSession,
   runningSession,
@@ -38,7 +39,6 @@ const {
   session,
   modifySession,
   deleteSessions,
-  resetQuestionBlock,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -111,13 +111,13 @@ const typeDefs = [
     modifySession(id: ID!, session: SessionModifyInput!): Session!
     modifyUser(user: User_Modify!): User!
     pauseSession(id: ID!): Session!
+    cancelSession(id: ID!): Session!
     requestAccountDeletion: String!
     resolveAccountDeletion(deletionToken: String!): String!
     requestPassword(email: String!): String!
     requestPresignedURL(fileType: String!): File_PresignedURL!
     startSession(id: ID!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
-    resetQuestionBlock(id: ID!, instanceIds: [ID!]!): Session!
   }
 
   type Subscription {
@@ -168,6 +168,7 @@ const resolvers = {
     modifySession: requireAuth(modifySession),
     modifyUser: requireAuth(modifyUser),
     pauseSession: requireAuth(pauseSession),
+    cancelSession: requireAuth(cancelSession),
     requestAccountDeletion: requireAuth(requestAccountDeletion),
     resolveAccountDeletion: requireAuth(resolveAccountDeletion),
     requestPassword,
@@ -175,7 +176,6 @@ const resolvers = {
     startSession: requireAuth(startSession),
     updateSessionSettings: requireAuth(updateSessionSettings),
     activateNextBlock: requireAuth(activateNextBlock),
-    resetQuestionBlock: requireAuth(resetQuestionBlock),
   },
   Subscription: {
     // TODO: some form of authentication
