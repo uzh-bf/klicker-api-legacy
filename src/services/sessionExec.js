@@ -386,25 +386,15 @@ const resetQuestionBlock = async ({ id, instanceIds }) => {
       for (let i = 0; i < maxChoices; i += 1) {
         responseCache.hset(`instance:${instanceId}:results`, `${i}`, 0)
       }
-      responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
     }
 
-    if (type === QUESTION_TYPES.FREE) {
+    if (type === QUESTION_TYPES.FREE || type === QUESTION_TYPES.FREE_RANGE) {
       const responseHashes = await responseCache.hgetall(`instance:${instanceId}:responseHashes`)
       responseHashes.forEach(hash => {
         responseCache.hset(`instance:${instanceId}:responseHashes`, `${hash}`, null)
       })
-      await responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
     }
-
-    if (type === QUESTION_TYPES.FREE_RANGE) {
-      const responseHashes = await responseCache.hgetall(`instance:${instanceId}:responseHashes`)
-
-      responseHashes.forEach(hash => {
-        responseCache.hset(`instance:${instanceId}:responseHashes`, `${hash}`, null)
-      })
-      responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
-    }
+    await responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
   })
 
   // return the updated session
