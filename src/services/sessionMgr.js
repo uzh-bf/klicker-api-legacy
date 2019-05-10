@@ -8,6 +8,7 @@ const { ObjectId } = mongoose.Types
 const { sendSlackNotification } = require('./notifications')
 const { QuestionInstanceModel, SessionModel, UserModel, QuestionModel } = require('../models')
 const { getRedis } = require('../redis')
+const { pubsub, SESSION_UPDATE } = require('../resolvers/subscriptions')
 const {
   QUESTION_TYPES,
   QUESTION_GROUPS,
@@ -528,7 +529,10 @@ const updateSettings = async ({ sessionId, userId, settings, shortname }) => {
  */
 const activateNextBlock = async ({ userId }) => {
   const user = await UserModel.findById(userId).populate(['activeInstances', 'runningSession'])
+
   const { shortname, runningSession } = user
+
+  const sessionId = runningSession._id
 
   if (!runningSession) {
     throw new ForbiddenError('NO_RUNNING_SESSION')
@@ -618,7 +622,35 @@ const activateNextBlock = async ({ userId }) => {
   }
 
   // TODO: pubsub
-  //
+  const savedsession = user.runningSession.toObject()
+  let activeBlock
+  const arrayLength = savedsession.blocks.length
+  for (let i = 0; i < arrayLength; i += 1) {
+    if (savedsession.blocks[i].status === QUESTION_BLOCK_STATUS.ACTIVE) {
+      activeBlock = savedsession.blocks[i]
+    }
+  }
+
+  if (activeBlock != null) {
+    const instanceId = activeBlock.instances[0]
+    const questioninstance = await QuestionInstanceModel.findById(instanceId)
+    const question = await QuestionModel.findById(questioninstance.question)
+    const questionPublic = Object()
+    const questionInfo = question.versions[question.versions.length - 1]
+    questionPublic.id = instanceId
+    questionPublic.questionId = question._id
+    questionPublic.title = question.title
+    questionPublic.type = question.type
+    questionPublic.content = questionInfo.content
+    questionPublic.description = questionInfo.description
+    questionPublic.options = questionInfo.options
+    questionPublic.files = questionInfo.files
+    savedsession.activeInstances[0] = questionPublic
+  }
+  pubsub.publish(SESSION_UPDATE, {
+    [SESSION_UPDATE]: { ...savedsession, id: savedsession._id },
+    sessionId,
+  })
 
   return user.runningSession
 }

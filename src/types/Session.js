@@ -69,6 +69,7 @@ const Session = `
     isFeedbackChannelActive: Boolean
     isFeedbackChannelPublic: Boolean
   }
+
   type Session_Settings {
     isConfusionBarometerActive: Boolean!
     isEvaluationPublic: Boolean!
