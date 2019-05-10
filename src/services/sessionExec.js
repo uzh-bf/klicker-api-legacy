@@ -68,6 +68,40 @@ const deleteFeedback = async ({ sessionId, feedbackId, userId }) => {
 }
 
 /**
+ * Update a feedback from a session
+ * @param {*} param0
+ */
+const updateFeedback = async ({ sessionId, feedbackId, tags, userId }) => {
+  const session = await getRunningSession(sessionId)
+
+  // ensure the user is authorized to modify this session
+  if (!session.user.equals(userId)) {
+    throw new ForbiddenError('UNAUTHORIZED')
+  }
+
+  // add new tag to a feedback
+  const index = session.feedbacks.indexOf(session.feedbacks.find(feedback => feedback.id === feedbackId))
+  session.feedbacks[index].tags = tags
+
+  // sort feedbacks
+  session.feedbacks = session.feedbacks.sort((f1, f2) => {
+    if (f1.tags.length !== 0) {
+      return 1
+    }
+    if (f2.tags.length !== 0) {
+      return -1
+    }
+    return 0
+  })
+
+  // save the updated session
+  await session.save()
+
+  // return the updated session
+  return session
+}
+
+/**
  * Add a new confusion timestep to the session
  * @param {*} param0
  */
@@ -409,4 +443,5 @@ module.exports = {
   deleteFeedback,
   joinSession,
   resetQuestionBlock,
+  updateFeedback,
 }

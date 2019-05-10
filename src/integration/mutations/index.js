@@ -14,6 +14,7 @@ const EndSessionMutation = loadAsString('./EndSessionMutation.graphql')
 const AddFeedbackMutation = loadAsString('./AddFeedbackMutation.graphql')
 const DeleteFeedbackMutation = loadAsString('./DeleteFeedbackMutation.graphql')
 const AddConfusionTSMutation = loadAsString('./AddConfusionTSMutation.graphql')
+const UpdateFeedbackMutation = loadAsString('./UpdateFeedbackMutation.graphql')
 const UpdateSessionSettingsMutation = loadAsString('./UpdateSessionSettingsMutation.graphql')
 const AddResponseMutation = loadAsString('./AddResponseMutation.graphql')
 const ActivateNextBlockMutation = loadAsString('./ActivateNextBlockMutation.graphql')
@@ -51,6 +52,7 @@ module.exports = {
   AddFeedbackMutation,
   DeleteFeedbackMutation,
   AddConfusionTSMutation,
+  UpdateFeedbackMutation,
   UpdateSessionSettingsMutation,
   AddResponseMutation,
   ActivateNextBlockMutation,

@@ -108,8 +108,19 @@ const Session = `
   type Session_Feedback {
     id: ID!
     content: String!
+    tags: [String!]!
     votes: Int!
 
     createdAt: DateTime!
+  }
+
+  input Session_FeedbackTagInput{
+    name: String
+    value: String
+  }
+
+  type Session_FeedbackTag {
+    name: String!
+    value: String!
   }
 `

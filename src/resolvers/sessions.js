@@ -126,6 +126,9 @@ const addFeedbackMutation = async (parentValue, { fp, sessionId, content }, { ip
 const deleteFeedbackMutation = (parentValue, { sessionId, feedbackId }, { auth }) =>
   SessionExecService.deleteFeedback({ sessionId, feedbackId, userId: auth.sub })
 
+const updateFeedbackMutation = (parentValue, { sessionId, feedbackId, tags }, { auth }) =>
+  SessionExecService.updateFeedback({ sessionId, feedbackId, tags, userId: auth.sub })
+
 const addConfusionTSMutation = async (parentValue, { fp, sessionId, difficulty, speed }, { ip }) => {
   await SessionExecService.addConfusionTS({
     fp,
@@ -169,6 +172,7 @@ module.exports = {
   addFeedback: addFeedbackMutation,
   deleteFeedback: deleteFeedbackMutation,
   addConfusionTS: addConfusionTSMutation,
+  updateFeedback: updateFeedbackMutation,
   updateSessionSettings: updateSessionSettingsMutation,
   joinSession: joinSessionQuery,
   deleteSessions: deleteSessionsMutation,

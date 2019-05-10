@@ -10,8 +10,9 @@ module.exports = {
       `
       )}
       feedbacks: ${feedbacks.map(
-        ({ content, votes }) => `
+        ({ content, tags, votes }) => `
         content: ${content}
+        tags: ${tags}
         votes: ${votes}
       `
       )}

@@ -39,6 +39,10 @@ query JoinSession($shortname: String!) {
     feedbacks {
       id
       content
+      tags {
+        name
+        value
+      }
       votes
     }
   }

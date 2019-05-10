@@ -22,6 +22,7 @@ const {
 const {
   addFeedback,
   deleteFeedback,
+  updateFeedback,
   addConfusionTS,
   allSessions,
   createSession,
@@ -118,6 +119,7 @@ const typeDefs = [
     requestPassword(email: String!): String!
     requestPresignedURL(fileType: String!): File_PresignedURL!
     startSession(id: ID!): Session!
+    updateFeedback(sessionId: ID!, feedbackId: ID!, tags: [String!]!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
     resetQuestionBlock(id: ID!, instanceIds: [ID!]!): Session!
   }
@@ -154,6 +156,7 @@ const resolvers = {
     archiveQuestions: requireAuth(archiveQuestions),
     addFeedback,
     deleteFeedback: requireAuth(deleteFeedback),
+    updateFeedback: requireAuth(updateFeedback),
     addConfusionTS,
     addResponse,
     changePassword: requireAuth(changePassword),

@@ -107,6 +107,7 @@ const sessionSerializer = {
     Feedbacks: [${val.feedbacks.map(
       feedback => `{
       Content: ${feedback.content}
+      tags: ${feedback.tags}
       Votes: ${feedback.votes}
     }`
     )}]
