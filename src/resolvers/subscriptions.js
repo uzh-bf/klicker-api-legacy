@@ -30,9 +30,9 @@ const confusionAddedSubscription = {
   subscribe: withFilter(() => pubsub.asyncIterator(CONFUSION_ADDED), compareSessionId),
 }
 
-const SESSION_UPDATE = 'sessionUpdateAdded'
-const sessionUpdateSubscription = {
-  subscribe: withFilter(() => pubsub.asyncIterator(SESSION_UPDATE), compareSessionId),
+const SESSION_UPDATED = 'sessionUpdated'
+const sessionUpdatedSubscription = {
+  subscribe: withFilter(() => pubsub.asyncIterator(SESSION_UPDATED), compareSessionId),
 }
 
 module.exports = {
@@ -42,10 +42,10 @@ module.exports = {
   // export subscriptions
   confusionAdded: confusionAddedSubscription,
   feedbackAdded: feedbackAddedSubscription,
-  sessionUpdateAdded: sessionUpdateSubscription,
+  sessionUpdated: sessionUpdatedSubscription,
 
   // export subscription types
   CONFUSION_ADDED,
   FEEDBACK_ADDED,
-  SESSION_UPDATE,
+  SESSION_UPDATED,
 }

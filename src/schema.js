@@ -56,7 +56,7 @@ const {
   activateAccount,
 } = require('./resolvers/users')
 const { files } = require('./resolvers/files')
-const { confusionAdded, feedbackAdded, sessionUpdateAdded } = require('./resolvers/subscriptions')
+const { confusionAdded, feedbackAdded, sessionUpdated } = require('./resolvers/subscriptions')
 const { allTypes } = require('./types')
 
 // create graphql schema in schema language
@@ -121,7 +121,7 @@ const typeDefs = [
   type Subscription {
     confusionAdded(sessionId: ID!): Session_ConfusionTimestep
     feedbackAdded(sessionId: ID!): Session_Feedback
-    sessionUpdateAdded(sessionId: ID!): Session_Public
+    sessionUpdated(sessionId: ID!): Session_Public
   }
 `,
   ...allTypes,
@@ -179,7 +179,7 @@ const resolvers = {
     // TODO: some form of authentication
     confusionAdded,
     feedbackAdded,
-    sessionUpdateAdded,
+    sessionUpdated,
   },
   // map our own types
   Question: {

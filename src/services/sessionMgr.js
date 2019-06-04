@@ -8,7 +8,7 @@ const { ObjectId } = mongoose.Types
 const { sendSlackNotification } = require('./notifications')
 const { QuestionInstanceModel, SessionModel, UserModel, QuestionModel } = require('../models')
 const { getRedis } = require('../redis')
-const { pubsub, SESSION_UPDATE } = require('../resolvers/subscriptions')
+const { pubsub, SESSION_UPDATED } = require('../resolvers/subscriptions')
 const {
   QUESTION_TYPES,
   QUESTION_GROUPS,
@@ -621,7 +621,6 @@ const activateNextBlock = async ({ userId }) => {
     await cleanCache(shortname)
   }
 
-  // TODO: pubsub
   const savedsession = user.runningSession.toObject()
   let activeBlock
   const arrayLength = savedsession.blocks.length
@@ -631,24 +630,32 @@ const activateNextBlock = async ({ userId }) => {
     }
   }
 
-  if (activeBlock != null) {
-    const instanceId = activeBlock.instances[0]
-    const questioninstance = await QuestionInstanceModel.findById(instanceId)
-    const question = await QuestionModel.findById(questioninstance.question)
-    const questionPublic = Object()
-    const questionInfo = question.versions[question.versions.length - 1]
-    questionPublic.id = instanceId
-    questionPublic.questionId = question._id
-    questionPublic.title = question.title
-    questionPublic.type = question.type
-    questionPublic.content = questionInfo.content
-    questionPublic.description = questionInfo.description
-    questionPublic.options = questionInfo.options
-    questionPublic.files = questionInfo.files
-    savedsession.activeInstances[0] = questionPublic
+  // Create the session Object
+  if (activeBlock != null && activeBlock.instances != null) {
+    await Promise.all(
+      activeBlock.instances.map(async (instanceId, index) => {
+        const questioninstance = await QuestionInstanceModel.findById(instanceId)
+        const question = await QuestionModel.findById(questioninstance.question)
+        const questionInfo = question.versions[question.versions.length - 1]
+        const questionPublic = {
+          id: instanceId,
+          questionId: question._id,
+          title: question.title,
+          type: question.type,
+          content: questionInfo.content,
+          description: questionInfo.description,
+          options: questionInfo.options,
+          files: questionInfo.files,
+        }
+        console.log(questionPublic)
+        savedsession.activeInstances[index] = questionPublic
+      })
+    )
   }
-  pubsub.publish(SESSION_UPDATE, {
-    [SESSION_UPDATE]: { ...savedsession, id: savedsession._id },
+
+  // Publish Subscription Data to Subscribers
+  pubsub.publish(SESSION_UPDATED, {
+    [SESSION_UPDATED]: { ...savedsession, id: savedsession._id },
     sessionId,
   })
 
