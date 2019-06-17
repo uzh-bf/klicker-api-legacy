@@ -305,7 +305,7 @@ describe('SessionMgrService', () => {
           id: preparedSession.id,
           userId,
         })
-      ).rejects.toEqual(new Error('SESSION_NOT_RUNNING'))
+      ).rejects.toEqual(new Error('SESSION_NOT_STARTED'))
     })
 
     it('allows cancelling a running session and restarting it', async () => {
