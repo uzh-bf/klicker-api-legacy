@@ -8,6 +8,7 @@ const { ObjectId } = mongoose.Types
 const { sendSlackNotification } = require('./notifications')
 const { QuestionInstanceModel, SessionModel, UserModel, QuestionModel } = require('../models')
 const { getRedis } = require('../redis')
+const { pubsub, SESSION_UPDATED } = require('../resolvers/subscriptions')
 const {
   QUESTION_TYPES,
   QUESTION_GROUPS,
@@ -559,7 +560,10 @@ const updateSettings = async ({ sessionId, userId, settings, shortname }) => {
  */
 const activateNextBlock = async ({ userId }) => {
   const user = await UserModel.findById(userId).populate(['activeInstances', 'runningSession'])
+
   const { shortname, runningSession } = user
+
+  const sessionId = runningSession._id
 
   if (!runningSession) {
     throw new ForbiddenError('NO_RUNNING_SESSION')
@@ -647,6 +651,44 @@ const activateNextBlock = async ({ userId }) => {
   if (redisCache) {
     await cleanCache(shortname)
   }
+
+  const savedsession = user.runningSession.toObject()
+  let activeBlock
+  const arrayLength = savedsession.blocks.length
+  for (let i = 0; i < arrayLength; i += 1) {
+    if (savedsession.blocks[i].status === QUESTION_BLOCK_STATUS.ACTIVE) {
+      activeBlock = savedsession.blocks[i]
+    }
+  }
+
+  // Create the session Object
+  if (activeBlock != null && activeBlock.instances != null) {
+    await Promise.all(
+      activeBlock.instances.map(async (instanceId, index) => {
+        const questioninstance = await QuestionInstanceModel.findById(instanceId)
+        const question = await QuestionModel.findById(questioninstance.question)
+        const questionInfo = question.versions[question.versions.length - 1]
+        const questionPublic = {
+          id: instanceId,
+          questionId: question._id,
+          title: question.title,
+          type: question.type,
+          content: questionInfo.content,
+          description: questionInfo.description,
+          options: questionInfo.options,
+          files: questionInfo.files,
+        }
+        console.log(questionPublic)
+        savedsession.activeInstances[index] = questionPublic
+      })
+    )
+  }
+
+  // Publish Subscription Data to Subscribers
+  pubsub.publish(SESSION_UPDATED, {
+    [SESSION_UPDATED]: { ...savedsession, id: savedsession._id },
+    sessionId,
+  })
 
   return user.runningSession
 }
