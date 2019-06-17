@@ -440,6 +440,30 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
 
       break
 
+    case SESSION_ACTIONS.CANCEL:
+      // if the session is not yet running, throw an error
+      if (session.status === SESSION_STATUS.CREATED) {
+        throw new ForbiddenError('SESSION_NOT_STARTED')
+      }
+
+      // if the session was already completed, return it
+      if (session.status === SESSION_STATUS.COMPLETED) {
+        return session
+      }
+
+      // Reset any session progress, in order to revert the session to its "CREATED" state.
+      if (session.blocks.length > 0) {
+        session.activeBlock = -1
+        session.activeStep = 0
+        session.activeInstances = []
+        for (let i = 0; i < session.blocks.length; i += 1) {
+          session.blocks[i].status = QUESTION_BLOCK_STATUS.PLANNED
+        }
+      }
+      // update the session status to CREATED
+      session.status = SESSION_STATUS.CREATED
+      break
+
     default:
       throw new ForbiddenError('INVALID_SESSION_ACTION')
   }
@@ -476,6 +500,13 @@ const startSession = ({ id, userId, shortname }) =>
  */
 const pauseSession = ({ id, userId, shortname }) =>
   sessionAction({ sessionId: id, userId, shortname }, SESSION_ACTIONS.PAUSE)
+
+/**
+ * Cancel a running session, reverting it to the "CREATED" state.
+ * @param {*} param0
+ */
+const cancelSession = ({ id, userId, shortname }) =>
+  sessionAction({ sessionId: id, userId, shortname }, SESSION_ACTIONS.CANCEL)
 
 /**
  * End (complete) an existing session
@@ -708,6 +739,7 @@ module.exports = {
   activateNextBlock,
   getRunningSession,
   pauseSession,
+  cancelSession,
   deleteSessions,
   choicesToResults,
   freeToResults,

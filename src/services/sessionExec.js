@@ -366,6 +366,40 @@ const joinSession = async ({ shortname }) => {
   }
 }
 
+/**
+ * Resets a QuestionBlock in a running session
+ * @param {*} param0
+ */
+const resetQuestionBlock = async ({ id, instanceIds }) => {
+  const session = await getRunningSession(id)
+  instanceIds.forEach(async instanceId => {
+    const type = await responseCache.hget(`instance:${instanceId}:info`, 'type')
+    const responseResults = await responseCache.hgetall(`instance:${instanceId}:responseHashes`)
+
+    if (type === QUESTION_TYPES.SC || type === QUESTION_TYPES.MC) {
+      Object.keys(responseResults).forEach(key => {
+        responseCache.hset(`instance:${instanceId}:results`, `${key}`, 0)
+      })
+    }
+
+    if (type === QUESTION_TYPES.FREE || type === QUESTION_TYPES.FREE_RANGE) {
+      const responseHashes = await responseCache.hgetall(`instance:${instanceId}:responseHashes`)
+
+      Object.keys(responseHashes).forEach(key => {
+        responseCache.hdel(`instance:${instanceId}:responseHashes`, `${key}`)
+      })
+
+      Object.keys(responseResults).forEach(key => {
+        responseCache.hdel(`instance:${instanceId}:results`, `${key}`)
+      })
+    }
+    await responseCache.hset(`instance:${instanceId}:results`, 'participants', 0)
+  })
+
+  // return the updated session
+  return session
+}
+
 module.exports = {
   getRunningSession,
   addResponse,
@@ -374,4 +408,5 @@ module.exports = {
   addFeedback,
   deleteFeedback,
   joinSession,
+  resetQuestionBlock,
 }
