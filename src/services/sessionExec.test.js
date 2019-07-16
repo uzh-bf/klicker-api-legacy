@@ -31,8 +31,8 @@ describe('SessionExecService', () => {
       withQuestions: true,
     }))
   })
-  afterAll(done => {
-    mongoose.disconnect(done)
+  afterAll(async done => {
+    await mongoose.disconnect(done)
     userId = undefined
   })
 
