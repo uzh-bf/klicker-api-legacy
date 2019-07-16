@@ -277,7 +277,7 @@ Object {
 
 exports[`Integration Session Execution allows completing sessions 1`] = `
 
-    startSession / pauseSession / endSession {
+    startSession / pauseSession / endSession / cancelSession {
       status: COMPLETED
     }
     
@@ -662,12 +662,11 @@ exports[`Integration Session Execution allows running the full session flow (res
 `;
 
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can cancel the running session 1`] = `
-Object {
-  "cancelSession": Object {
-    "id": "5d2dec42488a36207bd261aa",
-    "status": "CREATED",
-  },
-}
+
+    startSession / pauseSession / endSession / cancelSession {
+      status: CREATED
+    }
+    
 `;
 
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can close the first question block 1`] = `
@@ -732,7 +731,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can continue the session 1`] = `
 
-    startSession / pauseSession / endSession {
+    startSession / pauseSession / endSession / cancelSession {
       status: RUNNING
     }
     
@@ -1740,7 +1739,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can pause the session 1`] = `
 
-    startSession / pauseSession / endSession {
+    startSession / pauseSession / endSession / cancelSession {
       status: PAUSED
     }
     
@@ -1897,7 +1896,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can restart the cancelled session 1`] = `
 
-    startSession / pauseSession / endSession {
+    startSession / pauseSession / endSession / cancelSession {
       status: RUNNING
     }
     
@@ -2029,7 +2028,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 
 exports[`Integration Session Execution allows starting sessions 1`] = `
 
-    startSession / pauseSession / endSession {
+    startSession / pauseSession / endSession / cancelSession {
       status: RUNNING
     }
     
