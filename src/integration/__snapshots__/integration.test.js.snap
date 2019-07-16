@@ -664,7 +664,7 @@ exports[`Integration Session Execution allows running the full session flow (res
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can cancel the running session 1`] = `
 Object {
   "cancelSession": Object {
-    "id": "5d2de9c69f6150117cd2e831",
+    "id": "5d2dec42488a36207bd261aa",
     "status": "CREATED",
   },
 }
