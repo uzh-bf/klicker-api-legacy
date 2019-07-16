@@ -27,8 +27,8 @@ describe('QuestionService', () => {
     }))
   })
   afterAll(async done => {
-    await mongoose.disconnect(done)
     userId = undefined
+    await mongoose.disconnect(done)
   })
 
   describe('createQuestion', () => {

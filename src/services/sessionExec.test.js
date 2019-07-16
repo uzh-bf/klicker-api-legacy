@@ -32,8 +32,8 @@ describe('SessionExecService', () => {
     }))
   })
   afterAll(async done => {
-    await mongoose.disconnect(done)
     userId = undefined
+    await mongoose.disconnect(done)
   })
 
   describe('addFeedback', () => {
