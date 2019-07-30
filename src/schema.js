@@ -113,13 +113,14 @@ const typeDefs = [
     modifyUser(user: User_Modify!): User!
     pauseSession(id: ID!): Session!
     cancelSession(id: ID!): Session!
+    resetSession(id: ID!): Session!
     requestAccountDeletion: String!
     resolveAccountDeletion(deletionToken: String!): String!
     requestPassword(email: String!): String!
     requestPresignedURL(fileType: String!): File_PresignedURL!
     startSession(id: ID!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
-    resetQuestionBlock(id: ID!, instanceIds: [ID!]!): Session!
+    resetQuestionBlock(sessionId: ID!, blockId: ID!): Session!
   }
 
   type Subscription {
