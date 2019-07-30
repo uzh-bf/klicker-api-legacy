@@ -29,6 +29,7 @@ const SESSION_ACTIONS = {
   PAUSE: 'PAUSE',
   STOP: 'STOP',
   CANCEL: 'CANCEL',
+  RESET: 'RESET',
 }
 
 const Errors = {
