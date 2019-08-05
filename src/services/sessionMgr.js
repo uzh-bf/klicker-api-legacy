@@ -36,7 +36,7 @@ async function publishSessionUpdate({ sessionId, activeBlock }) {
   }
 
   const activeBlockData = resultObj.blocks[activeBlock]
-  if (activeBlockData.instances !== null) {
+  if (activeBlockData && activeBlockData.instances !== null) {
     resultObj.activeInstances = activeBlockData.instances.map(instance => {
       const { question } = instance
       const versionInfo = question.versions[instance.version]
