@@ -115,7 +115,6 @@ const getRunningSession = async sessionId => {
  * Pass through all the question blocks in params
  * Skip any blocks that are empty (erroneous blocks)
  * Create question instances for all questions within
- * @param {*} param0
  */
 const mapBlocks = ({ sessionId, questionBlocks, userId }) => {
   // initialize a store for newly created instance models
@@ -206,7 +205,6 @@ const freeToResults = (redisResults, responseHashes) => {
 
 /**
  * Initialize the redis response cache as needed for session execution
- * @param {*} param0
  */
 const initializeResponseCache = async ({ id, question, version, results }) => {
   const transaction = responseCache.multi()
@@ -251,7 +249,6 @@ const initializeResponseCache = async ({ id, question, version, results }) => {
 
 /**
  * Compute the question instance results based on the redis response cache
- * @param {*} param0
  */
 const computeInstanceResults = async ({ id, question }) => {
   // setup a transaction for result extraction from redis
@@ -287,7 +284,6 @@ const computeInstanceResults = async ({ id, question }) => {
 
 /**
  * Create a new session
- * @param {*} param0
  */
 const createSession = async ({ name, questionBlocks = [], userId }) => {
   const sessionId = ObjectId()
@@ -324,7 +320,6 @@ const createSession = async ({ name, questionBlocks = [], userId }) => {
 
 /**
  * Modify a session
- * @param {*} param0
  */
 const modifySession = async ({ id, name, questionBlocks, userId }) => {
   // get the specified session from the database
@@ -394,8 +389,6 @@ const modifySession = async ({ id, name, questionBlocks, userId }) => {
 
 /**
  * Generic session action handler (start, pause, stop...)
- * @param {*} param0
- * @param {*} actionType
  */
 const sessionAction = async ({ sessionId, userId }, actionType) => {
   // get the current user instance
@@ -767,6 +760,29 @@ const deleteSessions = async ({ userId, ids }) => {
   return 'DELETION_SUCCESSFUL'
 }
 
+async function modifyQuestionBlock({ sessionId, id, questionBlockSettings, userId }) {
+  const session = await SessionModel.findOne({ _id: sessionId, user: userId })
+  if (!session) {
+    throw new ForbiddenError('INVALID_QUESTION_BLOCK')
+  }
+
+  const blockIndex = session.blocks.findIndex(block => block.id === id)
+  if (blockIndex < 0) {
+    return session
+  }
+
+  console.error(questionBlockSettings)
+
+  console.error(session.blocks[blockIndex])
+
+  session.blocks[blockIndex].timeLimit = questionBlockSettings.timeLimit
+  session.markModified(`blocks.${blockIndex}.timeLimit`)
+
+  console.error(session.blocks[blockIndex])
+
+  return session.save()
+}
+
 module.exports = {
   createSession,
   modifySession,
@@ -782,4 +798,5 @@ module.exports = {
   freeToResults,
   cleanCache,
   publishSessionUpdate,
+  modifyQuestionBlock,
 }

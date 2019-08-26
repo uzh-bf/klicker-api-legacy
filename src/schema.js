@@ -40,6 +40,7 @@ const {
   modifySession,
   deleteSessions,
   resetQuestionBlock,
+  modifyQuestionBlock,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -108,6 +109,7 @@ const typeDefs = [
     endSession(id: ID!): Session!
     login(email: String!, password: String!): ID!
     logout: String!
+    modifyQuestionBlock(sessionId: ID!, id: ID!, questionBlockSettings: Session_QuestionBlockModifyInput!): Session!
     modifyQuestion(id: ID!, question: QuestionModifyInput!): Question!
     modifySession(id: ID!, session: SessionModifyInput!): Session!
     modifyUser(user: User_Modify!): User!
@@ -181,6 +183,7 @@ const resolvers = {
     updateSessionSettings: requireAuth(updateSessionSettings),
     activateNextBlock: requireAuth(activateNextBlock),
     resetQuestionBlock: requireAuth(resetQuestionBlock),
+    modifyQuestionBlock: requireAuth(modifyQuestionBlock),
   },
   Subscription: {
     // TODO: some form of authentication

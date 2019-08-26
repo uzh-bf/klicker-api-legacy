@@ -77,12 +77,18 @@ module.exports = `
     version: Int!
   }
   input Session_QuestionBlockInput {
+    timeLimit: Int
     questions: [Session_QuestionBlockQuestionInput!]!
+  }
+  input Session_QuestionBlockModifyInput {
+    timeLimit: Int
   }
   type Session_QuestionBlock {
     id: ID!
 
     status: Session_QuestionBlockStatus!
+    timeLimit: Int
+    expiresAt: DateTime
 
     instances: [QuestionInstance!]!
   }

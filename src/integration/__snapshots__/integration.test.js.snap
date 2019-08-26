@@ -669,6 +669,26 @@ exports[`Integration Session Execution allows running the full session flow (res
     
 `;
 
+exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can change the settings of the third question block 1`] = `
+
+    modifyQuestionBlock {
+      blocks: 
+        timeLimit: -1
+        expiresAt: null
+      ,
+        timeLimit: -1
+        expiresAt: null
+      ,
+        timeLimit: 60
+        expiresAt: null
+      ,
+        timeLimit: -1
+        expiresAt: null
+      
+    }
+  
+`;
+
 exports[`Integration Session Execution allows running the full session flow (responding and evaluation) LECTURER: can close the first question block 1`] = `
 
     activateNextBlock {
