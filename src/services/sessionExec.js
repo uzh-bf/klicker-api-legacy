@@ -349,6 +349,8 @@ const joinSession = async ({ shortname }) => {
       const files = FileModel.find({ _id: { $in: version.files } })
 
       return {
+        expiresAt: currentBlock.expiresAt,
+        timeLimit: currentBlock.timeLimit,
         execution: currentBlock.execution,
         questionId: question.id,
         id: instanceId,

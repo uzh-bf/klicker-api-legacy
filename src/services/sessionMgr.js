@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const { ForbiddenError } = require('apollo-server-express')
 const _mapValues = require('lodash/mapValues')
 const _forOwn = require('lodash/forOwn')
+const dayjs = require('dayjs')
+const schedule = require('node-schedule')
 
 const { ObjectId } = mongoose.Types
 
@@ -50,6 +52,8 @@ async function publishSessionUpdate({ sessionId, activeBlock }) {
         const versionInfo = question.versions[instance.version]
         return {
           id: instance._id,
+          timeLimit: activeBlockData.timeLimit,
+          expiresAt: activeBlockData.expiresAt,
           execution: activeBlockData.execution,
           questionId: question._id,
           title: question.title,
@@ -57,16 +61,18 @@ async function publishSessionUpdate({ sessionId, activeBlock }) {
           content: versionInfo.content,
           description: versionInfo.description,
           options: versionInfo.options,
-          files: versionInfo.files.map(el => ({ ...el, id: el._id })),
+          files: versionInfo.files.map(el => ({ ...el, id: el._id, _id: undefined })),
         }
       })
     }
   }
 
   resultObj.id = resultObj._id
+  delete resultObj._id
+
   const properties = ['blocks', 'feedbacks', 'confusionTS']
   properties.forEach(property => {
-    resultObj[property] = resultObj[property].map(el => ({ ...el, id: el._id }))
+    resultObj[property] = resultObj[property].map(el => ({ ...el, id: el._id, _id: undefined }))
   })
 
   // Publish Subscription Data to Subscribers
@@ -511,6 +517,7 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
         for (let i = 0; i < session.blocks.length; i += 1) {
           session.blocks[i].status = QUESTION_BLOCK_STATUS.PLANNED
           session.blocks[i].execution += 1
+          session.blocks[i].expiresAt = null
 
           // reset any results that are already stored in the database
           promises.push(
@@ -624,7 +631,6 @@ const updateSettings = async ({ sessionId, userId, settings, shortname }) => {
 
 /**
  * Activate the next question block of a running session
- * @param {*} param0
  */
 const activateNextBlock = async ({ userId }) => {
   const user = await UserModel.findById(userId).populate(['activeInstances', 'runningSession'])
@@ -677,6 +683,20 @@ const activateNextBlock = async ({ userId }) => {
 
     // set the status of the instances in the next block to active
     runningSession.blocks[nextBlockIndex].status = QUESTION_BLOCK_STATUS.ACTIVE
+
+    // check whether the next block has a time limit
+    if (runningSession.blocks[nextBlockIndex].timeLimit > -1) {
+      // set expiresAt for time-limited blocks
+      runningSession.blocks[nextBlockIndex].expiresAt = dayjs().add(
+        runningSession.blocks[nextBlockIndex].timeLimit,
+        'second'
+      )
+
+      // schedule the activation of the next block
+      schedule.scheduleJob(runningSession.blocks[nextBlockIndex].expiresAt, async () => {
+        await activateNextBlock({ userId })
+      })
+    }
 
     // set the instances of the next block to be the users active instances
     runningSession.activeInstances = nextBlock.instances
@@ -771,14 +791,7 @@ async function modifyQuestionBlock({ sessionId, id, questionBlockSettings, userI
     return session
   }
 
-  console.error(questionBlockSettings)
-
-  console.error(session.blocks[blockIndex])
-
   session.blocks[blockIndex].timeLimit = questionBlockSettings.timeLimit
-  session.markModified(`blocks.${blockIndex}.timeLimit`)
-
-  console.error(session.blocks[blockIndex])
 
   return session.save()
 }
