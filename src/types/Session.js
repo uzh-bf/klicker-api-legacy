@@ -114,4 +114,19 @@ module.exports = `
 
     createdAt: DateTime!
   }
+
+  type Session_Update {
+    id: ID!
+    activeStep: Int!
+    activeBlock: Int!
+
+    blocks: [SessionUpdate_Block!]!
+  }
+
+  type SessionUpdate_Block {
+    id: ID!
+    status: Session_QuestionBlockStatus!
+    timeLimit: Int
+    expiresAt: DateTime
+  }
 `

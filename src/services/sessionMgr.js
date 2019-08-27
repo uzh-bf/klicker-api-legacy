@@ -4,13 +4,14 @@ const _mapValues = require('lodash/mapValues')
 const _forOwn = require('lodash/forOwn')
 const dayjs = require('dayjs')
 const schedule = require('node-schedule')
+const _pick = require('lodash/pick')
 
 const { ObjectId } = mongoose.Types
 
 const { sendSlackNotification } = require('./notifications')
 const { QuestionInstanceModel, SessionModel, UserModel, QuestionModel } = require('../models')
 const { getRedis } = require('../redis')
-const { pubsub, SESSION_UPDATED } = require('../resolvers/subscriptions')
+const { pubsub, SESSION_UPDATED, RUNNING_SESSION_UPDATED } = require('../resolvers/subscriptions')
 const {
   QUESTION_TYPES,
   QUESTION_GROUPS,
@@ -23,6 +24,40 @@ const { logDebug } = require('../lib/utils')
 
 const redisCache = getRedis()
 const responseCache = getRedis(3)
+
+function mapPropertyIds(elem) {
+  if (Array.isArray(elem)) {
+    return elem.map(obj => ({ ...obj, id: obj._id, _id: undefined }))
+  }
+
+  const result = { ...elem }
+  result.id = result._id
+  delete result._id
+  return result
+}
+
+async function publishRunningSessionUpdate({ sessionId }) {
+  const result = await SessionModel.findById(sessionId).populate({
+    path: 'blocks.instances',
+    populate: [
+      {
+        path: 'question',
+      },
+    ],
+  })
+
+  const resultObj = mapPropertyIds(result.toObject())
+  resultObj.blocks = resultObj.blocks.map(block => ({
+    ...mapPropertyIds(block),
+    instances: mapPropertyIds(block.instances),
+  }))
+
+  // Publish Subscription Data to Subscribers
+  await pubsub.publish(RUNNING_SESSION_UPDATED, {
+    [RUNNING_SESSION_UPDATED]: resultObj,
+    sessionId,
+  })
+}
 
 async function publishSessionUpdate({ sessionId, activeBlock }) {
   const result = await SessionModel.findById(sessionId).populate({
@@ -632,7 +667,7 @@ const updateSettings = async ({ sessionId, userId, settings, shortname }) => {
 /**
  * Activate the next question block of a running session
  */
-const activateNextBlock = async ({ userId }) => {
+const activateNextBlock = async ({ userId, scheduledStep }) => {
   const user = await UserModel.findById(userId).populate(['activeInstances', 'runningSession'])
 
   const { shortname, runningSession } = user
@@ -651,6 +686,13 @@ const activateNextBlock = async ({ userId }) => {
 
   const prevBlockIndex = runningSession.activeBlock
   const nextBlockIndex = runningSession.activeBlock + 1
+
+  if (
+    scheduledStep &&
+    (runningSession.activeInstances.length === 0 || scheduledStep !== runningSession.activeStep + 1)
+  ) {
+    throw new ForbiddenError('CANNOT_EXECUTE_SCHEDULE')
+  }
 
   if (runningSession.activeInstances.length === 0) {
     // if there are no active instances, activate the next block
@@ -694,7 +736,8 @@ const activateNextBlock = async ({ userId }) => {
 
       // schedule the activation of the next block
       schedule.scheduleJob(runningSession.blocks[nextBlockIndex].expiresAt, async () => {
-        await activateNextBlock({ userId })
+        await activateNextBlock({ userId, scheduledStep: runningSession.activeStep + 1 })
+        await publishRunningSessionUpdate({ sessionId: runningSession.id })
       })
     }
 
