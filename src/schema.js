@@ -83,7 +83,7 @@ const typeDefs = [
     allQuestions: [Question]!
     allSessions: [Session]!
     allTags: [Tag]!
-    checkAccountStatus: AccountStatus!
+    checkAccountStatus: ID
     checkAvailability(email: String, shortname: String): User_Availability!
     joinSession(shortname: String!): Session_Public
     question(id: ID!): Question

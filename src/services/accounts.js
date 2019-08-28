@@ -258,20 +258,22 @@ const signup = async (email, password, shortname, institution, useCase, { isAAI,
   throw new UserInputError('SIGNUP_FAILED')
 }
 
-const ACCOUNT_STATUS = {
-  INVALID: 'INVALID',
-  CREATED: 'CREATED',
-  EXISTING: 'EXISTING',
-}
 async function checkAccountStatus({ res, auth }) {
   if (!auth || !auth.sub) {
-    return ACCOUNT_STATUS.INVALID
+    return null
   }
 
   let user
   try {
     user = await UserModel.findOne({ email: auth.sub })
+    if (!user) {
+      user = await UserModel.findById(auth.sub)
+    }
   } catch (e) {
+    console.log(e.message)
+  }
+
+  if (!user) {
     const shortname = passwordGenerator.generate({ length: 6, uppercase: false, symbols: false, numbers: true })
     const password = passwordGenerator.generate({ length: 20, uppercase: true, symbols: true, numbers: true })
     user = await signup(auth.sub, password, shortname, 'aai institution', '-', { isAAI: true, isActive: true })
@@ -286,9 +288,9 @@ async function checkAccountStatus({ res, auth }) {
   }
 
   // update the last login date
-  await UserModel.findOneAndUpdate({ email: user.email }, { $currentDate: { lastLoginAt: true } })
+  await UserModel.findByIdAndUpdate(user.id, { $currentDate: { lastLoginAt: true } })
 
-  return 'INVALID'
+  return user.id
 }
 
 /**
