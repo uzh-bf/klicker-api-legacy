@@ -15,7 +15,10 @@ module.exports = `
   type Session_Public {
     id: ID!
 
+    timeLimit: Int
+    expiresAt: DateTime
     execution: Int
+
     settings: Session_Settings!
 
     activeInstances: [Question_Public]!

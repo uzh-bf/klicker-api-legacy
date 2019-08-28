@@ -82,13 +82,13 @@ async function publishSessionUpdate({ sessionId, activeBlock }) {
     if (activeBlockData.status === QUESTION_BLOCK_STATUS.EXECUTED) {
       resultObj.activeInstances = []
     } else {
+      resultObj.timeLimit = activeBlockData.timeLimit
+      resultObj.expiresAt = activeBlockData.expiresAt
       resultObj.activeInstances = activeBlockData.instances.map(instance => {
         const { question } = instance
         const versionInfo = question.versions[instance.version]
         return {
           id: instance._id,
-          timeLimit: activeBlockData.timeLimit,
-          expiresAt: activeBlockData.expiresAt,
           execution: activeBlockData.execution,
           questionId: question._id,
           title: question.title,
@@ -687,10 +687,7 @@ const activateNextBlock = async ({ userId, scheduledStep }) => {
   const prevBlockIndex = runningSession.activeBlock
   const nextBlockIndex = runningSession.activeBlock + 1
 
-  if (
-    scheduledStep &&
-    (runningSession.activeInstances.length === 0 || scheduledStep !== runningSession.activeStep + 1)
-  ) {
+  if (scheduledStep && (runningSession.activeInstances.length === 0 || scheduledStep !== runningSession.activeStep)) {
     throw new ForbiddenError('CANNOT_EXECUTE_SCHEDULE')
   }
 
@@ -736,7 +733,7 @@ const activateNextBlock = async ({ userId, scheduledStep }) => {
 
       // schedule the activation of the next block
       schedule.scheduleJob(runningSession.blocks[nextBlockIndex].expiresAt, async () => {
-        await activateNextBlock({ userId, scheduledStep: runningSession.activeStep + 1 })
+        await activateNextBlock({ userId, scheduledStep: runningSession.activeStep })
         await publishRunningSessionUpdate({ sessionId: runningSession.id })
       })
     }

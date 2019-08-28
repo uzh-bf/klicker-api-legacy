@@ -341,6 +341,8 @@ const joinSession = async ({ shortname }) => {
   return {
     id,
     settings,
+    expiresAt: currentBlock.expiresAt,
+    timeLimit: currentBlock.timeLimit,
     // map active instances to be in the correct format
     activeInstances: currentBlock.instances.map(({ id: instanceId, question, version: instanceVersion }) => {
       const version = question.versions[instanceVersion]
@@ -349,8 +351,6 @@ const joinSession = async ({ shortname }) => {
       const files = FileModel.find({ _id: { $in: version.files } })
 
       return {
-        expiresAt: currentBlock.expiresAt,
-        timeLimit: currentBlock.timeLimit,
         execution: currentBlock.execution,
         questionId: question.id,
         id: instanceId,
