@@ -14,6 +14,12 @@ module.exports = `
     useCase: String
   }
 
+  enum AccountStatus {
+    EXISTING
+    CREATED
+    INVALID
+  }
+
   type User {
     id: ID!
     email: String!

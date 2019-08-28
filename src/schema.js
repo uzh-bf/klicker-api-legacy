@@ -57,6 +57,7 @@ const {
   requestAccountDeletion,
   resolveAccountDeletion,
   activateAccount,
+  checkAccountStatus,
 } = require('./resolvers/users')
 const { files } = require('./resolvers/files')
 const { confusionAdded, feedbackAdded, sessionUpdated, runningSessionUpdated } = require('./resolvers/subscriptions')
@@ -82,6 +83,7 @@ const typeDefs = [
     allQuestions: [Question]!
     allSessions: [Session]!
     allTags: [Tag]!
+    checkAccountStatus: AccountStatus!
     checkAvailability(email: String, shortname: String): User_Availability!
     joinSession(shortname: String!): Session_Public
     question(id: ID!): Question
@@ -146,6 +148,7 @@ const resolvers = {
     allQuestions: requireAuth(allQuestions),
     allSessions: requireAuth(allSessions),
     allTags: requireAuth(allTags),
+    checkAccountStatus,
     checkAvailability,
     joinSession,
     question: requireAuth(question),
