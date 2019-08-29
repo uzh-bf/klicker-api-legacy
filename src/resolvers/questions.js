@@ -24,6 +24,9 @@ const questionByPVQuery = (parentValue, args, { loaders }) =>
 const questionsByPVQuery = (parentValue, args, { loaders }) =>
   ensureLoaders(loaders).questions.loadMany(parentValue.questions)
 
+const questionStatisticsQuery = (parentValue, { ids }, { auth }) =>
+  QuestionService.computeQuestionStatistics({ ids, userId: auth.sub })
+
 /* ----- mutations ----- */
 const createQuestionMutation = (parentValue, { question }, { auth }) =>
   QuestionService.createQuestion({ ...question, userId: auth.sub })
@@ -43,6 +46,7 @@ module.exports = {
   question: questionQuery,
   questionByPV: questionByPVQuery,
   questionsByPV: questionsByPVQuery,
+  questionStatistics: questionStatisticsQuery,
 
   // mutations
   createQuestion: createQuestionMutation,

@@ -11,6 +11,7 @@ const {
   modifyQuestion,
   archiveQuestions,
   deleteQuestions,
+  questionStatistics,
 } = require('./resolvers/questions')
 const {
   questionInstancesByPV,
@@ -85,6 +86,7 @@ const typeDefs = [
     checkAvailability(email: String, shortname: String): User_Availability!
     joinSession(shortname: String!): Session_Public
     question(id: ID!): Question
+    questionStatistics(ids: [ID!]!): [ID!]!
     runningSession: Session
     session(id: ID!): Session
     sessionPublic(id: ID!): Session_PublicEvaluation
@@ -149,6 +151,7 @@ const resolvers = {
     checkAvailability,
     joinSession,
     question: requireAuth(question),
+    questionStatistics: requireAuth(questionStatistics),
     runningSession: requireAuth(runningSession),
     session: requireAuth(session),
     sessionPublic: session,

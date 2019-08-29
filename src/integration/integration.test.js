@@ -1306,6 +1306,30 @@ describe('Integration', () => {
     })
   })
 
+  describe('Question Statistics', () => {
+    it('can load question statistics for all question types', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Queries.QuestionStatisticsQuery,
+            variables: {
+              ids: [questions.SC, questions.MC, questions.FREE, questions.FREE_RANGE],
+            },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchInlineSnapshot(`
+        Object {
+          "questionStatistics": Array [
+            "5d682873171b4c702a94a0f0",
+          ],
+        }
+      `)
+    })
+  })
+
   describe('Question Archiving', () => {
     it('can archive questions', async () => {
       const data = ensureNoErrors(

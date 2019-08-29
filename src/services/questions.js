@@ -1,5 +1,8 @@
 const _isNumber = require('lodash/isNumber')
-// TODO: find a way to use draft.js without needing react and react-dom
+const _round = require('lodash/round')
+const _pick = require('lodash/pick')
+const _sum = require('lodash/sum')
+const _mapValues = require('lodash/mapValues')
 const { ContentState, convertToRaw } = require('draft-js')
 const { UserInputError } = require('apollo-server-express')
 
@@ -323,6 +326,7 @@ const archiveQuestions = async ({ ids, userId }) => {
   // await the question update promises
   return Promise.all(promises)
 }
+
 /**
  * Delete a question from the database
  * @param {*} param0
@@ -349,9 +353,115 @@ const deleteQuestions = async ({ ids, userId }) => {
   return 'DELETION_SUCCESSFUL'
 }
 
+async function computeQuestionStatistics({ ids, userId }) {
+  const questions = await QuestionModel.find({
+    _id: { $in: ids },
+    user: userId,
+  }).populate({ path: 'instances' })
+
+  const results = questions
+    .flatMap(question => {
+      const usageCount = {}
+      const rawData = {}
+
+      question.instances.forEach(instance => {
+        // if the current instance has no results, return early
+        if (!instance.results) {
+          return
+        }
+
+        // initialize an array for all instance results
+        // this can later be aggregated into a single result
+        if (!rawData[instance.version]) {
+          usageCount[instance.version] = 0
+          rawData[instance.version] = []
+        }
+
+        // increase the usage count of the current version
+        usageCount[instance.version] += 1
+
+        if (QUESTION_GROUPS.CHOICES.includes(question.type)) {
+          rawData[instance.version].push(
+            instance.results.CHOICES.map(choice => {
+              const data = {
+                chosen: choice,
+                total: instance.results.totalParticipants,
+              }
+
+              return data
+            })
+          )
+        } else if (QUESTION_GROUPS.FREE.includes(question.type)) {
+          rawData[instance.version] = rawData[instance.version].concat(
+            Object.entries(instance.results.FREE).map(([key, value]) => ({
+              ...value,
+              key,
+            }))
+          )
+        }
+      })
+
+      return {
+        ..._pick(question, ['id', 'title', 'description', 'type', 'createdAt', 'updatedAt', 'versions']),
+        usageCount,
+        rawData,
+      }
+    })
+    .map(result => {
+      const question = { ...result, statistics: {} }
+
+      // calculate the total usage count
+      question.usageCount.total = _sum(Object.values(question.usageCount))
+
+      // process sc and mc questions
+      if (QUESTION_GROUPS.CHOICES.includes(question.type)) {
+        question.statistics = _mapValues(question.rawData, (versionData, version) => {
+          return versionData
+            .reduce((acc, response) => {
+              if (acc.length === 0) {
+                return response.map((choice, index) => ({
+                  ...question.versions[version].options[question.type].choices[index],
+                  ...choice,
+                }))
+              }
+
+              return acc.map((choice, index) => ({
+                ...choice,
+                chosen: choice.chosen + response[index].choice,
+                total: choice.total + response[index].total,
+              }))
+            }, [])
+            .map(choice => ({ ...choice, percentageChosen: _round(choice.chosen / choice.total, 2) }))
+        })
+      } else if (QUESTION_GROUPS.FREE.includes(question.type)) {
+        // process free and free range questions
+        question.statistics = _mapValues(question.rawData, (versionData, version) => {
+          return versionData.reduce(
+            (acc, { key, count, value }) => ({
+              ...acc,
+              [key]: {
+                count: acc[key] ? acc[key].count + count : count,
+                value,
+              },
+              total: acc.total + count,
+            }),
+            { total: 0, ...question.versions[version].options }
+          )
+        })
+      }
+
+      delete question.versions
+
+      return question
+    })
+
+  return ids
+}
+
 module.exports = {
   createQuestion,
   modifyQuestion,
   archiveQuestions,
   deleteQuestions,
+  computeQuestionStatistics,
 }
