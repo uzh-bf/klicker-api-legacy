@@ -86,7 +86,7 @@ const typeDefs = [
     checkAvailability(email: String, shortname: String): User_Availability!
     joinSession(shortname: String!): Session_Public
     question(id: ID!): Question
-    questionStatistics(ids: [ID!]!): [ID!]!
+    questionStatistics(ids: [ID!]!): [QuestionStatistics!]!
     runningSession: Session
     session(id: ID!): Session
     sessionPublic(id: ID!): Session_PublicEvaluation

@@ -1320,13 +1320,11 @@ describe('Integration', () => {
         )
       )
 
-      expect(data).toMatchInlineSnapshot(`
-        Object {
-          "questionStatistics": Array [
-            "5d682873171b4c702a94a0f0",
-          ],
-        }
-      `)
+      const util = require('util')
+
+      console.log(util.inspect(data, { showHidden: false, depth: null }))
+
+      expect(data).toMatchSnapshot()
     })
   })
 

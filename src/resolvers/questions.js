@@ -1,4 +1,5 @@
 const QuestionService = require('../services/questions')
+const StatisticsService = require('../services/statistics')
 const { ensureLoaders } = require('../lib/loaders')
 const { QuestionModel } = require('../models')
 
@@ -25,7 +26,7 @@ const questionsByPVQuery = (parentValue, args, { loaders }) =>
   ensureLoaders(loaders).questions.loadMany(parentValue.questions)
 
 const questionStatisticsQuery = (parentValue, { ids }, { auth }) =>
-  QuestionService.computeQuestionStatistics({ ids, userId: auth.sub })
+  StatisticsService.computeQuestionStatistics({ ids, userId: auth.sub })
 
 /* ----- mutations ----- */
 const createQuestionMutation = (parentValue, { question }, { auth }) =>
