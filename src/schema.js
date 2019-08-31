@@ -86,7 +86,6 @@ const typeDefs = [
     checkAvailability(email: String, shortname: String): User_Availability!
     joinSession(shortname: String!): Session_Public
     question(id: ID!): Question
-    questionStatistics(ids: [ID!]!): [QuestionStatistics!]!
     runningSession: Session
     session(id: ID!): Session
     sessionPublic(id: ID!): Session_PublicEvaluation
@@ -125,6 +124,7 @@ const typeDefs = [
     startSession(id: ID!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
     resetQuestionBlock(sessionId: ID!, blockId: ID!): Session!
+    questionStatistics(ids: [ID!]!): [QuestionStatistics!]!
   }
 
   type Subscription {
@@ -151,7 +151,6 @@ const resolvers = {
     checkAvailability,
     joinSession,
     question: requireAuth(question),
-    questionStatistics: requireAuth(questionStatistics),
     runningSession: requireAuth(runningSession),
     session: requireAuth(session),
     sessionPublic: session,
@@ -188,6 +187,7 @@ const resolvers = {
     activateNextBlock: requireAuth(activateNextBlock),
     resetQuestionBlock: requireAuth(resetQuestionBlock),
     modifyQuestionBlock: requireAuth(modifyQuestionBlock),
+    questionStatistics: requireAuth(questionStatistics),
   },
   Subscription: {
     // TODO: some form of authentication

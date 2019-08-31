@@ -32,12 +32,12 @@ module.exports = `
     name: String!
     chosen: Int!
     total: Int!
-    percentageChosen: Int!
+    percentageChosen: Float!
   }
 
   type QuestionStatistics_StatisticsFREE {
     chosen: Int!
-    percentageChosen: Int!
+    percentageChosen: Float!
     total: Int!
     key: String!
     value: String!

@@ -1,4 +1,4 @@
-query QuestionStatistics($ids: [ID!]!) {
+mutation QuestionStatistics($ids: [ID!]!) {
   questionStatistics(ids: $ids) {
     title
     usageTotal
