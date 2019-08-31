@@ -1311,7 +1311,7 @@ describe('Integration', () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
-            query: Queries.QuestionStatisticsQuery,
+            query: Mutations.QuestionStatisticsMutation,
             variables: {
               ids: [questions.SC, questions.MC, questions.FREE, questions.FREE_RANGE],
             },
@@ -1319,10 +1319,6 @@ describe('Integration', () => {
           authCookie
         )
       )
-
-      const util = require('util')
-
-      console.log(util.inspect(data, { showHidden: false, depth: null }))
 
       expect(data).toMatchSnapshot()
     })
