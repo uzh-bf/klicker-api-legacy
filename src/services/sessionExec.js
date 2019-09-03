@@ -372,10 +372,18 @@ const joinSession = async ({ shortname }) => {
  * Resets question instances
  */
 async function resetQuestionInstances({ instanceIds }) {
-  // TODO: handle instances that have been completed (have been persisted to db)
-
   return Promise.all(
     instanceIds.map(async instanceId => {
+      // get instance data from the database
+      const instance = await QuestionInstanceModel.findById(instanceId)
+
+      // if the instance is not currently open, reset data in the database
+      if (!instance.isOpen) {
+        instance.responses = []
+        instance.results = null
+        await instance.save()
+      }
+
       const type = await responseCache.hget(`instance:${instanceId}:info`, 'type')
       const responseResults = await responseCache.hgetall(`instance:${instanceId}:responseHashes`)
 
