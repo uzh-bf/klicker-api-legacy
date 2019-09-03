@@ -663,91 +663,34 @@ const updateSettings = async ({ sessionId, userId, settings, shortname }) => {
   return session
 }
 
-/**
- * Activate the next question block of a running session
- */
-const activateNextBlock = async ({ userId, scheduledStep }) => {
-  const user = await UserModel.findById(userId).populate(['activeInstances', 'runningSession'])
+async function deactivateBlockById({ userId, sessionId, blockId, incrementActiveStep }) {
+  const user = await UserModel.findById(userId)
+  const session = await SessionModel.findOne({ _id: sessionId, user: userId })
 
-  const { shortname, runningSession } = user
-
-  if (!runningSession) {
-    throw new ForbiddenError('NO_RUNNING_SESSION')
+  if (!user || !session) {
+    throw new ForbiddenError('INVALID_SESSION')
   }
 
-  // if all the blocks have already been activated, simply return the session
-  if (runningSession.activeBlock === runningSession.blocks.length) {
-    return user.runningSession
+  // find the index of the block with the given id
+  const blockIndex = session.blocks.findIndex(block => block.id === blockId)
+
+  // find the next block for the running session
+  const oldBlock = session.blocks[blockIndex]
+
+  // set the status of the previous block to executed
+  session.blocks[blockIndex].status = QUESTION_BLOCK_STATUS.EXECUTED
+
+  // reset the activeInstances of the current session
+  session.activeInstances = []
+
+  // increment the active step if the flag is passed
+  if (incrementActiveStep) {
+    session.activeStep += 1
   }
 
-  // prepare an array for promises to be executed
-  const promises = []
-
-  const prevBlockIndex = runningSession.activeBlock
-  const nextBlockIndex = runningSession.activeBlock + 1
-
-  if (scheduledStep && (runningSession.activeInstances.length === 0 || scheduledStep !== runningSession.activeStep)) {
-    throw new ForbiddenError('CANNOT_EXECUTE_SCHEDULE')
-  }
-
-  if (runningSession.activeInstances.length === 0) {
-    // if there are no active instances, activate the next block
-    runningSession.activeStep += 1
-
-    // increase the index of the currently active block
-    runningSession.activeBlock += 1
-
-    // find the next block for the running session
-    const nextBlock = runningSession.blocks[nextBlockIndex]
-
-    // update the instances in the new active block to be open
-    const instancePromises = nextBlock.instances.map(async instanceId => {
-      const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
-
-      // set the instances to be open
-      instance.isOpen = true
-
-      // if a response cache is available, hydrate it with the newly activated instances
-      if (responseCache) {
-        const initResponseCache = initializeResponseCache(instance)
-        promises.push(initResponseCache)
-      }
-
-      return instance.save()
-    })
-
-    // push the update promises to the list of all promises
-    promises.push(Promise.all(instancePromises))
-
-    // set the status of the instances in the next block to active
-    runningSession.blocks[nextBlockIndex].status = QUESTION_BLOCK_STATUS.ACTIVE
-
-    // check whether the next block has a time limit
-    if (runningSession.blocks[nextBlockIndex].timeLimit > -1) {
-      // set expiresAt for time-limited blocks
-      runningSession.blocks[nextBlockIndex].expiresAt = dayjs().add(
-        runningSession.blocks[nextBlockIndex].timeLimit,
-        'second'
-      )
-
-      // schedule the activation of the next block
-      schedule.scheduleJob(runningSession.blocks[nextBlockIndex].expiresAt, async () => {
-        await activateNextBlock({ userId, scheduledStep: runningSession.activeStep })
-        await publishRunningSessionUpdate({ sessionId: runningSession.id })
-      })
-    }
-
-    // set the instances of the next block to be the users active instances
-    runningSession.activeInstances = nextBlock.instances
-  } else if (runningSession.activeBlock >= 0) {
-    // if there are active instances, close them
-    runningSession.activeStep += 1
-
-    // find the currently active block
-    const previousBlock = runningSession.blocks[prevBlockIndex]
-
-    // update the instances in the currently active block to be closed
-    const instancePromises = previousBlock.instances.map(async instanceId => {
+  // update the instances in the currently active block to be closed
+  await Promise.all(
+    oldBlock.instances.map(async instanceId => {
       const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
 
       // set the instances to be open
@@ -758,28 +701,125 @@ const activateNextBlock = async ({ userId, scheduledStep }) => {
 
       return instance.save()
     })
+  )
 
-    // push the update promises to the list of all promises
-    promises.push(Promise.all(instancePromises))
-
-    // reset the activeInstances of the current session
-    runningSession.activeInstances = []
-
-    // set the status of the previous block to executed
-    runningSession.blocks[prevBlockIndex].status = QUESTION_BLOCK_STATUS.EXECUTED
-  }
-
-  promises.push([runningSession.save(), user.save()])
-  await Promise.all(promises)
+  await session.save()
 
   // if redis is in use, cleanup the page cache
   if (redisCache) {
-    await cleanCache(shortname)
+    await cleanCache(user.shortname)
   }
 
-  await publishSessionUpdate({ sessionId: runningSession.id, activeBlock: runningSession.activeBlock })
+  await publishSessionUpdate({ sessionId, activeBlock: session.activeBlock })
 
-  return user.runningSession
+  return session
+}
+
+async function activateBlockById({ userId, sessionId, blockId }) {
+  const user = await UserModel.findById(userId)
+  const session = await SessionModel.findOne({ _id: sessionId, user: userId })
+
+  if (!user || !session) {
+    throw new ForbiddenError('INVALID_SESSION')
+  }
+
+  // find the index of the block with the given id
+  const blockIndex = session.blocks.findIndex(block => block.id === blockId)
+
+  // find the next block for the running session
+  const newBlock = session.blocks[blockIndex]
+
+  // set the status of the instances in the next block to active
+  session.blocks[blockIndex].status = QUESTION_BLOCK_STATUS.ACTIVE
+
+  // set the instances of the next block to be the users active instances
+  session.activeInstances = newBlock.instances
+
+  // update the active block and step
+  session.activeBlock = blockIndex
+  session.activeStep = blockIndex * 2 + 1
+
+  // update the instances in the new active block to be open
+  await Promise.all(
+    newBlock.instances.map(async instanceId => {
+      const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
+
+      // set the instances to be open
+      instance.isOpen = true
+
+      // if a response cache is available, hydrate it with the newly activated instances
+      if (responseCache) {
+        await initializeResponseCache(instance)
+      }
+
+      return instance.save()
+    })
+  )
+
+  // check whether the next block has a time limit
+  if (session.blocks[blockIndex].timeLimit > -1) {
+    // set expiresAt for time-limited blocks
+    session.blocks[blockIndex].expiresAt = dayjs().add(session.blocks[blockIndex].timeLimit, 'second')
+
+    // schedule the activation of the next block
+    schedule.scheduleJob(session.blocks[blockIndex].expiresAt, async () => {
+      await deactivateBlockById({ userId, sessionId: session.id, blockId, incrementActiveStep: true })
+      await publishRunningSessionUpdate({ sessionId: session.id })
+    })
+  }
+
+  await session.save()
+
+  // if redis is in use, cleanup the page cache
+  if (redisCache) {
+    await cleanCache(user.shortname)
+  }
+
+  await publishSessionUpdate({ sessionId, activeBlock: session.activeBlock })
+
+  return session
+}
+
+/**
+ * Activate the next question block of a running session
+ */
+const activateNextBlock = async ({ userId }) => {
+  const user = await UserModel.findById(userId).populate('runningSession')
+
+  const { runningSession } = user
+
+  if (!runningSession) {
+    throw new ForbiddenError('NO_RUNNING_SESSION')
+  }
+
+  // if all the blocks have already been activated, simply return the session
+  if (runningSession.activeBlock === runningSession.blocks.length) {
+    return user.runningSession
+  }
+
+  const prevBlockIndex = runningSession.activeBlock
+  const nextBlockIndex = runningSession.activeBlock + 1
+
+  let updatedSession
+  if (runningSession.activeInstances.length === 0) {
+    // find the next block for the running session
+    const nextBlock = runningSession.blocks[nextBlockIndex]
+
+    // activate the next block
+    updatedSession = await activateBlockById({ userId, sessionId: runningSession.id, blockId: nextBlock.id })
+  } else if (runningSession.activeBlock >= 0) {
+    // find the currently active block
+    const previousBlock = runningSession.blocks[prevBlockIndex]
+
+    updatedSession = await deactivateBlockById({
+      userId,
+      sessionId: runningSession.id,
+      blockId: previousBlock.id,
+      incrementActiveStep: true,
+    })
+  }
+
+  return updatedSession || user.runningSession
 }
 
 /**
@@ -851,4 +891,5 @@ module.exports = {
   cleanCache,
   publishSessionUpdate,
   modifyQuestionBlock,
+  activateBlockById,
 }
