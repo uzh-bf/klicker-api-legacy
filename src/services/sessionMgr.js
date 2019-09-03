@@ -740,6 +740,16 @@ async function activateBlockById({ userId, sessionId, blockId }) {
   // find the next block for the running session
   const newBlock = session.blocks[blockIndex]
 
+  // if the newly activated block has been executed before, rehydrate the cache
+  if (newBlock.status === QUESTION_BLOCK_STATUS.EXECUTED) {
+    await Promise.all(
+      newBlock.instances.map(async instance => {
+        const instanceWithDetails = await QuestionInstanceModel.findById(instance).populate('question')
+        return initializeResponseCache(instanceWithDetails)
+      })
+    )
+  }
+
   // set the status of the instances in the next block to active
   session.blocks[blockIndex].status = QUESTION_BLOCK_STATUS.ACTIVE
 
