@@ -292,7 +292,7 @@ const initializeResponseCache = async ({ id, question, version, results }) => {
  */
 const computeInstanceResults = async ({ id, question }) => {
   // setup a transaction for result extraction from redis
-  const redisResults = (await responseCache
+  const redisResponse = await responseCache
     .multi()
     .hgetall(`instance:${id}:results`)
     .del(
@@ -302,7 +302,13 @@ const computeInstanceResults = async ({ id, question }) => {
       `instance:${id}:ip`,
       `instance:${id}:fp`
     )
-    .exec())[0][1]
+    .exec()
+
+  if (!redisResponse) {
+    return null
+  }
+
+  const redisResults = redisResponse[0][1]
 
   if (QUESTION_GROUPS.CHOICES.includes(question.type)) {
     return choicesToResults(redisResults)
@@ -717,10 +723,15 @@ async function deactivateBlockById({ userId, sessionId, blockId, incrementActive
 
 async function activateBlockById({ userId, sessionId, blockId }) {
   const user = await UserModel.findById(userId)
-  const session = await SessionModel.findOne({ _id: sessionId, user: userId })
+  let session = await SessionModel.findOne({ _id: sessionId, user: userId })
 
   if (!user || !session) {
     throw new ForbiddenError('INVALID_SESSION')
+  }
+
+  // deactivate the previous block if one has been active already
+  if (session.activeBlock > -1 && session.activeStep === session.activeBlock * 2 + 1) {
+    session = await deactivateBlockById({ userId, sessionId, blockId: session.blocks[session.activeBlock].id })
   }
 
   // find the index of the block with the given id
@@ -764,7 +775,7 @@ async function activateBlockById({ userId, sessionId, blockId }) {
     // schedule the activation of the next block
     schedule.scheduleJob(session.blocks[blockIndex].expiresAt, async () => {
       await deactivateBlockById({ userId, sessionId: session.id, blockId, incrementActiveStep: true })
-      await publishRunningSessionUpdate({ sessionId: session.id })
+      await publishRunningSessionUpdate({ sessionId: session.id, activeBlock: session.activeBlock })
     })
   }
 
