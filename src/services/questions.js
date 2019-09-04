@@ -52,8 +52,6 @@ const processFiles = (files = [], userId) => {
     return null
   })
 
-  console.log(modifiedFiles)
-
   // create models for entirely new files
   const createdFiles = files
     .filter(file => !file.id)
