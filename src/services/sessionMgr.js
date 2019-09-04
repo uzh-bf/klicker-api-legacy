@@ -669,12 +669,18 @@ const updateSettings = async ({ sessionId, userId, settings, shortname }) => {
   return session
 }
 
-async function deactivateBlockById({ userId, sessionId, blockId, incrementActiveStep }) {
+const jobs = {}
+
+async function deactivateBlockById({ userId, sessionId, blockId, incrementActiveStep, isScheduled }) {
   const user = await UserModel.findById(userId)
   const session = await SessionModel.findOne({ _id: sessionId, user: userId })
 
   if (!user || !session) {
     throw new ForbiddenError('INVALID_SESSION')
+  }
+
+  if (!isScheduled && jobs[blockId]) {
+    await jobs[blockId].cancel()
   }
 
   // find the index of the block with the given id
@@ -714,6 +720,10 @@ async function deactivateBlockById({ userId, sessionId, blockId, incrementActive
   // if redis is in use, cleanup the page cache
   if (redisCache) {
     await cleanCache(user.shortname)
+  }
+
+  if (isScheduled) {
+    await publishRunningSessionUpdate({ sessionId })
   }
 
   await publishSessionUpdate({ sessionId, activeBlock: session.activeBlock })
@@ -783,9 +793,14 @@ async function activateBlockById({ userId, sessionId, blockId }) {
     session.blocks[blockIndex].expiresAt = dayjs().add(session.blocks[blockIndex].timeLimit, 'second')
 
     // schedule the activation of the next block
-    schedule.scheduleJob(session.blocks[blockIndex].expiresAt, async () => {
-      await deactivateBlockById({ userId, sessionId: session.id, blockId, incrementActiveStep: true })
-      await publishRunningSessionUpdate({ sessionId: session.id, activeBlock: session.activeBlock })
+    jobs[blockId] = schedule.scheduleJob(session.blocks[blockIndex].expiresAt, async () => {
+      await deactivateBlockById({
+        userId,
+        sessionId: session.id,
+        blockId,
+        incrementActiveStep: true,
+        isScheduled: true,
+      })
     })
   }
 
