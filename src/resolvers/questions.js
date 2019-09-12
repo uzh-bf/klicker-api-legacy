@@ -1,4 +1,5 @@
 const QuestionService = require('../services/questions')
+const StatisticsService = require('../services/statistics')
 const { ensureLoaders } = require('../lib/loaders')
 const { QuestionModel } = require('../models')
 
@@ -37,6 +38,12 @@ const archiveQuestionsMutation = (parentValue, { ids }, { auth }) =>
 const deleteQuestionsMutation = (parentValue, { ids }, { auth }) =>
   QuestionService.deleteQuestions({ ids, userId: auth.sub })
 
+const questionStatisticsMutation = (parentValue, { ids }, { auth }) =>
+  StatisticsService.computeQuestionStatistics({ ids, userId: auth.sub })
+
+const exportQuestionsMutation = (parentValue, { ids }, { auth }) =>
+  QuestionService.exportQuestions({ ids, userId: auth.sub })
+
 module.exports = {
   // queries
   allQuestions: allQuestionsQuery,
@@ -49,4 +56,6 @@ module.exports = {
   modifyQuestion: modifyQuestionMutation,
   archiveQuestions: archiveQuestionsMutation,
   deleteQuestions: deleteQuestionsMutation,
+  questionStatistics: questionStatisticsMutation,
+  exportQuestions: exportQuestionsMutation,
 }

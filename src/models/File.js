@@ -8,7 +8,6 @@ const File = new mongoose.Schema(
       type: String,
       required: true,
       index: true,
-      unique: true,
     },
     originalName: {
       type: String,
@@ -19,6 +18,9 @@ const File = new mongoose.Schema(
       enum: ['image/png', 'image/jpeg', 'image/gif'],
       required: true,
       index: true,
+    },
+    description: {
+      type: String,
     },
 
     user: {

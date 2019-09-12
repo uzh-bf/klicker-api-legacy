@@ -1,5 +1,4 @@
 const _isNumber = require('lodash/isNumber')
-// TODO: find a way to use draft.js without needing react and react-dom
 const { ContentState, convertToRaw } = require('draft-js')
 const { UserInputError } = require('apollo-server-express')
 
@@ -43,25 +42,35 @@ const processTags = (existingTags, newTags, userId) => {
  */
 const processFiles = (files = [], userId) => {
   // extract the ids of already existing files
-  const existingFileIds = files.filter(file => file.id).map(file => file.id)
+  const existingFiles = files.filter(file => file.id)
+  const modifiedFiles = existingFiles.flatMap(async existingFile => {
+    const updatedFile = await FileModel.findById(existingFile.id)
+    if (updatedFile.description !== existingFile.description) {
+      updatedFile.description = existingFile.description
+      return updatedFile.save()
+    }
+    return null
+  })
 
   // create models for entirely new files
   const createdFiles = files
     .filter(file => !file.id)
     .map(
-      ({ name, originalName, type }) =>
+      ({ name, originalName, type, description }) =>
         new FileModel({
           name,
           originalName,
           type,
+          description,
           user: userId,
         })
     )
 
   return {
     createdFiles,
+    modifiedFiles,
     createdFileIds: createdFiles.map(file => file.id),
-    existingFileIds,
+    existingFileIds: existingFiles.map(file => file.id),
   }
 }
 
@@ -262,12 +271,12 @@ const modifyQuestion = async (questionId, userId, { title, tags, content, option
     const lastVersion = question.versions[question.versions.length - 1]
 
     // process files
-    const { createdFiles, createdFileIds, existingFileIds } = processFiles(files, userId)
+    const { createdFiles, createdFileIds, existingFileIds, modifiedFiles } = processFiles(files, userId)
 
     // replace the files of the user
     if (files) {
       user.files = Array.from(new Set([...user.files, ...createdFileIds]))
-      promises.push(createdFiles.map(file => file.save()))
+      promises.push(createdFiles.map(file => file.save()), modifiedFiles)
     }
 
     // push a new version into the question model
@@ -323,6 +332,7 @@ const archiveQuestions = async ({ ids, userId }) => {
   // await the question update promises
   return Promise.all(promises)
 }
+
 /**
  * Delete a question from the database
  * @param {*} param0
@@ -349,9 +359,31 @@ const deleteQuestions = async ({ ids, userId }) => {
   return 'DELETION_SUCCESSFUL'
 }
 
+async function exportQuestions({ ids, userId }) {
+  const questions = await QuestionModel.find({ _id: { $in: ids }, user: userId }).populate(['tags', 'versions.files'])
+  return questions.map(question => {
+    const latestVersion = question.versions[question.versions.length - 1]
+    return {
+      title: question.title,
+      type: question.type,
+      tags: question.tags,
+      content: latestVersion.content,
+      description: latestVersion.description,
+      options: latestVersion.options,
+      solution: latestVersion.solution,
+      files: latestVersion.files.map(file => ({
+        name: file.name,
+        description: file.description,
+        type: file.type,
+      })),
+    }
+  })
+}
+
 module.exports = {
   createQuestion,
   modifyQuestion,
   archiveQuestions,
   deleteQuestions,
+  exportQuestions,
 }

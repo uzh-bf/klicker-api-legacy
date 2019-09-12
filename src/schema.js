@@ -11,6 +11,8 @@ const {
   modifyQuestion,
   archiveQuestions,
   deleteQuestions,
+  questionStatistics,
+  exportQuestions,
 } = require('./resolvers/questions')
 const {
   questionInstancesByPV,
@@ -35,6 +37,7 @@ const {
   startSession,
   updateSessionSettings,
   activateNextBlock,
+  activateBlockById,
   runtimeByPV,
   session,
   modifySession,
@@ -96,6 +99,7 @@ const typeDefs = [
   type Mutation {
     activateAccount(activationToken: String!): String!
     activateNextBlock: Session!
+    activateBlockById(sessionId: ID!, blockId: ID!): Session!
     addConfusionTS(fp: ID, sessionId: ID!, difficulty: Int!, speed: Int!): String!
     addFeedback(fp: ID, sessionId: ID!, content: String!): String!
     addResponse(fp: ID, instanceId: ID!, response: QuestionInstance_ResponseInput!): String!
@@ -125,6 +129,8 @@ const typeDefs = [
     startSession(id: ID!): Session!
     updateSessionSettings(sessionId: ID!, settings: Session_SettingsInput!): Session!
     resetQuestionBlock(sessionId: ID!, blockId: ID!): Session!
+    questionStatistics(ids: [ID!]!): [QuestionStatistics!]!
+    exportQuestions(ids: [ID!]!): [Question_Export!]!
   }
 
   type Subscription {
@@ -186,8 +192,11 @@ const resolvers = {
     startSession: requireAuth(startSession),
     updateSessionSettings: requireAuth(updateSessionSettings),
     activateNextBlock: requireAuth(activateNextBlock),
+    activateBlockById: requireAuth(activateBlockById),
     resetQuestionBlock: requireAuth(resetQuestionBlock),
     modifyQuestionBlock: requireAuth(modifyQuestionBlock),
+    questionStatistics: requireAuth(questionStatistics),
+    exportQuestions: requireAuth(exportQuestions),
   },
   Subscription: {
     // TODO: some form of authentication
