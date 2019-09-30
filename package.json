@@ -31,7 +31,7 @@
     "dataloader": "1.4.0",
     "dayjs": "1.8.16",
     "dotenv": "8.1.0",
-    "draft-js": "0.11.0",
+    "draft-js": "0.11.1",
     "elastic-apm-node": "2.17.1",
     "express": "4.17.1",
     "express-jwt": "5.3.1",
