@@ -58,7 +58,7 @@
     "rate-limit-redis": "1.6.0",
     "raven": "2.6.4",
     "react": "16.11.0",
-    "react-dom": "16.11.0",
+    "react-dom": "16.12.0",
     "request": "2.88.0",
     "request-promise": "4.2.5",
     "saslprep": "1.0.3",
