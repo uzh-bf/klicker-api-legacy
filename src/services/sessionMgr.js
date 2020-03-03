@@ -170,7 +170,7 @@ const mapBlocks = async ({ sessionId, questionBlocks, userId }) => {
             let questionVersion = version
 
             // if there is no valid defined version, look up the latest one
-            if (questionVersion <= 0) {
+            if (questionVersion < 0) {
               const questionInfo = await QuestionModel.findById(question)
               questionVersion = questionInfo.versions.length - 1
               console.log(questionInfo, questionVersion)
