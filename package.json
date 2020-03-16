@@ -57,7 +57,7 @@
     "pretty-error": "2.1.1",
     "rate-limit-redis": "1.7.0",
     "raven": "2.6.4",
-    "react": "16.12.0",
+    "react": "16.13.0",
     "react-dom": "16.12.0",
     "request": "2.88.0",
     "request-promise": "4.2.5",
