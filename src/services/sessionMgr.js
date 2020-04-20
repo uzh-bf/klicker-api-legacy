@@ -4,6 +4,7 @@ const _mapValues = require('lodash/mapValues')
 const _forOwn = require('lodash/forOwn')
 const dayjs = require('dayjs')
 const schedule = require('node-schedule')
+const passwordGenerator = require('generate-password')
 
 const { ObjectId } = mongoose.Types
 
@@ -339,16 +340,28 @@ const computeInstanceResults = async ({ id, question }) => {
   return null
 }
 
+function enhanceSessionParticipants({ sessionId, participants }) {
+  // TODO: should we hash/salt the password? probably not, as the session creator needs to export them..
+  return participants.map((participant) => ({
+    session: sessionId,
+    username: participant.username,
+    password: passwordGenerator.generate({ length: 14, uppercase: true, symbols: false, numbers: true }),
+  }))
+}
+
 /**
  * Create a new session
  */
-const createSession = async ({ name, questionBlocks = [], userId }) => {
+const createSession = async ({ name, questionBlocks = [], participants = [], userId }) => {
   const sessionId = ObjectId()
   const { blocks, instances, promises } = await mapBlocks({
     sessionId,
     questionBlocks,
     userId,
   })
+
+  // if there are any participants specified, set the session to be authentication-based
+  const participantsWithPasswords = enhanceSessionParticipants({ sessionId, participants })
 
   // create a new session model
   // pass in the list of blocks created above
@@ -357,6 +370,10 @@ const createSession = async ({ name, questionBlocks = [], userId }) => {
     name,
     blocks,
     user: userId,
+    participants: participantsWithPasswords,
+    settings: {
+      isParticipantAuthenticationEnabled: participantsWithPasswords.length > 0,
+    },
   })
 
   // save everything at once
@@ -378,7 +395,7 @@ const createSession = async ({ name, questionBlocks = [], userId }) => {
 /**
  * Modify a session
  */
-const modifySession = async ({ id, name, questionBlocks, userId }) => {
+const modifySession = async ({ id, name, questionBlocks, participants, userId }) => {
   // get the specified session from the database
   const sessionWithInstances = await SessionModel.findOne({
     _id: id,
@@ -435,6 +452,18 @@ const modifySession = async ({ id, name, questionBlocks, userId }) => {
 
     // await all promises
     await Promise.all([...promises, instances.map((instance) => instance.save()), questionCleanup, instanceCleanup])
+  }
+
+  // if the participants parameter is set, update the participants list
+  if (typeof participants !== 'undefined') {
+    if (participants.length === 0) {
+      session.participants = []
+      session.settings.isParticipantAuthenticationEnabled = false
+    } else {
+      const participantsWithPassword = enhanceSessionParticipants({ sessionId: id, participants })
+      session.participants = participantsWithPassword
+      session.settings.isParticipantAuthenticationEnabled = true
+    }
   }
 
   // save the updated session to the database

@@ -25,10 +25,13 @@ exports[`SessionExecService addConfusionTS allows adding new timesteps 1`] = `
 
     Feedbacks: []
 
+    Participants: []
+
     Settings: {
       ConfusionActive: true
       FeedbacksActive: false
       FeedbacksPublic: false
+      ParticipantAuthentication: false
     }
 `;
 
@@ -60,10 +63,13 @@ exports[`SessionExecService addConfusionTS allows adding new timesteps 2`] = `
 
     Feedbacks: []
 
+    Participants: []
+
     Settings: {
       ConfusionActive: true
       FeedbacksActive: false
       FeedbacksPublic: false
+      ParticipantAuthentication: false
     }
 `;
 
@@ -92,10 +98,13 @@ exports[`SessionExecService addFeedback allows adding new feedbacks to a running
       Votes: 0
     }]
 
+    Participants: []
+
     Settings: {
       ConfusionActive: false
       FeedbacksActive: true
       FeedbacksPublic: false
+      ParticipantAuthentication: false
     }
 `;
 
@@ -127,10 +136,13 @@ exports[`SessionExecService addFeedback allows adding new feedbacks to a running
       Votes: 0
     }]
 
+    Participants: []
+
     Settings: {
       ConfusionActive: false
       FeedbacksActive: true
       FeedbacksPublic: false
+      ParticipantAuthentication: false
     }
 `;
 
@@ -156,10 +168,13 @@ exports[`SessionExecService addResponse allows adding responses to a FREE questi
 
     Feedbacks: []
 
+    Participants: []
+
     Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
+      ParticipantAuthentication: false
     }
 `;
 
@@ -185,10 +200,13 @@ exports[`SessionExecService addResponse allows adding responses to a FREE_RANGE 
 
     Feedbacks: []
 
+    Participants: []
+
     Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
+      ParticipantAuthentication: false
     }
 `;
 
@@ -214,10 +232,13 @@ exports[`SessionExecService addResponse allows adding responses to a SC question
 
     Feedbacks: []
 
+    Participants: []
+
     Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
+      ParticipantAuthentication: false
     }
 `;
 
@@ -243,9 +264,12 @@ exports[`SessionExecService addResponse allows adding responses to an MC questio
 
     Feedbacks: []
 
+    Participants: []
+
     Settings: {
       ConfusionActive: false
       FeedbacksActive: false
       FeedbacksPublic: false
+      ParticipantAuthentication: false
     }
 `;

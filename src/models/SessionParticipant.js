@@ -6,13 +6,10 @@ module.exports = new mongoose.Schema({
   // the session that the participant belongs to
   session: { type: ObjectId, ref: 'Session', required: true },
 
-  // the username of the participant
+  // the credentials of the participant
   username: { type: String, required: true },
+  password: { type: String, required: true },
 
-  // the credential of the participant
-  // either a shibRef (e.g., AAI email) or a password
+  // the shibRef of the participant (e.g., AAI email)
   shibRef: { type: String },
-  password: { type: String },
-
-  instances: [{ type: ObjectId, ref: 'QuestionInstance' }],
 })
