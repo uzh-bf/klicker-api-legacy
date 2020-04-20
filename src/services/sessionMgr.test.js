@@ -637,4 +637,17 @@ describe('SessionMgrService', () => {
       sessionIdWithAuth = newSession.id
     })
   })
+
+  describe('modifySession (auth)', () => {
+    it('allows changing the participants of a session', async () => {
+      const updatedSession = await SessionMgrService.modifySession({
+        id: sessionIdWithAuth,
+        participants: [{ username: 'newparticipant' }],
+        userId,
+      })
+
+      expect(updatedSession.participants).toHaveLength(1)
+      expect(updatedSession).toMatchSnapshot()
+    })
+  })
 })
