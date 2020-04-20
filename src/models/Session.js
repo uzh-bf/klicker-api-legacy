@@ -18,6 +18,7 @@ const Session = new mongoose.Schema(
       index: true,
     },
     settings: {
+      isAuthorizationEnabled: { type: Boolean, default: false },
       isConfusionBarometerActive: { type: Boolean, default: false },
       isEvaluationPublic: { type: Boolean, default: false },
       isFeedbackChannelActive: { type: Boolean, default: false },
@@ -40,6 +41,7 @@ const Session = new mongoose.Schema(
     activeBlock: { type: Number, default: -1 },
     activeStep: { type: Number, default: 0 },
     activeInstances: [{ type: ObjectId, ref: 'QuestionInstance' }],
+    participants: [{ type: ObjectId, ref: 'SessionParticipant' }],
 
     startedAt: { type: Date },
     finishedAt: { type: Date },
