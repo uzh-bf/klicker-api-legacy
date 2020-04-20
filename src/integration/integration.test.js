@@ -1570,6 +1570,29 @@ describe('Integration', () => {
       )
     })
 
+    it('LECTURER: can evaluate the first question block', async () => {
+      const runningSession = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Queries.RunningSessionQuery,
+          },
+          authCookie
+        )
+      )
+      expect(runningSession).toMatchSnapshot()
+
+      const evaluateSession = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Queries.SessionEvaluationQuery,
+            variables: { sessionId },
+          },
+          authCookie
+        )
+      )
+      expect(evaluateSession).toMatchSnapshot()
+    })
+
     it('LECTURER: can close the first question block', async () => {
       const data = ensureNoErrors(
         await sendQuery(
@@ -1626,6 +1649,40 @@ describe('Integration', () => {
           authCookieParticipant
         )
       )
+    })
+
+    it('PARTICIPANT: is unable to respond to the FREE question a second time', async () => {
+      const response = await sendQuery(
+        {
+          query: Mutations.AddResponseMutation,
+          variables: {
+            fp: 'myfp2',
+            instanceId: instanceIds.FREE,
+            response: { value: 'hello different world' },
+          },
+        },
+        authCookieParticipant
+      )
+
+      expect(response.body.errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "extensions": Object {
+              "code": "FORBIDDEN",
+            },
+            "locations": Array [
+              Object {
+                "column": 3,
+                "line": 2,
+              },
+            ],
+            "message": "ALREADY_RESPONDED",
+            "path": Array [
+              "addResponse",
+            ],
+          },
+        ]
+      `)
     })
   })
 

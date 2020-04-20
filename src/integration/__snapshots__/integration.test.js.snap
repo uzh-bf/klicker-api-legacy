@@ -479,6 +479,92 @@ exports[`Integration Session Execution (authenticated) LECTURER: can close the f
   
 `;
 
+exports[`Integration Session Execution (authenticated) LECTURER: can evaluate the first question block 1`] = `
+
+    runningSession {
+      activeStep: 1
+      confusionTS: 
+      feedbacks: 
+      blocks: 
+        status: ACTIVE
+        instances: 
+          isOpen: true
+          version: 0
+          question {
+            title: Test SC #2
+            type: SC
+          }
+        ,
+          isOpen: true
+          version: 0
+          question {
+            title: Test MC #2
+            type: MC
+          }
+        
+      ,
+        status: PLANNED
+        instances: 
+          isOpen: false
+          version: 0
+          question {
+            title: Test FREE #2
+            type: FREE
+          }
+        
+      ,
+        status: PLANNED
+        instances: 
+          isOpen: false
+          version: 0
+          question {
+            title: Test FREE_RANGE #2
+            type: FREE_RANGE
+          }
+        ,
+          isOpen: false
+          version: 0
+          question {
+            title: Test partly restricted FREE_RANGE
+            type: FREE_RANGE
+          }
+        ,
+          isOpen: false
+          version: 0
+          question {
+            title: Test unrestricted FREE_RANGE
+            type: FREE_RANGE
+          }
+        
+      ,
+        status: PLANNED
+        instances: 
+          isOpen: false
+          version: 0
+          question {
+            title: Test MC #2
+            type: MC
+          }
+        ,
+          isOpen: false
+          version: 0
+          question {
+            title: Test SC #2
+            type: SC
+          }
+        
+      
+      settings: {"isConfusionBarometerActive":false,"isFeedbackChannelActive":false,"isFeedbackChannelPublic":false}
+    }
+  
+`;
+
+exports[`Integration Session Execution (authenticated) LECTURER: can evaluate the first question block 2`] = `
+Object {
+  "session": null,
+}
+`;
+
 exports[`Integration Session Execution (authenticated) PARTICIPANT: can join the session initially (initial) 1`] = `
 
     joinSession {
@@ -2346,47 +2432,6 @@ exports[`Integration Session Management (authenticated) enables modifications on
           username: integration-3,
       ]
       settings: undefined
-    }
-  
-`;
-
-exports[`Integration Session Management (authenticated) enables the creation of a new authenticated session) 1`] = `
-
-    createSession / modifySession {
-      confusionTS: 
-      feedbacks: 
-      blocks: [
-        status: PLANNED
-        instances: 
-          title: Test SC #2
-          type: SC
-        ,
-          title: Test MC #2
-          type: MC
-        
-      ,
-        status: PLANNED
-        instances: 
-          title: Test FREE #2
-          type: FREE
-        
-      ,
-        status: PLANNED
-        instances: 
-          title: Test FREE_RANGE #2
-          type: FREE_RANGE
-        ,
-          title: Test partly restricted FREE_RANGE
-          type: FREE_RANGE
-        ,
-          title: Test unrestricted FREE_RANGE
-          type: FREE_RANGE
-        
-      ]
-      participants: [
-          username: integration-1,
-      ]
-      settings: {"isParticipantAuthenticationEnabled":true,"isConfusionBarometerActive":false,"isFeedbackChannelActive":false,"isFeedbackChannelPublic":false}
     }
   
 `;
