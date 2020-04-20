@@ -153,6 +153,8 @@ describe('SessionMgrService', () => {
   })
 
   describe('modifySession', () => {
+    // TODO: make use of the session factory
+
     it('allows modifying a session', async () => {
       const updatedSession = await SessionMgrService.modifySession({
         id: sessionId,
@@ -639,6 +641,8 @@ describe('SessionMgrService', () => {
   })
 
   describe('modifySession (auth)', () => {
+    // TODO: make use of the session factory
+
     it('allows changing the participants of a session', async () => {
       const updatedSession = await SessionMgrService.modifySession({
         id: sessionIdWithAuth,

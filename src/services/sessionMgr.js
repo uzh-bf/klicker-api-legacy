@@ -260,14 +260,16 @@ const freeToResults = (redisResults, responseHashes) => {
 /**
  * Initialize the redis response cache as needed for session execution
  */
-const initializeResponseCache = async ({ id, question, version, results }) => {
+const initializeResponseCache = async ({ id, question, version, results }, participantAuth = false) => {
+  // TODO: participant auth reinitialization if the session is resumed
+
   const transaction = responseCache.multi()
 
   // extract relevant information from the question entity
   const questionVersion = question.versions[version]
 
   // set the instance status, opening the instance for responses
-  transaction.hmset(`instance:${id}:info`, 'status', 'OPEN', 'type', question.type)
+  transaction.hmset(`instance:${id}:info`, 'status', 'OPEN', 'type', question.type, 'auth', participantAuth)
   transaction.hset(`instance:${id}:results`, 'participants', results ? results.totalParticipants : 0)
 
   // include the min/max restrictions in the cache for FREE_RANGE questions
@@ -341,7 +343,6 @@ const computeInstanceResults = async ({ id, question }) => {
 }
 
 function enhanceSessionParticipants({ sessionId, participants }) {
-  // TODO: should we hash/salt the password? probably not, as the session creator needs to export them..
   return participants.map((participant) => ({
     session: sessionId,
     username: participant.username,
@@ -509,7 +510,7 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
         await Promise.all(
           session.activeInstances.map(async (instanceId) => {
             const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
-            await initializeResponseCache(instance)
+            await initializeResponseCache(instance, session.settings.isParticipantAuthenticationEnabled)
           })
         )
       }
@@ -797,7 +798,7 @@ async function activateBlockById({ userId, sessionId, blockId }) {
     await Promise.all(
       newBlock.instances.map(async (instance) => {
         const instanceWithDetails = await QuestionInstanceModel.findById(instance).populate('question')
-        return initializeResponseCache(instanceWithDetails)
+        return initializeResponseCache(instanceWithDetails, session.settings.isParticipantAuthenticationEnabled)
       })
     )
   }
@@ -822,7 +823,7 @@ async function activateBlockById({ userId, sessionId, blockId }) {
 
       // if a response cache is available, hydrate it with the newly activated instances
       if (responseCache) {
-        await initializeResponseCache(instance)
+        await initializeResponseCache(instance, session.settings.isParticipantAuthenticationEnabled)
       }
 
       return instance.save()
