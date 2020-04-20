@@ -690,6 +690,8 @@ const updateSettings = async ({ sessionId, userId, settings, shortname }) => {
   session.settings = {
     ...session.settings,
     ...settings,
+    // ensure that participant authentication cannot be changed here
+    isParticipantAuthenticationEnabled: session.settings.isParticipantAuthenticationEnabled,
   }
 
   // if the feedback channel functionality is set to be deactivated

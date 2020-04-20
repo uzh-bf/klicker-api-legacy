@@ -1,6 +1,7 @@
 const md5 = require('md5')
 const v8n = require('v8n')
 const _trim = require('lodash/trim')
+const JWT = require('jsonwebtoken')
 const { ForbiddenError, UserInputError } = require('apollo-server-express')
 
 const CFG = require('../klicker.conf.js')
@@ -9,7 +10,9 @@ const { QUESTION_GROUPS, QUESTION_TYPES, QUESTION_BLOCK_STATUS } = require('../c
 const { getRedis } = require('../redis')
 const { getRunningSession, cleanCache, publishSessionUpdate } = require('./sessionMgr')
 const { pubsub, CONFUSION_ADDED, FEEDBACK_ADDED } = require('../resolvers/subscriptions')
+const { AUTH_COOKIE_SETTINGS } = require('./accounts')
 
+const APP_CFG = CFG.get('app')
 const FILTERING_CFG = CFG.get('security.filtering')
 
 // initialize redis if available
@@ -121,6 +124,8 @@ const addResponse = async ({ ip, fp, instanceId, response, participantId }) => {
   // if authentication is enabled for the session with the current instance
   // check if the current participant has already responded and exit early if so
   if (auth === 'true') {
+    console.log(`addResponse with auth for ${participantId}`)
+
     if (typeof participantId === 'undefined') {
       throw new ForbiddenError('MISSING_PARTICIPANT_ID')
     }
@@ -286,10 +291,51 @@ const deleteResponse = async ({ userId, instanceId, response }) => {
 }
 
 /**
+ *
+ * @param {*} res
+ */
+const loginParticipant = async ({ res, sessionId, username, password }) => {
+  const session = await SessionModel.findById(sessionId)
+  if (!session) {
+    throw new ForbiddenError('INVALID_SESSION')
+  }
+
+  // check if we have a participant with the given username and password
+  const participantIndex = session.participants.findIndex((p) => p.username === username && p.password === password)
+  if (participantIndex === -1) {
+    throw new ForbiddenError('INVALID_PARTICIPANT_LOGIN')
+  }
+
+  // participant has logged in, get the relevant data
+  const participant = session.participants[participantIndex]
+
+  // set a token for the participant
+  const jwt = JWT.sign(
+    {
+      // expiresIn: 86400,
+      sub: participant.id,
+      scope: ['PARTICIPANT', session.id],
+      sessionId: session.id,
+    },
+    APP_CFG.secret,
+    {
+      expiresIn: '1w',
+    }
+  )
+
+  // set a cookie with the generated JWT
+  if (res && res.cookie) {
+    res.cookie('jwt', jwt, AUTH_COOKIE_SETTINGS)
+  }
+
+  return participant.id
+}
+
+/**
  * Prepare data needed for participating in a session
  * @param {*} param0
  */
-const joinSession = async ({ shortname }) => {
+const joinSession = async ({ shortname, participantId }) => {
   // find the user with the given shortname
   const user = await UserModel.findOne({ shortname }).populate('runningSession')
   if (!user || !user.runningSession) {
@@ -306,6 +352,12 @@ const joinSession = async ({ shortname }) => {
 
   const { id, activeBlock, blocks, settings, feedbacks, status } = runningSession
   const currentBlock = blocks[activeBlock] || { instances: [] }
+
+  if (settings.isParticipantAuthenticationEnabled) {
+    if (typeof participantId === 'undefined') {
+      throw new ForbiddenError('INVALID_PARTICIPANT_LOGIN')
+    }
+  }
 
   return {
     id,
@@ -420,4 +472,5 @@ module.exports = {
   deleteFeedback,
   joinSession,
   resetQuestionBlock,
+  loginParticipant,
 }
