@@ -6,7 +6,7 @@ const { ForbiddenError, UserInputError } = require('apollo-server-express')
 
 const CFG = require('../klicker.conf.js')
 const { QuestionInstanceModel, UserModel, FileModel, SessionModel } = require('../models')
-const { QUESTION_GROUPS, QUESTION_TYPES, QUESTION_BLOCK_STATUS } = require('../constants')
+const { QUESTION_GROUPS, QUESTION_TYPES, QUESTION_BLOCK_STATUS, SESSION_STATUS } = require('../constants')
 const { getRedis } = require('../redis')
 const { getRunningSession, cleanCache, publishSessionUpdate } = require('./sessionMgr')
 const { pubsub, CONFUSION_ADDED, FEEDBACK_ADDED } = require('../resolvers/subscriptions')
@@ -296,7 +296,7 @@ const deleteResponse = async ({ userId, instanceId, response }) => {
  * @param {*} res
  */
 const loginParticipant = async ({ res, sessionId, username, password }) => {
-  const session = await SessionModel.findById(sessionId)
+  const session = await SessionModel.findOne({ _id: sessionId, status: SESSION_STATUS.RUNNING })
   if (!session) {
     throw new ForbiddenError('INVALID_SESSION')
   }
@@ -313,10 +313,10 @@ const loginParticipant = async ({ res, sessionId, username, password }) => {
   // set a token for the participant
   const jwt = JWT.sign(
     {
-      // expiresIn: 86400,
+      expiresIn: 86400,
       sub: participant.id,
-      scope: ['PARTICIPANT', session.id],
-      sessionId: session.id,
+      scope: ['PARTICIPANT'],
+      session: session.id,
     },
     APP_CFG.secret,
     {
@@ -336,7 +336,7 @@ const loginParticipant = async ({ res, sessionId, username, password }) => {
  * Prepare data needed for participating in a session
  * @param {*} param0
  */
-const joinSession = async ({ shortname, participantId }) => {
+const joinSession = async ({ shortname, auth }) => {
   // find the user with the given shortname
   const user = await UserModel.findOne({ shortname }).populate('runningSession')
   if (!user || !user.runningSession) {
@@ -355,8 +355,14 @@ const joinSession = async ({ shortname, participantId }) => {
   const currentBlock = blocks[activeBlock] || { instances: [] }
 
   if (settings.isParticipantAuthenticationEnabled) {
-    if (typeof participantId === 'undefined') {
-      throw new ForbiddenError('INVALID_PARTICIPANT_LOGIN')
+    const participantId = auth ? auth.sub : undefined
+
+    if (typeof participantId === 'undefined' || !auth.scope.includes('PARTICIPANT')) {
+      throw new UserInputError('INVALID_PARTICIPANT_LOGIN', { id })
+    }
+
+    if (!runningSession.participants.map((participant) => participant.id).includes(participantId)) {
+      throw new UserInputError('SESSION_NOT_ACCESSIBLE', { id })
     }
   }
 

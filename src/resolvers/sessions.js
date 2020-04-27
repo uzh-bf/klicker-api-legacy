@@ -46,7 +46,7 @@ const runningSessionQuery = async (parentValue, args, { auth }) => {
 }
 
 const joinSessionQuery = async (parentValue, { shortname }, { auth }) =>
-  SessionExecService.joinSession({ shortname, participantId: auth ? auth.sub : undefined })
+  SessionExecService.joinSession({ shortname, auth })
 
 // calculate the session runtime
 const runtimeByPVQuery = ({ startedAt }) => {
