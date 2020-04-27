@@ -127,7 +127,6 @@ const addResponse = async ({ ip, fp, instanceId, response, participantId }) => {
   // if authentication is enabled for the session with the current instance
   // check if the current participant has already responded and exit early if so
   if (auth === 'true') {
-
     // ensure that a participant id is available (i.e., the participant has logged in)
     if (typeof participantId === 'undefined') {
       throw new ForbiddenError('MISSING_PARTICIPANT_ID')
