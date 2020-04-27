@@ -218,6 +218,42 @@ exports[`SessionExecService addResponse (auth) prevents participants without a l
     }
 `;
 
+exports[`SessionExecService addResponse (auth) prevents unauthorized participants from responding 1`] = `
+
+    SESSION
+
+    Name: testing session
+    Status: RUNNING
+
+    ActiveBlock: 0
+    ActiveStep: 1
+    ActiveInstances: 4
+
+    Blocks: [{
+      Show solutions: false
+      Status: ACTIVE
+      Time limit: -1
+      Number of instances: 4
+    }]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Participants: [{
+      Username: testparticipant1
+    },{
+      Username: participant2
+    }]
+
+    Settings: {
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+      ParticipantAuthentication: true
+    }
+`;
+
 exports[`SessionExecService addResponse allows adding responses to a FREE question 1`] = `
 
     SESSION

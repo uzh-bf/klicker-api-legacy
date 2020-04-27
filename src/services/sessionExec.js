@@ -121,23 +121,29 @@ const addResponse = async ({ ip, fp, instanceId, response, participantId }) => {
     throw new ForbiddenError('INSTANCE_CLOSED')
   }
 
+  // prepare a redis transaction pipeline to batch all actions into an atomic transaction
+  const transaction = responseCache.multi()
+
   // if authentication is enabled for the session with the current instance
   // check if the current participant has already responded and exit early if so
   if (auth === 'true') {
     console.log(`addResponse with auth for ${participantId}`)
 
+    // ensure that a participant id is available (i.e., the participant has logged in)
     if (typeof participantId === 'undefined') {
       throw new ForbiddenError('MISSING_PARTICIPANT_ID')
     }
 
-    if (await responseCache.sismember(`instance:${instanceId}:participants`, participantId)) {
+    // ensure that the participant is within the allowed set of voters
+    const isAllowedVoter = await responseCache.sismember(`instance:${instanceId}:participants`, participantId)
+    if (!isAllowedVoter) {
       await responseCache.rpush(`instance:${instanceId}:dropped`, JSON.stringify({ ip, fp, response, participantId }))
-      throw new ForbiddenError('ALREADY_RESPONDED')
+      throw new ForbiddenError('RESPONSE_NOT_ALLOWED')
     }
-  }
 
-  // prepare a redis transaction pipeline to batch all actions into an atomic transaction
-  const transaction = responseCache.multi()
+    // remove the participant from the set of participants that can still vote
+    transaction.srem(`instance:${instanceId}:participants`, participantId)
+  }
 
   if (QUESTION_GROUPS.CHOICES.includes(type)) {
     // if the response doesn't contain any valid choices, throw
@@ -218,11 +224,6 @@ const addResponse = async ({ ip, fp, instanceId, response, participantId }) => {
   // if fingerprinting is enabled, add the fingerprint to the redis respondent set
   if (FILTERING_CFG.byFP.enabled && fp) {
     transaction.sadd(`instance:${instanceId}:fp`, fp)
-  }
-
-  // add the response to the list of responses
-  if (auth === 'true') {
-    transaction.sadd(`instance:${instanceId}:participants`, participantId)
   }
 
   transaction.rpush(`instance:${instanceId}:responses`, JSON.stringify({ ip, fp, response, participantId }))

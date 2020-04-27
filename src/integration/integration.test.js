@@ -1676,7 +1676,7 @@ describe('Integration', () => {
                 "line": 2,
               },
             ],
-            "message": "ALREADY_RESPONDED",
+            "message": "RESPONSE_NOT_ALLOWED",
             "path": Array [
               "addResponse",
             ],

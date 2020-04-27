@@ -476,6 +476,25 @@ describe('SessionExecService', () => {
       ).rejects.toThrow('MISSING_PARTICIPANT_ID')
     })
 
+    it('prevents unauthorized participants from responding', async () => {
+      const activeInstance = 0
+
+      // activate the next block of the running session
+      // this opens the instances for responses
+      const session = await SessionMgrService.activateNextBlock({ userId })
+      expect(session).toMatchSnapshot()
+
+      expect(
+        SessionExecService.addResponse({
+          instanceId: session.activeInstances[activeInstance],
+          response: {
+            choices: [1],
+          },
+          participantId: 'participant-unauthorized',
+        })
+      ).rejects.toThrow('RESPONSE_NOT_ALLOWED')
+    })
+
     it('allows participants with a login to respond exactly once', async () => {
       const activeInstance = 0
 
@@ -489,7 +508,7 @@ describe('SessionExecService', () => {
         response: {
           choices: [0],
         },
-        participantId: 'participant-1',
+        participantId: session.participants[0].id,
       })
       expect(instanceWithResponse).toEqual([
         [null, 1],
@@ -504,9 +523,9 @@ describe('SessionExecService', () => {
           response: {
             choices: [1],
           },
-          participantId: 'participant-1',
+          participantId: session.participants[0].id,
         })
-      ).rejects.toThrow('ALREADY_RESPONDED')
+      ).rejects.toThrow('RESPONSE_NOT_ALLOWED')
     })
   })
 })
