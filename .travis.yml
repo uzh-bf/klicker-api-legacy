@@ -15,7 +15,7 @@ jobs:
       stage: test
       language: node_js
       node_js:
-        - '12'
+        - "14"
       cache: npm
       script:
         - npm run format:ci
