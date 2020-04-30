@@ -57,11 +57,6 @@ module.exports = convict({
   },
   cache: {
     redis: {
-      enabled: {
-        default: false,
-        env: 'CACHE_REDIS_ENABLED',
-        format: 'Boolean',
-      },
       host: {
         default: undefined,
         env: 'CACHE_REDIS_HOST',
