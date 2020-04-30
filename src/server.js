@@ -14,7 +14,7 @@ const SERVICES_CFG = CFG.get('services')
 if (SERVICES_CFG.apm.enabled) {
   const { monitorDev, secretToken, serverUrl, serviceName } = SERVICES_CFG.apm
   require('elastic-apm-node').start({
-    active: monitorDev || !process.env.NODE_ENV === 'development',
+    active: monitorDev || process.env.NODE_ENV !== 'development',
     secretToken,
     serverUrl,
     serviceName,
