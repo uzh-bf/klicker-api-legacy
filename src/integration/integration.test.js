@@ -10,7 +10,7 @@ const { UserModel } = require('../models')
 const { app } = require('../app')
 const { initializeDb } = require('../lib/test/setup')
 const { createContentState } = require('../lib/draft')
-const { Errors, QUESTION_TYPES } = require('../constants')
+const { Errors, QUESTION_TYPES, SESSION_STORAGE_MODE } = require('../constants')
 const { getRedis } = require('../redis')
 
 process.env.NODE_ENV = 'test'
@@ -41,6 +41,13 @@ const ensureNoErrors = (response, debug = false) => {
   return response.body.data
 }
 
+const isParticipantIdValid = (value) => {
+  if (typeof value === 'string' && value.length === 24) {
+    return 'UUID_VALID'
+  }
+  return 'UUID_INVALID'
+}
+
 const REDIS_TYPES = {
   LIST: 'LIST',
   HASH: 'HASH',
@@ -52,6 +59,7 @@ const REDIS_KEY_TYPES = {
   info: REDIS_TYPES.HASH,
   ip: REDIS_TYPES.SET,
   participants: REDIS_TYPES.SET,
+  participantList: REDIS_TYPES.SET,
   responseHashes: REDIS_TYPES.HASH,
   responses: REDIS_TYPES.LIST,
   results: REDIS_TYPES.HASH,
@@ -85,18 +93,23 @@ const ensureCacheConsistency = async (questionBlock, { expectedKeys, unexpectedK
             case REDIS_TYPES.HASH:
               data[key] = await responseCache.hgetall(`${instanceKey}:${key}`)
               break
-            case REDIS_TYPES.LIST:
-              data[key] = await responseCache.lrange(`${instanceKey}:${key}`, 0, -1)
+            case REDIS_TYPES.LIST: {
+              const listItems = await responseCache.lrange(`${instanceKey}:${key}`, 0, -1)
+              if (['responses', 'dropped'].includes(key)) {
+                data[key] = map((response) => {
+                  const json = JSON.parse(response)
+                  return { ...json, participant: isParticipantIdValid(json.participant) }
+                }, listItems)
+              } else {
+                data[key] = listItems
+              }
               break
+            }
+
             case REDIS_TYPES.SET: {
               const setMembers = await responseCache.smembers(`${instanceKey}:${key}`)
-              if (key === 'participants') {
-                data[key] = map((participantId) => {
-                  if (typeof participantId === 'string' && participantId.length === 24) {
-                    return 'UUID_VALID'
-                  }
-                  return 'UUID_INVALID'
-                }, setMembers)
+              if (['participants', 'participantList'].includes(key)) {
+                data[key] = map(isParticipantIdValid, setMembers)
               } else {
                 data[key] = setMembers
               }
@@ -119,6 +132,7 @@ describe('Integration', () => {
   let authCookieParticipant
   let sessionId
   let sessionIdWithAuth
+  let sessionIdCompleteWithAuth
   let initialUserId
   let initialShortname
   let blocks
@@ -953,8 +967,6 @@ describe('Integration', () => {
             },
           ]
         `)
-
-      // TODO: ensure that the response has not been persisted (for the default, aggregate-only mode of operation)
     })
 
     it('LECTURER: can cancel the running session', async () => {
@@ -1119,8 +1131,6 @@ describe('Integration', () => {
             },
           ]
         `)
-
-      // TODO: ensure that the response has not been persisted (for the default, aggregate-only mode of operation)
     })
 
     it('PARTICIPANT: can respond to the MC question in the first block', async () => {
@@ -1169,8 +1179,6 @@ describe('Integration', () => {
             },
           ]
         `)
-
-      // TODO: ensure that the response has not been persisted (for the default, aggregate-only mode of operation)
     })
 
     it('LECTURER: can evaluate the first question block', async () => {
@@ -1355,8 +1363,6 @@ describe('Integration', () => {
             },
           ]
         `)
-
-      // TODO: ensure that the response has not been persisted (for the default, aggregate-only mode of operation)
     })
 
     it('LECTURER: can evaluate the second question block', async () => {
@@ -1551,8 +1557,6 @@ describe('Integration', () => {
             },
           ]
         `)
-
-      // TODO: ensure that the response has not been persisted (for the default, aggregate-only mode of operation)
     })
 
     it('PARTICIPANT: can respond to the partly restricted FREE_RANGE question in the third block', async () => {
@@ -1619,8 +1623,6 @@ describe('Integration', () => {
             },
           ]
         `)
-
-      // TODO: ensure that the response has not been persisted (for the default, aggregate-only mode of operation)
     })
 
     it('PARTICIPANT: can respond to the unrestricted FREE_RANGE question in the third block', async () => {
@@ -1737,8 +1739,6 @@ describe('Integration', () => {
             },
           ]
         `)
-
-      // TODO: ensure that the response has not been persisted (for the default, aggregate-only mode of operation)
     })
 
     it('LECTURER: can evaluate the third question block', async () => {
@@ -2160,6 +2160,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "SC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2173,6 +2177,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "MC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2247,6 +2255,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "SC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "participants": Array [
               "UUID_VALID",
             ],
@@ -2263,6 +2275,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "MC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2339,6 +2355,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "SC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "participants": Array [
               "UUID_VALID",
             ],
@@ -2355,6 +2375,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "MC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2442,6 +2466,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "participants": "0",
             },
@@ -2496,6 +2524,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "participants": Array [
               "UUID_VALID",
             ],
@@ -2558,6 +2590,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "participants": Array [
               "UUID_VALID",
             ],
@@ -2634,6 +2670,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "participants": "0",
             },
@@ -2672,6 +2712,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "participants": Array [
               "UUID_VALID",
             ],
@@ -2709,6 +2753,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "SC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2722,6 +2770,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "MC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2761,6 +2813,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "SC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2774,6 +2830,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "MC",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "participants": Array [
               "UUID_VALID",
             ],
@@ -2786,8 +2846,6 @@ describe('Integration', () => {
           },
         ]
       `)
-
-      // TODO: ensure that the response has not been persisted (for the default, aggregate-only mode of operation)
     })
 
     it('LECTURER: can jump back to the second question block', async () => {
@@ -2813,6 +2871,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "participants": Array [
               "UUID_VALID",
             ],
@@ -2875,6 +2937,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "participants": Array [
               "UUID_VALID",
             ],
@@ -2917,6 +2983,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "results": Object {
               "participants": "0",
             },
@@ -2955,6 +3025,10 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
             "participants": Array [
               "UUID_VALID",
             ],
@@ -2969,9 +3043,1061 @@ describe('Integration', () => {
         ]
       `)
     })
+
+    it('LECTURER: can cancel the running session', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.CancelSessionMutation,
+            variables: {
+              id: sessionIdWithAuth,
+            },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      // ensure that everything has been purged from the cache
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+      expect(ensureCacheConsistency(blocks[1], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+    })
   })
 
-  // // TODO: test a result reset
+  describe('Session Management (authenticated, complete)', () => {
+    it('enables the creation of a new session)', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.CreateSessionMutation,
+            variables: {
+              name: 'Session Name (auth & complete)',
+              blocks: [
+                {
+                  questions: [
+                    { question: questions[QUESTION_TYPES.SC], version: 0 },
+                    { question: questions[QUESTION_TYPES.MC], version: 0 },
+                  ],
+                },
+                {
+                  questions: [{ question: questions[QUESTION_TYPES.FREE], version: 0 }],
+                },
+                {
+                  questions: [
+                    {
+                      question: questions[QUESTION_TYPES.FREE_RANGE],
+                      version: 0,
+                    },
+                    { question: questions.FREE_RANGE_PART, version: 0 },
+                    { question: questions.FREE_RANGE_OPEN, version: 0 },
+                  ],
+                },
+              ],
+              participants: [{ username: 'integration-1' }, { username: 'tester-1' }],
+              storageMode: SESSION_STORAGE_MODE.COMPLETE,
+            },
+          },
+          authCookie
+        )
+      )
+
+      sessionIdCompleteWithAuth = data.createSession.id
+      blocks = data.createSession.blocks
+      blockIds = data.createSession.blocks.map((block) => block.id)
+      participantCredentials = data.createSession.participants
+
+      expect(data).toMatchSnapshot()
+    })
+  })
+
+  describe('Session Execution (authenticated, complete)', () => {
+    const instanceIds = {}
+
+    it('LECTURER: can start a session', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.StartSessionMutation,
+            variables: { id: sessionIdCompleteWithAuth },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+    })
+
+    it('LECTURER: can activate the first question block', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ActivateNextBlockMutation,
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      // ensure that the question instances are initialized in the response cache
+      expect(ensureCacheConsistency(blocks[0])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "SC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "0",
+              "participants": "0",
+            },
+          },
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "MC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "0",
+              "2": "0",
+              "participants": "0",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('PARTICIPANT: can login to the session', async () => {
+      // send a login request
+      const response = await sendQuery({
+        query: Mutations.LoginParticipantMutation,
+        variables: {
+          sessionId: sessionIdCompleteWithAuth,
+          username: participantCredentials[1].username,
+          password: participantCredentials[1].password,
+        },
+      })
+
+      const data = ensureNoErrors(response)
+      expect(data).toBeTruthy()
+
+      // save the authorization cookie
+      authCookieParticipant = response.header['set-cookie']
+      expect(authCookieParticipant.length).toEqual(1)
+    })
+
+    it('PARTICIPANT: can join the session initially', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Queries.JoinSessionQuery,
+            variables: { shortname: 'integr' },
+          },
+          authCookieParticipant
+        )
+      )
+
+      instanceIds.SC = data.joinSession.activeInstances[0].id
+      instanceIds.MC = data.joinSession.activeInstances[1].id
+
+      expect(data).toMatchSnapshot()
+    })
+
+    it('PARTICIPANT: can respond to the SC question in the first block', async () => {
+      ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.AddResponseMutation,
+            variables: {
+              fp: 'myfp1',
+              instanceId: instanceIds.SC,
+              response: {
+                choices: [0],
+              },
+            },
+          },
+          authCookieParticipant
+        )
+      )
+
+      // ensure that the results in the response cache have been updated
+      expect(ensureCacheConsistency(blocks[0])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "SC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    0,
+                  ],
+                },
+              },
+            ],
+            "results": Object {
+              "0": "1",
+              "1": "0",
+              "participants": "1",
+            },
+          },
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "MC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "0",
+              "2": "0",
+              "participants": "0",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('PARTICIPANT: can respond to the MC question in the first block', async () => {
+      ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.AddResponseMutation,
+            variables: {
+              fp: 'myfp1',
+              instanceId: instanceIds.MC,
+              response: {
+                choices: [1, 2],
+              },
+            },
+          },
+          authCookieParticipant
+        )
+      )
+
+      // ensure that the results in the response cache have been updated
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: ['responses'] })).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "SC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    0,
+                  ],
+                },
+              },
+            ],
+            "results": Object {
+              "0": "1",
+              "1": "0",
+              "participants": "1",
+            },
+          },
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "MC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    1,
+                    2,
+                  ],
+                },
+              },
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "1",
+              "2": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('PARTICIPANT: cannot respond to the SC question again', async () => {
+      const response = await sendQuery(
+        {
+          query: Mutations.AddResponseMutation,
+          variables: {
+            fp: 'myfp1',
+            instanceId: instanceIds.SC,
+            response: {
+              choices: [1],
+            },
+          },
+        },
+        authCookieParticipant
+      )
+
+      expect(response.body.errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "extensions": Object {
+              "code": "FORBIDDEN",
+            },
+            "locations": Array [
+              Object {
+                "column": 3,
+                "line": 2,
+              },
+            ],
+            "message": "RESPONSE_NOT_ALLOWED",
+            "path": Array [
+              "addResponse",
+            ],
+          },
+        ]
+      `)
+
+      // ensure that the results in the response cache have been updated
+      expect(ensureCacheConsistency(blocks[0])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "dropped": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    1,
+                  ],
+                },
+              },
+            ],
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "SC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    0,
+                  ],
+                },
+              },
+            ],
+            "results": Object {
+              "0": "1",
+              "1": "0",
+              "participants": "1",
+            },
+          },
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "MC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    1,
+                    2,
+                  ],
+                },
+              },
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "1",
+              "2": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('LECTURER: can pause the session', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.PauseSessionMutation,
+            variables: { id: sessionIdCompleteWithAuth },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      // TODO: ensure that the results have been persisted to the database
+
+      // ensure that the response cache has been cleaned up
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+    })
+
+    it('LECTURER: can continue the session', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.StartSessionMutation,
+            variables: { id: sessionIdCompleteWithAuth },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      // ensure that the response cache has been rehydrated from the database results
+      expect(ensureCacheConsistency(blocks[0])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "dropped": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    1,
+                  ],
+                },
+              },
+            ],
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "SC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    0,
+                  ],
+                },
+              },
+            ],
+            "results": Object {
+              "0": "1",
+              "1": "0",
+              "participants": "1",
+            },
+          },
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "MC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    1,
+                    2,
+                  ],
+                },
+              },
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "1",
+              "2": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('LECTURER: can cancel the running session', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.CancelSessionMutation,
+            variables: {
+              id: sessionIdCompleteWithAuth,
+            },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      // ensure that everything has been purged from the cache
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+      expect(ensureCacheConsistency(blocks[1], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+    })
+
+    it('LECTURER: can restart the cancelled session', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.StartSessionMutation,
+            variables: { id: sessionIdCompleteWithAuth },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+    })
+
+    it('LECTURER: can jump directly to the second question block', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ActivateBlockByIdMutation,
+            variables: { sessionId: sessionIdCompleteWithAuth, blockId: blocks[1].id },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+      expect(ensureCacheConsistency(blocks[1])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "results": Object {
+              "participants": "0",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('PARTICIPANT: can update the joined session for the second block', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Queries.JoinSessionQuery,
+            variables: { shortname: 'integr' },
+          },
+          authCookieParticipant
+        )
+      )
+
+      instanceIds.FREE = data.joinSession.activeInstances[0].id
+
+      expect(data).toMatchSnapshot()
+    })
+
+    it('PARTICIPANT: can respond to the FREE question in the second block', async () => {
+      ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.AddResponseMutation,
+            variables: {
+              fp: 'myfp1',
+              instanceId: instanceIds.FREE,
+              response: { value: 'hello world' },
+            },
+          },
+          authCookieParticipant
+        )
+      )
+
+      // ensure that the results in the response cache have been updated
+      expect(ensureCacheConsistency(blocks[1])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responseHashes": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "hello world",
+            },
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "value": "hello world",
+                },
+              },
+            ],
+            "results": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('LECTURER: can jump directly to the first question block', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ActivateBlockByIdMutation,
+            variables: { sessionId: sessionIdCompleteWithAuth, blockId: blocks[0].id },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      expect(ensureCacheConsistency(blocks[0])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "SC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "0",
+              "participants": "0",
+            },
+          },
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "MC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "0",
+              "2": "0",
+              "participants": "0",
+            },
+          },
+        ]
+      `)
+      expect(ensureCacheConsistency(blocks[1], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+    })
+
+    it('PARTICIPANT: can respond to the MC question in the first block', async () => {
+      ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.AddResponseMutation,
+            variables: {
+              fp: 'myfp1',
+              instanceId: instanceIds.MC,
+              response: {
+                choices: [1, 2],
+              },
+            },
+          },
+          authCookieParticipant
+        )
+      )
+
+      // ensure that the results in the response cache have been updated
+      expect(ensureCacheConsistency(blocks[0])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "SC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "0",
+              "participants": "0",
+            },
+          },
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "MC",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "choices": Array [
+                    1,
+                    2,
+                  ],
+                },
+              },
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "1",
+              "2": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('LECTURER: can jump back to the second question block', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ActivateBlockByIdMutation,
+            variables: { sessionId: sessionIdCompleteWithAuth, blockId: blocks[1].id },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+      expect(ensureCacheConsistency(blocks[1])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responseHashes": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "hello world",
+            },
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "value": "hello world",
+                },
+              },
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "value": "hello world",
+                },
+              },
+            ],
+            "results": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('PARTICIPANT: is unable to respond to the FREE question a second time', async () => {
+      const response = await sendQuery(
+        {
+          query: Mutations.AddResponseMutation,
+          variables: {
+            fp: 'myfp2',
+            instanceId: instanceIds.FREE,
+            response: { value: 'hello different world' },
+          },
+        },
+        authCookieParticipant
+      )
+
+      expect(response.body.errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "extensions": Object {
+              "code": "FORBIDDEN",
+            },
+            "locations": Array [
+              Object {
+                "column": 3,
+                "line": 2,
+              },
+            ],
+            "message": "RESPONSE_NOT_ALLOWED",
+            "path": Array [
+              "addResponse",
+            ],
+          },
+        ]
+      `)
+
+      expect(ensureCacheConsistency(blocks[1])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "dropped": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "value": "hello different world",
+                },
+              },
+            ],
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responseHashes": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "hello world",
+            },
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "value": "hello world",
+                },
+              },
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "value": "hello world",
+                },
+              },
+            ],
+            "results": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('LECTURER: can reset the results of the second question block (current)', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ResetQuestionBlockMutation,
+            variables: { sessionId: sessionIdCompleteWithAuth, blockId: blocks[1].id },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      expect(
+        ensureCacheConsistency(blocks[1], {
+          expectedKeys: ['info', 'results'],
+          unexpectedKeys: ['participants'],
+        })
+      ).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "results": Object {
+              "participants": "0",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('PARTICIPANT: can respond to the FREE question in the second block', async () => {
+      ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.AddResponseMutation,
+            variables: {
+              fp: 'myfp1',
+              instanceId: instanceIds.FREE,
+              response: { value: 'hello world' },
+            },
+          },
+          authCookieParticipant
+        )
+      )
+
+      // ensure that the results in the response cache have been updated
+      expect(ensureCacheConsistency(blocks[1])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "COMPLETE",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participantList": Array [
+              "UUID_VALID",
+              "UUID_VALID",
+            ],
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responseHashes": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "hello world",
+            },
+            "responses": Array [
+              Object {
+                "participant": "UUID_VALID",
+                "response": Object {
+                  "value": "hello world",
+                },
+              },
+            ],
+            "results": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+  })
 
   describe('Logout', () => {
     it('works', async () => {

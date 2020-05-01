@@ -24,8 +24,6 @@ const Session = new mongoose.Schema(
       isEvaluationPublic: { type: Boolean, default: false },
       isFeedbackChannelActive: { type: Boolean, default: false },
       isFeedbackChannelPublic: { type: Boolean, default: false },
-      fingerprinting: { type: Boolean, default: true },
-      ipFiltering: { type: Boolean, default: false },
       storageMode: { type: String, enum: _values(SESSION_STORAGE_MODE), default: SESSION_STORAGE_MODE.SECRET },
     },
     user: {

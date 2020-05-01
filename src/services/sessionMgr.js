@@ -261,7 +261,7 @@ const freeToResults = (redisResults, responseHashes) => {
  * @param {Session}
  */
 const initializeResponseCache = async (
-  { id, question, version, results, blockedParticipants },
+  { id, question, version, results, blockedParticipants, responses, dropped },
   { settings, participants }
 ) => {
   const instanceKey = `instance:${id}`
@@ -296,6 +296,20 @@ const initializeResponseCache = async (
 
     if (blockedParticipants && blockedParticipants.length > 0) {
       transaction.sadd(`${instanceKey}:participants`, ...blockedParticipants)
+    }
+
+    if (responses && responses.length > 0) {
+      transaction.lpush(
+        `${instanceKey}:responses`,
+        ...responses.map((response) => JSON.stringify({ response: response.value, participant: response.participant }))
+      )
+    }
+
+    if (dropped && dropped.length > 0) {
+      transaction.lpush(
+        `${instanceKey}:dropped`,
+        ...dropped.map((response) => JSON.stringify({ response: response.value, participant: response.participant }))
+      )
     }
   }
 
@@ -379,20 +393,40 @@ const getBlockedParticipants = async ({ id }) => {
   return participants[0][1]
 }
 
+const parseResponses = (responseData) => {
+  if (typeof responseData === 'undefined') {
+    return []
+  }
+
+  return responseData.flatMap((response) => {
+    try {
+      const json = JSON.parse(response)
+      return [
+        {
+          participant: json.participant,
+          value: json.response,
+        },
+      ]
+    } catch (e) {
+      return []
+    }
+  })
+}
+
 const getFullResponseData = async ({ id }) => {
   const instanceKey = `instance:${id}`
 
   const allResponses = await responseCache
     .multi()
-    .smembers(`${instanceKey}:responses`)
-    .smembers(`${instanceKey}:dropped`)
+    .lrange(`${instanceKey}:responses`, 0, -1)
+    .lrange(`${instanceKey}:dropped`, 0, -1)
     .del(`${instanceKey}:responses`, `${instanceKey}:dropped`)
     .exec()
 
-  return {
-    responses: allResponses[0][1],
-    dropped: allResponses[0][2],
-  }
+  const responses = parseResponses(allResponses[0][1])
+  const dropped = parseResponses(allResponses[1][1])
+
+  return { responses, dropped }
 }
 
 function enhanceSessionParticipants({ sessionId, participants }) {
@@ -406,7 +440,7 @@ function enhanceSessionParticipants({ sessionId, participants }) {
 /**
  * Create a new session
  */
-const createSession = async ({ name, questionBlocks = [], participants = [], userId }) => {
+const createSession = async ({ name, questionBlocks = [], participants = [], storageMode, userId }) => {
   const sessionId = ObjectId()
   const { blocks, instances, promises } = await mapBlocks({
     sessionId,
@@ -427,6 +461,7 @@ const createSession = async ({ name, questionBlocks = [], participants = [], use
     participants: participantsWithPasswords,
     settings: {
       isParticipantAuthenticationEnabled: participantsWithPasswords.length > 0,
+      storageMode: storageMode || SESSION_STORAGE_MODE.SECRET,
     },
   })
 
@@ -449,7 +484,7 @@ const createSession = async ({ name, questionBlocks = [], participants = [], use
 /**
  * Modify a session
  */
-const modifySession = async ({ id, name, questionBlocks, participants, userId }) => {
+const modifySession = async ({ id, name, questionBlocks, participants, storageMode, userId }) => {
   // get the specified session from the database
   const sessionWithInstances = await SessionModel.findOne({
     _id: id,
@@ -514,6 +549,11 @@ const modifySession = async ({ id, name, questionBlocks, participants, userId })
   } else {
     session.participants = []
     session.settings.isParticipantAuthenticationEnabled = false
+  }
+
+  // update the session storage mode
+  if (storageMode) {
+    session.settings.storageMode = storageMode
   }
 
   // save the updated session to the database
@@ -598,7 +638,9 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
             instance.results = await computeInstanceResults(instance)
             instance.blockedParticipants = await getBlockedParticipants(instance)
             if (session.settings.storageMode === SESSION_STORAGE_MODE.COMPLETE) {
-              instance.responses = await getFullResponseData(instance)
+              const { responses, dropped } = await getFullResponseData(instance)
+              instance.responses = responses
+              instance.dropped = dropped
             }
 
             return instance.save()
@@ -667,6 +709,7 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
               instance.isOpen = false
               instance.blockedParticipants = []
               instance.responses = []
+              instance.dropped = []
               instance.results = null
               return instance.save()
             })
@@ -753,6 +796,7 @@ const updateSettings = async ({ sessionId, userId, settings, shortname }) => {
     ...settings,
     // ensure that participant authentication cannot be changed here
     isParticipantAuthenticationEnabled: session.settings.isParticipantAuthenticationEnabled,
+    storageMode: session.settings.storageMode,
   }
 
   // if the feedback channel functionality is set to be deactivated
