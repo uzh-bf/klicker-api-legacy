@@ -464,9 +464,6 @@ async function resetQuestionBlock({ sessionId, blockId }) {
 
   // increment the execution counter of the block
   await SessionModel.findByIdAndUpdate(session.id, {
-    $set: {
-      [`blocks.${blockIndex}.status`]: QUESTION_BLOCK_STATUS.PLANNED,
-    },
     $inc: {
       [`blocks.${blockIndex}.execution`]: 1,
     },
