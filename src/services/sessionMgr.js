@@ -173,7 +173,6 @@ const mapBlocks = async ({ sessionId, questionBlocks, userId }) => {
             if (questionVersion < 0) {
               const questionInfo = await QuestionModel.findById(question)
               questionVersion = questionInfo.versions.length - 1
-              console.log(questionInfo, questionVersion)
             }
 
             // create a new question instance model
