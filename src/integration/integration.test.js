@@ -2160,10 +2160,6 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "SC",
             },
-            "participants": Array [
-              "UUID_VALID",
-              "UUID_VALID",
-            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2177,10 +2173,6 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "MC",
             },
-            "participants": Array [
-              "UUID_VALID",
-              "UUID_VALID",
-            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2271,10 +2263,6 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "MC",
             },
-            "participants": Array [
-              "UUID_VALID",
-              "UUID_VALID",
-            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2367,10 +2355,6 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "MC",
             },
-            "participants": Array [
-              "UUID_VALID",
-              "UUID_VALID",
-            ],
             "results": Object {
               "0": "0",
               "1": "0",
@@ -2449,8 +2433,7 @@ describe('Integration', () => {
       expect(data).toMatchSnapshot()
 
       // ensure that the question instances are initialized in the response cache
-      expect(ensureCacheConsistency(blocks[1], { expectedKeys: ['participants'], unexpectedKeys: ['responses'] }))
-        .resolves.toMatchInlineSnapshot(`
+      expect(ensureCacheConsistency(blocks[1], { unexpectedKeys: ['responses'] })).resolves.toMatchInlineSnapshot(`
         Array [
           Object {
             "info": Object {
@@ -2459,10 +2442,6 @@ describe('Integration', () => {
               "status": "OPEN",
               "type": "FREE",
             },
-            "participants": Array [
-              "UUID_VALID",
-              "UUID_VALID",
-            ],
             "results": Object {
               "participants": "0",
             },
@@ -2546,25 +2525,422 @@ describe('Integration', () => {
       )
 
       expect(response.body.errors).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "extensions": Object {
-                "code": "FORBIDDEN",
-              },
-              "locations": Array [
-                Object {
-                  "column": 3,
-                  "line": 2,
-                },
-              ],
-              "message": "RESPONSE_NOT_ALLOWED",
-              "path": Array [
-                "addResponse",
-              ],
+        Array [
+          Object {
+            "extensions": Object {
+              "code": "FORBIDDEN",
             },
-          ]
-        `)
+            "locations": Array [
+              Object {
+                "column": 3,
+                "line": 2,
+              },
+            ],
+            "message": "RESPONSE_NOT_ALLOWED",
+            "path": Array [
+              "addResponse",
+            ],
+          },
+        ]
+      `)
 
+      expect(
+        ensureCacheConsistency(blocks[1], {
+          expectedKeys: ['info', 'participants', 'responseHashes', 'results'],
+          unexpectedKeys: ['responses'],
+        })
+      ).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responseHashes": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "hello world",
+            },
+            "results": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('LECTURER: can cancel the running session', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.CancelSessionMutation,
+            variables: {
+              id: sessionIdWithAuth,
+            },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      // ensure that everything has been purged from the cache
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+      expect(ensureCacheConsistency(blocks[1], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+    })
+
+    it('LECTURER: can start the session again', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.StartSessionMutation,
+            variables: { id: sessionIdWithAuth },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      // ensure that everything has been purged from the cache
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+      expect(ensureCacheConsistency(blocks[1], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+    })
+
+    it('LECTURER: can jump directly to the second question block', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ActivateBlockByIdMutation,
+            variables: { sessionId: sessionIdWithAuth, blockId: blocks[1].id },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+      expect(ensureCacheConsistency(blocks[1])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "results": Object {
+              "participants": "0",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('PARTICIPANT: can respond to the FREE question in the second block', async () => {
+      ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.AddResponseMutation,
+            variables: {
+              fp: 'myfp1',
+              instanceId: instanceIds.FREE,
+              response: { value: 'hello world' },
+            },
+          },
+          authCookieParticipant
+        )
+      )
+
+      // ensure that the results in the response cache have been updated
+      expect(
+        ensureCacheConsistency(blocks[1], {
+          expectedKeys: ['info', 'participants', 'responseHashes', 'results'],
+          unexpectedKeys: ['responses'],
+        })
+      ).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responseHashes": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "hello world",
+            },
+            "results": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('LECTURER: can jump directly to the first question block', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ActivateBlockByIdMutation,
+            variables: { sessionId: sessionIdWithAuth, blockId: blocks[0].id },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      expect(ensureCacheConsistency(blocks[0])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "SC",
+            },
+            "results": Object {
+              "0": "0",
+              "1": "0",
+              "participants": "0",
+            },
+          },
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "MC",
+            },
+            "results": Object {
+              "0": "0",
+              "1": "0",
+              "2": "0",
+              "participants": "0",
+            },
+          },
+        ]
+      `)
+      expect(ensureCacheConsistency(blocks[1], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+    })
+
+    it('PARTICIPANT: can respond to the MC question in the first block', async () => {
+      ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.AddResponseMutation,
+            variables: {
+              fp: 'myfp1',
+              instanceId: instanceIds.MC,
+              response: {
+                choices: [1, 2],
+              },
+            },
+          },
+          authCookieParticipant
+        )
+      )
+
+      // ensure that the results in the response cache have been updated
+      expect(ensureCacheConsistency(blocks[0])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "SC",
+            },
+            "results": Object {
+              "0": "0",
+              "1": "0",
+              "participants": "0",
+            },
+          },
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "MC",
+            },
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "results": Object {
+              "0": "0",
+              "1": "1",
+              "2": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+
+      // TODO: ensure that the response has not been persisted (for the default, aggregate-only mode of operation)
+    })
+
+    it('LECTURER: can jump back to the second question block', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ActivateBlockByIdMutation,
+            variables: { sessionId: sessionIdWithAuth, blockId: blocks[1].id },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      expect(ensureCacheConsistency(blocks[0], { expectedKeys: [] })).resolves.toMatchInlineSnapshot(`Array []`)
+      expect(ensureCacheConsistency(blocks[1])).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responseHashes": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "hello world",
+            },
+            "results": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('PARTICIPANT: is unable to respond to the FREE question a second time', async () => {
+      const response = await sendQuery(
+        {
+          query: Mutations.AddResponseMutation,
+          variables: {
+            fp: 'myfp2',
+            instanceId: instanceIds.FREE,
+            response: { value: 'hello different world' },
+          },
+        },
+        authCookieParticipant
+      )
+
+      expect(response.body.errors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "extensions": Object {
+              "code": "FORBIDDEN",
+            },
+            "locations": Array [
+              Object {
+                "column": 3,
+                "line": 2,
+              },
+            ],
+            "message": "RESPONSE_NOT_ALLOWED",
+            "path": Array [
+              "addResponse",
+            ],
+          },
+        ]
+      `)
+
+      expect(
+        ensureCacheConsistency(blocks[1], {
+          expectedKeys: ['info', 'participants', 'responseHashes', 'results'],
+          unexpectedKeys: ['responses'],
+        })
+      ).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "participants": Array [
+              "UUID_VALID",
+            ],
+            "responseHashes": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "hello world",
+            },
+            "results": Object {
+              "5eb63bbbe01eeed093cb22bb8f5acdc3": "1",
+              "participants": "1",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('LECTURER: can reset the results of the second question block (current)', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ResetQuestionBlockMutation,
+            variables: { sessionId: sessionIdWithAuth, blockId: blocks[1].id },
+          },
+          authCookie
+        )
+      )
+
+      expect(data).toMatchSnapshot()
+
+      expect(
+        ensureCacheConsistency(blocks[1], {
+          expectedKeys: ['info', 'results'],
+          unexpectedKeys: ['participants', 'responses'],
+        })
+      ).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "info": Object {
+              "auth": "true",
+              "mode": "SECRET",
+              "status": "OPEN",
+              "type": "FREE",
+            },
+            "results": Object {
+              "participants": "0",
+            },
+          },
+        ]
+      `)
+    })
+
+    it('PARTICIPANT: can respond to the FREE question in the second block', async () => {
+      ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.AddResponseMutation,
+            variables: {
+              fp: 'myfp1',
+              instanceId: instanceIds.FREE,
+              response: { value: 'hello world' },
+            },
+          },
+          authCookieParticipant
+        )
+      )
+
+      // ensure that the results in the response cache have been updated
       expect(
         ensureCacheConsistency(blocks[1], {
           expectedKeys: ['info', 'participants', 'responseHashes', 'results'],
@@ -2595,7 +2971,6 @@ describe('Integration', () => {
     })
   })
 
-  // // TODO: test a nonlinear session flow
   // // TODO: test a result reset
 
   describe('Logout', () => {

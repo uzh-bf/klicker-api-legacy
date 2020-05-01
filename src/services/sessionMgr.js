@@ -261,9 +261,12 @@ const freeToResults = (redisResults, responseHashes) => {
  * @param {Session}
  */
 const initializeResponseCache = async (
-  { id, question, version, results, allowedParticipants },
+  { id, question, version, results, blockedParticipants },
   { settings, participants }
 ) => {
+  const instanceKey = `instance:${id}`
+  const transaction = responseCache.multi()
+
   // initialize auth and storage mode settings
   const isAuthEnabled = settings.isParticipantAuthenticationEnabled || false
   const storageMode = settings.storageMode || SESSION_STORAGE_MODE.SECRET
@@ -271,11 +274,9 @@ const initializeResponseCache = async (
   // extract relevant information from the question entity
   const questionVersion = question.versions[version]
 
-  const transaction = responseCache.multi()
-
   // set instance info and settings
   transaction.hmset(
-    `instance:${id}:info`,
+    `${instanceKey}:info`,
     'status',
     'OPEN',
     'type',
@@ -287,22 +288,21 @@ const initializeResponseCache = async (
   )
 
   // initialize the instance results
-  transaction.hset(`instance:${id}:results`, 'participants', results ? results.totalParticipants : 0)
+  transaction.hset(`${instanceKey}:results`, 'participants', results ? results.totalParticipants : 0)
 
-  // if participant authentication is enabled, hydrate the set of allowed participant ids
+  // if participant authentication is enabled, hydrate the participant list and the set of blocked participants
   if (isAuthEnabled) {
-    // in case of instance continuation, rehydrate from the set of allowed ids from the db
-    if (allowedParticipants && allowedParticipants.length > 0) {
-      transaction.sadd(`instance:${id}:participants`, ...allowedParticipants)
-    } else {
-      transaction.sadd(`instance:${id}:participants`, ...participants.map((participant) => participant.id))
+    transaction.sadd(`${instanceKey}:participantList`, ...participants.map((participant) => participant.id))
+
+    if (blockedParticipants && blockedParticipants.length > 0) {
+      transaction.sadd(`${instanceKey}:participants`, ...blockedParticipants)
     }
   }
 
   // include the min/max restrictions in the cache for FREE_RANGE questions
   if (question.type === QUESTION_TYPES.FREE_RANGE && questionVersion.options.FREE_RANGE.restrictions) {
     transaction.hmset(
-      `instance:${id}:info`,
+      `${instanceKey}:info`,
       'min',
       questionVersion.options.FREE_RANGE.restrictions.min,
       'max',
@@ -318,12 +318,12 @@ const initializeResponseCache = async (
 
     // initialize all response counts to 0
     options.choices.forEach((_, index) => {
-      transaction.hset(`instance:${id}:results`, index, results ? results.CHOICES[index] : 0)
+      transaction.hset(`${instanceKey}:results`, index, results ? results.CHOICES[index] : 0)
     })
   } else if (results && QUESTION_GROUPS.FREE.includes(question.type)) {
     _forOwn(results.FREE, ({ count, value }, key) => {
-      transaction.hset(`instance:${id}:results`, key, count)
-      transaction.hset(`instance:${id}:responseHashes`, key, value)
+      transaction.hset(`${instanceKey}:results`, key, count)
+      transaction.hset(`${instanceKey}:responseHashes`, key, value)
     })
   }
 
@@ -367,13 +367,13 @@ const computeInstanceResults = async ({ id, question }) => {
   return null
 }
 
-const getRemainingParticipants = async ({ id }) => {
+const getBlockedParticipants = async ({ id }) => {
   const instanceKey = `instance:${id}`
 
   const participants = await responseCache
     .multi()
     .smembers(`${instanceKey}:participants`)
-    .del(`${instanceKey}:participants`)
+    .del(`${instanceKey}:participants`, `${instanceKey}:participantList`)
     .exec()
 
   return participants[0][1]
@@ -490,9 +490,7 @@ const modifySession = async ({ id, name, questionBlocks, participants, userId })
     )
 
     // completely remove the instance entities
-    const instanceCleanup = QuestionInstanceModel.deleteMany({
-      _id: { $in: oldInstances },
-    })
+    const instanceCleanup = QuestionInstanceModel.deleteMany({ _id: { $in: oldInstances } })
 
     // map the blocks
     const { blocks, instances, promises } = await mapBlocks({
@@ -509,15 +507,13 @@ const modifySession = async ({ id, name, questionBlocks, participants, userId })
   }
 
   // if the participants parameter is set, update the participants list
-  if (typeof participants !== 'undefined') {
-    if (participants.length === 0) {
-      session.participants = []
-      session.settings.isParticipantAuthenticationEnabled = false
-    } else {
-      const participantsWithPassword = enhanceSessionParticipants({ sessionId: id, participants })
-      session.participants = participantsWithPassword
-      session.settings.isParticipantAuthenticationEnabled = true
-    }
+  if (typeof participants !== 'undefined' && participants.length > 0) {
+    const participantsWithPassword = enhanceSessionParticipants({ sessionId: id, participants })
+    session.participants = participantsWithPassword
+    session.settings.isParticipantAuthenticationEnabled = true
+  } else {
+    session.participants = []
+    session.settings.isParticipantAuthenticationEnabled = false
   }
 
   // save the updated session to the database
@@ -600,7 +596,7 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
 
             // persist the results of the paused instances
             instance.results = await computeInstanceResults(instance)
-            instance.allowedParticipants = await getRemainingParticipants(instance)
+            instance.blockedParticipants = await getBlockedParticipants(instance)
             if (session.settings.storageMode === SESSION_STORAGE_MODE.COMPLETE) {
               instance.responses = await getFullResponseData(instance)
             }
@@ -669,7 +665,7 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
               // reset all instance data
               const instance = await QuestionInstanceModel.findById(instanceId)
               instance.isOpen = false
-              instance.allowedParticipants = []
+              instance.blockedParticipants = []
               instance.responses = []
               instance.results = null
               return instance.save()
@@ -820,7 +816,7 @@ async function deactivateBlockById({ userId, sessionId, blockId, incrementActive
 
       // compute the instance results based on redis cache contents
       instance.results = await computeInstanceResults(instance)
-      instance.allowedParticipants = await getRemainingParticipants(instance)
+      instance.blockedParticipants = await getBlockedParticipants(instance)
       if (session.settings.storageMode === SESSION_STORAGE_MODE.COMPLETE) {
         const { responses, dropped } = await getFullResponseData(instance)
         instance.responses = responses

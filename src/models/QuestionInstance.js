@@ -44,9 +44,9 @@ const QuestionInstance = new mongoose.Schema(
     },
     version: { type: Number, min: 0, required: true },
 
-    // the participants that are still allowed to vote for this instance
-    // in case the session is paused, we need to persist the remaining whitelist
-    allowedParticipants: [{ type: String }],
+    // the participants that are blocked for further votes
+    // in case the session is paused, we need to persist who is still allowed to vote
+    blockedParticipants: [{ type: String }],
 
     // all the responses that have been received
     // this will only be used when the session storage mode is set to complete

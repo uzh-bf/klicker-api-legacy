@@ -451,6 +451,14 @@ exports[`Integration Session Execution (authenticated) LECTURER: can activate th
   
 `;
 
+exports[`Integration Session Execution (authenticated) LECTURER: can cancel the running session 2`] = `
+
+    startSession / pauseSession / endSession / cancelSession {
+      status: CREATED
+    }
+    
+`;
+
 exports[`Integration Session Execution (authenticated) LECTURER: can close the first question block 1`] = `
 
     activateNextBlock {
@@ -716,6 +724,90 @@ exports[`Integration Session Execution (authenticated) LECTURER: can evaluate th
   
 `;
 
+exports[`Integration Session Execution (authenticated) LECTURER: can jump back to the second question block 2`] = `
+
+    activateNextBlock {
+      blocks: 
+        status: EXECUTED
+        timeLimit: -1
+        expiresAt: Any
+        instances: false,false
+      ,
+        status: ACTIVE
+        timeLimit: -1
+        expiresAt: Any
+        instances: true
+      ,
+        status: PLANNED
+        timeLimit: -1
+        expiresAt: Any
+        instances: false,false,false
+      ,
+        status: PLANNED
+        timeLimit: -1
+        expiresAt: Any
+        instances: false,false
+      
+    }
+  
+`;
+
+exports[`Integration Session Execution (authenticated) LECTURER: can jump directly to the first question block 2`] = `
+
+    activateNextBlock {
+      blocks: 
+        status: ACTIVE
+        timeLimit: -1
+        expiresAt: Any
+        instances: true,true
+      ,
+        status: EXECUTED
+        timeLimit: -1
+        expiresAt: Any
+        instances: false
+      ,
+        status: PLANNED
+        timeLimit: -1
+        expiresAt: Any
+        instances: false,false,false
+      ,
+        status: PLANNED
+        timeLimit: -1
+        expiresAt: Any
+        instances: false,false
+      
+    }
+  
+`;
+
+exports[`Integration Session Execution (authenticated) LECTURER: can jump directly to the second question block 3`] = `
+
+    activateNextBlock {
+      blocks: 
+        status: PLANNED
+        timeLimit: -1
+        expiresAt: Any
+        instances: false,false
+      ,
+        status: ACTIVE
+        timeLimit: -1
+        expiresAt: Any
+        instances: true
+      ,
+        status: PLANNED
+        timeLimit: -1
+        expiresAt: Any
+        instances: false,false,false
+      ,
+        status: PLANNED
+        timeLimit: -1
+        expiresAt: Any
+        instances: false,false
+      
+    }
+  
+`;
+
 exports[`Integration Session Execution (authenticated) LECTURER: can pause the session 1`] = `
 
     startSession / pauseSession / endSession / cancelSession {
@@ -724,7 +816,67 @@ exports[`Integration Session Execution (authenticated) LECTURER: can pause the s
     
 `;
 
+exports[`Integration Session Execution (authenticated) LECTURER: can reset the results of the second question block (current) 2`] = `
+
+    createSession / modifySession {
+      confusionTS: undefined
+      feedbacks: undefined
+      blocks: [
+        status: EXECUTED
+        instances: 
+          title: Test SC #2
+          type: SC
+        ,
+          title: Test MC #2
+          type: MC
+        
+      ,
+        status: PLANNED
+        instances: 
+          title: Test FREE #2
+          type: FREE
+        
+      ,
+        status: PLANNED
+        instances: 
+          title: Test FREE_RANGE #2
+          type: FREE_RANGE
+        ,
+          title: Test partly restricted FREE_RANGE
+          type: FREE_RANGE
+        ,
+          title: Test unrestricted FREE_RANGE
+          type: FREE_RANGE
+        
+      ,
+        status: PLANNED
+        instances: 
+          title: Test MC #2
+          type: MC
+        ,
+          title: Test SC #2
+          type: SC
+        
+      ]
+      participants: [
+          username: integration-2,
+      ,
+          username: integration-3,
+      ]
+      settings: undefined
+    }
+  
+`;
+
 exports[`Integration Session Execution (authenticated) LECTURER: can start a session 1`] = `
+
+    startSession / pauseSession / endSession / cancelSession {
+      status: RUNNING
+    }
+    
+`;
+
+exports[`Integration Session Execution (authenticated) LECTURER: can start the session again 3`] = `
 
     startSession / pauseSession / endSession / cancelSession {
       status: RUNNING
