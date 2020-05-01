@@ -18,6 +18,7 @@ const {
   SESSION_STATUS,
   QUESTION_BLOCK_STATUS,
   SESSION_ACTIONS,
+  SESSION_STORAGE_MODE,
   Errors,
 } = require('../constants')
 const { logDebug } = require('../lib/utils')
@@ -126,8 +127,6 @@ const cleanCache = (shortname) => {
 
   logDebug(() => console.log(`[redis] Cleaning up SSR cache for ${key}`))
 
-  // return redis.unlink([`${key}:de`, `${key}:en`])
-  // TODO: use unlink with redis 4.x
   return redisCache.del([`${key}:de`, `${key}:en`])
 }
 
@@ -259,24 +258,46 @@ const freeToResults = (redisResults, responseHashes) => {
 
 /**
  * Initialize the redis response cache as needed for session execution
+ * @param {QuestionInstance}
+ * @param {Session}
  */
-const initializeResponseCache = async ({ id, question, version, results }, sessionParticipants = []) => {
-  // TODO: participant auth reinitialization if the session is resumed
-
-  const isAuthEnabled = sessionParticipants.length > 0
-
-  const transaction = responseCache.multi()
+const initializeResponseCache = async (
+  { id, question, version, results, allowedParticipants },
+  { settings, participants }
+) => {
+  // initialize auth and storage mode settings
+  const isAuthEnabled = settings.isParticipantAuthenticationEnabled || false
+  const storageMode = settings.storageMode || SESSION_STORAGE_MODE.SECRET
 
   // extract relevant information from the question entity
   const questionVersion = question.versions[version]
 
-  // set the instance status, opening the instance for responses
-  transaction.hmset(`instance:${id}:info`, 'status', 'OPEN', 'type', question.type, 'auth', isAuthEnabled)
+  const transaction = responseCache.multi()
+
+  // set instance info and settings
+  transaction.hmset(
+    `instance:${id}:info`,
+    'status',
+    'OPEN',
+    'type',
+    question.type,
+    'auth',
+    isAuthEnabled,
+    'mode',
+    storageMode
+  )
+
+  // initialize the instance results
   transaction.hset(`instance:${id}:results`, 'participants', results ? results.totalParticipants : 0)
 
   // if participant authentication is enabled, hydrate the set of allowed participant ids
   if (isAuthEnabled) {
-    transaction.sadd(`instance:${id}:participants`, ...sessionParticipants.map((participant) => participant.id))
+    // in case of instance continuation, rehydrate from the set of allowed ids from the db
+    if (allowedParticipants && allowedParticipants.length > 0) {
+      transaction.sadd(`instance:${id}:participants`, ...allowedParticipants)
+    } else {
+      transaction.sadd(`instance:${id}:participants`, ...participants.map((participant) => participant.id))
+    }
   }
 
   // include the min/max restrictions in the cache for FREE_RANGE questions
@@ -314,17 +335,13 @@ const initializeResponseCache = async ({ id, question, version, results }, sessi
  * Compute the question instance results based on the redis response cache
  */
 const computeInstanceResults = async ({ id, question }) => {
+  const instanceKey = `instance:${id}`
+
   // setup a transaction for result extraction from redis
   const redisResponse = await responseCache
     .multi()
-    .hgetall(`instance:${id}:results`)
-    .del(
-      `instance:${id}:info`,
-      `instance:${id}:results`,
-      `instance:${id}:responses`,
-      `instance:${id}:ip`,
-      `instance:${id}:fp`
-    )
+    .hgetall(`${instanceKey}:results`)
+    .del(`${instanceKey}:info`, `${instanceKey}:results`)
     .exec()
 
   if (!redisResponse) {
@@ -339,14 +356,44 @@ const computeInstanceResults = async ({ id, question }) => {
 
   if (QUESTION_GROUPS.FREE.includes(question.type)) {
     // extract the response hashes from redis
-    const responseHashes = (
-      await responseCache.multi().hgetall(`instance:${id}:responseHashes`).del(`instance:${id}:responseHashes`).exec()
-    )[0][1]
+    const responseHashes = await responseCache
+      .multi()
+      .hgetall(`${instanceKey}:responseHashes`)
+      .del(`${instanceKey}:responseHashes`)
+      .exec()
 
-    return freeToResults(redisResults, responseHashes)
+    return freeToResults(redisResults, responseHashes[0][1])
   }
 
   return null
+}
+
+const getRemainingParticipants = async ({ id }) => {
+  const instanceKey = `instance:${id}`
+
+  const participants = await responseCache
+    .multi()
+    .smembers(`${instanceKey}:participants`)
+    .del(`${instanceKey}:participants`)
+    .exec()
+
+  return participants[0][1]
+}
+
+const getFullResponseData = async ({ id }) => {
+  const instanceKey = `instance:${id}`
+
+  const allResponses = await responseCache
+    .multi()
+    .smembers(`${instanceKey}:responses`)
+    .smembers(`${instanceKey}:dropped`)
+    .del(`${instanceKey}:responses`, `${instanceKey}:dropped`)
+    .exec()
+
+  return {
+    responses: allResponses[0][1],
+    dropped: allResponses[0][2],
+  }
 }
 
 function enhanceSessionParticipants({ sessionId, participants }) {
@@ -517,7 +564,7 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
         await Promise.all(
           session.activeInstances.map(async (instanceId) => {
             const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
-            await initializeResponseCache(instance, session.participants)
+            await initializeResponseCache(instance, session)
           })
         )
       }
@@ -554,6 +601,10 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
 
             // persist the results of the paused instances
             instance.results = await computeInstanceResults(instance)
+            instance.allowedParticipants = await getRemainingParticipants(instance)
+            if (session.settings.storageMode === SESSION_STORAGE_MODE.COMPLETE) {
+              instance.responses = await getFullResponseData(instance)
+            }
 
             return instance.save()
           })
@@ -607,11 +658,19 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
           session.blocks[i].execution += 1
           session.blocks[i].expiresAt = null
 
-          // reset any results that are already stored in the database
+          // reset any results that are already stored in the database and response cache
           promises.push(
             session.blocks[i].instances.map(async (instanceId) => {
+              // cleanup the response cache
+              const cacheKeys = await responseCache.keys(`instance:${instanceId}:*`)
+              if (cacheKeys.length > 0) {
+                await responseCache.del(...cacheKeys)
+              }
+
+              // reset all instance data
               const instance = await QuestionInstanceModel.findById(instanceId)
               instance.isOpen = false
+              instance.allowedParticipants = []
               instance.responses = []
               instance.results = null
               return instance.save()
@@ -762,6 +821,12 @@ async function deactivateBlockById({ userId, sessionId, blockId, incrementActive
 
       // compute the instance results based on redis cache contents
       instance.results = await computeInstanceResults(instance)
+      instance.allowedParticipants = await getRemainingParticipants(instance)
+      if (session.settings.storageMode === SESSION_STORAGE_MODE.COMPLETE) {
+        const { responses, dropped } = await getFullResponseData(instance)
+        instance.responses = responses
+        instance.dropped = dropped
+      }
 
       return instance.save()
     })
@@ -807,7 +872,7 @@ async function activateBlockById({ userId, sessionId, blockId }) {
     await Promise.all(
       newBlock.instances.map(async (instance) => {
         const instanceWithDetails = await QuestionInstanceModel.findById(instance).populate('question')
-        return initializeResponseCache(instanceWithDetails, session.participants)
+        return initializeResponseCache(instanceWithDetails, session)
       })
     )
   }
@@ -832,7 +897,7 @@ async function activateBlockById({ userId, sessionId, blockId }) {
 
       // if a response cache is available, hydrate it with the newly activated instances
       if (responseCache) {
-        await initializeResponseCache(instance, session.participants)
+        await initializeResponseCache(instance, session)
       }
 
       return instance.save()
