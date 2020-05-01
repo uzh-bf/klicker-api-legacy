@@ -7,7 +7,7 @@ const Feedback = require('./Feedback')
 const ConfusionTimestep = require('./ConfusionTimestep')
 const SessionParticipant = require('./SessionParticipant')
 const { QuestionBlock } = require('./QuestionBlock')
-const { SESSION_STATUS } = require('../constants')
+const { SESSION_STATUS, SESSION_STORAGE_MODE } = require('../constants')
 
 const Session = new mongoose.Schema(
   {
@@ -26,6 +26,7 @@ const Session = new mongoose.Schema(
       isFeedbackChannelPublic: { type: Boolean, default: false },
       fingerprinting: { type: Boolean, default: true },
       ipFiltering: { type: Boolean, default: false },
+      storageMode: { type: String, enum: _values(SESSION_STORAGE_MODE), default: SESSION_STORAGE_MODE.SECRET },
     },
     user: {
       type: ObjectId,
