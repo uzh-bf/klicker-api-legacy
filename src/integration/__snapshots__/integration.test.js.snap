@@ -839,7 +839,7 @@ exports[`Integration Session Execution (authenticated) LECTURER: can reset the r
           type: MC
         
       ,
-        status: PLANNED
+        status: ACTIVE
         instances: 
           title: Test FREE #2
           type: FREE
@@ -1061,7 +1061,7 @@ exports[`Integration Session Execution (authenticated, complete) LECTURER: can r
           type: MC
         
       ,
-        status: PLANNED
+        status: ACTIVE
         instances: 
           title: Test FREE #2
           type: FREE
