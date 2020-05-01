@@ -724,6 +724,14 @@ exports[`Integration Session Execution (authenticated) LECTURER: can pause the s
     
 `;
 
+exports[`Integration Session Execution (authenticated) LECTURER: can start a session 1`] = `
+
+    startSession / pauseSession / endSession / cancelSession {
+      status: RUNNING
+    }
+    
+`;
+
 exports[`Integration Session Execution (authenticated) PARTICIPANT: can join the session initially (initial) 1`] = `
 
     joinSession {
@@ -760,14 +768,6 @@ exports[`Integration Session Execution (authenticated) PARTICIPANT: can update t
       feedbacks: null
     }
   
-`;
-
-exports[`Integration Session Execution (authenticated) allows starting sessions 1`] = `
-
-    startSession / pauseSession / endSession / cancelSession {
-      status: RUNNING
-    }
-    
 `;
 
 exports[`Integration Session Execution LECTURER: can activate the first question block (initial) 1`] = `

@@ -2124,7 +2124,7 @@ describe('Integration', () => {
   describe('Session Execution (authenticated)', () => {
     const instanceIds = {}
 
-    it('allows starting sessions', async () => {
+    it('LECTURER: can start a session', async () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
