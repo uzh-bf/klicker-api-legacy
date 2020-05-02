@@ -6,13 +6,7 @@ const { ForbiddenError, UserInputError } = require('apollo-server-express')
 
 const CFG = require('../klicker.conf.js')
 const { QuestionInstanceModel, UserModel, FileModel, SessionModel } = require('../models')
-const {
-  QUESTION_GROUPS,
-  QUESTION_TYPES,
-  QUESTION_BLOCK_STATUS,
-  SESSION_STATUS,
-  SESSION_STORAGE_MODE,
-} = require('../constants')
+const { QUESTION_GROUPS, QUESTION_TYPES, SESSION_STATUS, SESSION_STORAGE_MODE } = require('../constants')
 const { getRedis } = require('../redis')
 const { getRunningSession, cleanCache, publishSessionUpdate } = require('./sessionMgr')
 const { pubsub, CONFUSION_ADDED, FEEDBACK_ADDED } = require('../resolvers/subscriptions')
