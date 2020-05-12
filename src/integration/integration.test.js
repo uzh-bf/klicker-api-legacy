@@ -10,7 +10,7 @@ const { UserModel } = require('../models')
 const { app } = require('../app')
 const { initializeDb } = require('../lib/test/setup')
 const { createContentState } = require('../lib/draft')
-const { Errors, QUESTION_TYPES, SESSION_STORAGE_MODE } = require('../constants')
+const { Errors, QUESTION_TYPES, SESSION_STORAGE_MODE, SESSION_AUTHENTICATION_MODE } = require('../constants')
 const { getRedis } = require('../redis')
 
 process.env.NODE_ENV = 'test'
@@ -2092,6 +2092,8 @@ describe('Integration', () => {
                 },
               ],
               participants: [{ username: 'integration-1' }],
+              authenticationMode: SESSION_AUTHENTICATION_MODE.NONE,
+              storageMode: SESSION_STORAGE_MODE.SECRET,
             },
           },
           authCookie
@@ -3145,11 +3147,8 @@ describe('Integration', () => {
                   ],
                 },
               ],
-              participants: [
-                { username: 'integration-1' },
-                { username: 'tester-1' },
-                { username: 'aai-1', isAAI: true },
-              ],
+              participants: [{ username: 'integration-1' }, { username: 'tester-1' }, { username: 'aai-1' }],
+              authenticationMode: SESSION_AUTHENTICATION_MODE.PASSWORD,
               storageMode: SESSION_STORAGE_MODE.COMPLETE,
             },
           },
@@ -4191,6 +4190,50 @@ describe('Integration', () => {
           },
         ]
       `)
+    })
+  })
+
+  describe('Session Management (authentication, aai)', () => {
+    it('enables the creation of a new session)', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.CreateSessionMutation,
+            variables: {
+              name: 'Session Name (auth & aai)',
+              blocks: [
+                {
+                  questions: [
+                    { question: questions[QUESTION_TYPES.SC], version: 0 },
+                    { question: questions[QUESTION_TYPES.MC], version: 0 },
+                  ],
+                },
+                {
+                  questions: [{ question: questions[QUESTION_TYPES.FREE], version: 0 }],
+                },
+                {
+                  questions: [
+                    {
+                      question: questions[QUESTION_TYPES.FREE_RANGE],
+                      version: 0,
+                    },
+                    { question: questions.FREE_RANGE_PART, version: 0 },
+                    { question: questions.FREE_RANGE_OPEN, version: 0 },
+                  ],
+                },
+              ],
+              participants: [{ username: 'integration-1' }, { username: 'tester-1' }, { username: 'aai-1' }],
+              authenticationMode: SESSION_AUTHENTICATION_MODE.AAI,
+              storageMode: SESSION_STORAGE_MODE.SECRET,
+            },
+          },
+          authCookie
+        )
+      )
+
+      console.log(data.createSession.participants)
+
+      expect(data).toMatchSnapshot()
     })
   })
 
