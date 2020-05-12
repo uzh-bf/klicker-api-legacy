@@ -20,6 +20,7 @@ const {
   QUESTION_BLOCK_STATUS,
   SESSION_ACTIONS,
   SESSION_STORAGE_MODE,
+  SESSION_AUTHENTICATION_MODE,
   Errors,
 } = require('../constants')
 const { logDebug } = require('../lib/utils')
@@ -432,21 +433,29 @@ const getFullResponseData = async ({ id }) => {
   return { responses, dropped }
 }
 
-function enhanceSessionParticipants({ sessionNamespace, sessionId, participants }) {
-  return participants.map(({ username, isAAI }) => ({
+function enhanceSessionParticipants({ authenticationMode, sessionNamespace, sessionId, participants }) {
+  return participants.map(({ username }) => ({
     _id: uuidv5(username, sessionNamespace),
     session: sessionId,
     username,
-    password: isAAI
-      ? undefined
-      : passwordGenerator.generate({ length: 14, uppercase: true, symbols: false, numbers: true }),
+    password:
+      authenticationMode === SESSION_AUTHENTICATION_MODE.AAI
+        ? undefined
+        : passwordGenerator.generate({ length: 14, uppercase: true, symbols: false, numbers: true }),
   }))
 }
 
 /**
  * Create a new session
  */
-const createSession = async ({ name, questionBlocks = [], participants = [], storageMode, userId }) => {
+const createSession = async ({
+  name,
+  questionBlocks = [],
+  participants = [],
+  authenticationMode,
+  storageMode,
+  userId,
+}) => {
   const sessionId = ObjectId()
   const { blocks, instances, promises } = await mapBlocks({
     sessionId,
@@ -458,7 +467,12 @@ const createSession = async ({ name, questionBlocks = [], participants = [], sto
   const sessionNamespace = uuidv4()
 
   // if there are any participants specified, set the session to be authentication-based
-  const participantsWithPasswords = enhanceSessionParticipants({ sessionNamespace, sessionId, participants })
+  const enhancedParticipants = enhanceSessionParticipants({
+    authenticationMode,
+    sessionNamespace,
+    sessionId,
+    participants,
+  })
 
   // create a new session model
   // pass in the list of blocks created above
@@ -468,9 +482,10 @@ const createSession = async ({ name, questionBlocks = [], participants = [], sto
     name,
     blocks,
     user: userId,
-    participants: participantsWithPasswords,
+    participants: enhancedParticipants,
     settings: {
-      isParticipantAuthenticationEnabled: participantsWithPasswords.length > 0,
+      isParticipantAuthenticationEnabled: enhancedParticipants.length > 0,
+      authenticationMode: authenticationMode || SESSION_AUTHENTICATION_MODE.NONE,
       storageMode: storageMode || SESSION_STORAGE_MODE.SECRET,
     },
   })
@@ -494,7 +509,7 @@ const createSession = async ({ name, questionBlocks = [], participants = [], sto
 /**
  * Modify a session
  */
-const modifySession = async ({ id, name, questionBlocks, participants, storageMode, userId }) => {
+const modifySession = async ({ id, name, questionBlocks, participants, authenticationMode, storageMode, userId }) => {
   // get the specified session from the database
   const sessionWithInstances = await SessionModel.findOne({
     _id: id,
@@ -558,19 +573,23 @@ const modifySession = async ({ id, name, questionBlocks, participants, storageMo
 
   // if the participants parameter is set, update the participants list
   if (typeof participants !== 'undefined' && participants.length > 0) {
-    const participantsWithPassword = enhanceSessionParticipants({
+    const enhancedParticipants = enhanceSessionParticipants({
+      authenticationMode: authenticationMode || session.settings.authenticationMode,
       sessionNamespace: session.namespace,
       sessionId: id,
       participants,
     })
-    session.participants = participantsWithPassword
+    session.participants = enhancedParticipants
     session.settings.isParticipantAuthenticationEnabled = true
   } else {
     session.participants = []
     session.settings.isParticipantAuthenticationEnabled = false
   }
 
-  // update the session storage mode
+  // update the session authentication and storage mode
+  if (authenticationMode) {
+    session.settings.authenticationMode = authenticationMode
+  }
   if (storageMode) {
     session.settings.storageMode = storageMode
   }

@@ -385,7 +385,7 @@ const joinSession = async ({ shortname, auth }) => {
     const participantIdentifier = auth ? auth.sub : undefined
 
     if (typeof participantIdentifier === 'undefined' || !auth.scope.includes('PARTICIPANT') || auth.session !== id) {
-      throw new UserInputError('INVALID_PARTICIPANT_LOGIN', { id })
+      throw new UserInputError('INVALID_PARTICIPANT_LOGIN', { id, authenticationMode: settings.authenticationMode })
     }
 
     if (
@@ -393,7 +393,7 @@ const joinSession = async ({ shortname, auth }) => {
         !runningSession.participants.map((participant) => participant.username).includes(participantIdentifier)) ||
       !runningSession.participants.map((participant) => participant.id).includes(participantIdentifier)
     ) {
-      throw new UserInputError('SESSION_NOT_ACCESSIBLE', { id })
+      throw new UserInputError('SESSION_NOT_ACCESSIBLE', { id, authenticationMode: settings.authenticationMode })
     }
   }
 
