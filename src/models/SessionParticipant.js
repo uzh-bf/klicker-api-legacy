@@ -8,8 +8,5 @@ module.exports = new mongoose.Schema({
 
   // the credentials of the participant
   username: { type: String, required: true },
-  password: { type: String, required: true },
-
-  // the shibRef of the participant (e.g., AAI email)
-  shibRef: { type: String },
+  password: { type: String },
 })
