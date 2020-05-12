@@ -90,13 +90,14 @@ module.exports = `
 
   input Session_ParticipantInput {
     username: String!
+    isAAI: Boolean
   }
 
   type Session_Participant {
     id: ID!
 
     username: String!
-    password: String!
+    password: String
   }
 
   input Session_QuestionBlockQuestionInput {
