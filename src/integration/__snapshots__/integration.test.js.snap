@@ -1083,6 +1083,8 @@ exports[`Integration Session Execution (authenticated, complete) LECTURER: can r
           username: integration-1,
       ,
           username: tester-1,
+      ,
+          username: aai-1,
       ]
       settings: undefined
     }
@@ -3046,6 +3048,8 @@ exports[`Integration Session Management (authenticated, complete) enables the cr
           username: integration-1,
       ,
           username: tester-1,
+      ,
+          username: aai-1,
       ]
       settings: {"isParticipantAuthenticationEnabled":true,"isConfusionBarometerActive":false,"isFeedbackChannelActive":false,"isFeedbackChannelPublic":false,"storageMode":"COMPLETE"}
     }
