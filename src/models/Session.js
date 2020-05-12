@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const _values = require('lodash/values')
+const { v4: uuidv4 } = require('uuid')
 
 const { ObjectId } = mongoose.Schema.Types
 
@@ -11,7 +12,8 @@ const { SESSION_STATUS, SESSION_STORAGE_MODE } = require('../constants')
 
 const Session = new mongoose.Schema(
   {
-    name: { type: String, default: Date.now(), index: true },
+    namespace: { type: String, default: uuidv4 },
+    name: { type: String, default: Date.now, index: true },
     status: {
       type: String,
       enum: _values(SESSION_STATUS),
