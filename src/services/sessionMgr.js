@@ -5,6 +5,7 @@ const _forOwn = require('lodash/forOwn')
 const dayjs = require('dayjs')
 const schedule = require('node-schedule')
 const passwordGenerator = require('generate-password')
+const { v4: uuidv4, v5: uuidv5 } = require('uuid')
 
 const { ObjectId } = mongoose.Types
 
@@ -262,7 +263,7 @@ const freeToResults = (redisResults, responseHashes) => {
  */
 const initializeResponseCache = async (
   { id, question, version, results, blockedParticipants, responses, dropped },
-  { settings, participants }
+  { settings, participants, namespace }
 ) => {
   const instanceKey = `instance:${id}`
   const transaction = responseCache.multi()
@@ -284,7 +285,9 @@ const initializeResponseCache = async (
     'auth',
     isAuthEnabled,
     'mode',
-    storageMode
+    storageMode,
+    'namespace',
+    namespace
   )
 
   // initialize the instance results
@@ -429,11 +432,14 @@ const getFullResponseData = async ({ id }) => {
   return { responses, dropped }
 }
 
-function enhanceSessionParticipants({ sessionId, participants }) {
-  return participants.map((participant) => ({
+function enhanceSessionParticipants({ sessionNamespace, sessionId, participants }) {
+  return participants.map(({ username, isAAI }) => ({
+    _id: uuidv5(username, sessionNamespace),
     session: sessionId,
-    username: participant.username,
-    password: passwordGenerator.generate({ length: 14, uppercase: true, symbols: false, numbers: true }),
+    username,
+    password: isAAI
+      ? undefined
+      : passwordGenerator.generate({ length: 14, uppercase: true, symbols: false, numbers: true }),
   }))
 }
 
@@ -448,13 +454,17 @@ const createSession = async ({ name, questionBlocks = [], participants = [], sto
     userId,
   })
 
+  // initialize a new session namespace for hashing purposes
+  const sessionNamespace = uuidv4()
+
   // if there are any participants specified, set the session to be authentication-based
-  const participantsWithPasswords = enhanceSessionParticipants({ sessionId, participants })
+  const participantsWithPasswords = enhanceSessionParticipants({ sessionNamespace, sessionId, participants })
 
   // create a new session model
   // pass in the list of blocks created above
   const newSession = new SessionModel({
     _id: sessionId,
+    namespace: sessionNamespace,
     name,
     blocks,
     user: userId,
@@ -507,6 +517,11 @@ const modifySession = async ({ id, name, questionBlocks, participants, storageMo
     throw new ForbiddenError(Errors.SESSION_ALREADY_STARTED)
   }
 
+  // if the session does not have a namespace yet, create one
+  if (typeof session.namespace === 'undefined') {
+    session.namespace = uuidv4()
+  }
+
   // if the name parameter is set, update the session name
   if (name) {
     session.name = name
@@ -543,7 +558,11 @@ const modifySession = async ({ id, name, questionBlocks, participants, storageMo
 
   // if the participants parameter is set, update the participants list
   if (typeof participants !== 'undefined' && participants.length > 0) {
-    const participantsWithPassword = enhanceSessionParticipants({ sessionId: id, participants })
+    const participantsWithPassword = enhanceSessionParticipants({
+      sessionNamespace: session.namespace,
+      sessionId: id,
+      participants,
+    })
     session.participants = participantsWithPassword
     session.settings.isParticipantAuthenticationEnabled = true
   } else {
