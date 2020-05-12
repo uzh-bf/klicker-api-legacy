@@ -354,13 +354,17 @@ const joinSession = async ({ shortname, auth }) => {
   const currentBlock = blocks[activeBlock] || { instances: [] }
 
   if (settings.isParticipantAuthenticationEnabled) {
-    const participantId = auth ? auth.sub : undefined
+    const participantIdentifier = auth ? auth.sub : undefined
 
-    if (typeof participantId === 'undefined' || !auth.scope.includes('PARTICIPANT')) {
+    if (typeof participantIdentifier === 'undefined' || !auth.scope.includes('PARTICIPANT') || auth.session !== id) {
       throw new UserInputError('INVALID_PARTICIPANT_LOGIN', { id })
     }
 
-    if (!runningSession.participants.map((participant) => participant.id).includes(participantId)) {
+    if (
+      (auth.aai &&
+        !runningSession.participants.map((participant) => participant.username).includes(participantIdentifier)) ||
+      !runningSession.participants.map((participant) => participant.id).includes(participantIdentifier)
+    ) {
       throw new UserInputError('SESSION_NOT_ACCESSIBLE', { id })
     }
   }
