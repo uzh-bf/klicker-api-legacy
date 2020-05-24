@@ -1,7 +1,7 @@
 const { draftContentSerializer } = require('../../lib/test/serializers')
 
 module.exports = {
-  test: data => data && !!data.joinSession,
+  test: (data) => data && !!data.joinSession,
   print: ({ joinSession: { settings, activeInstances, feedbacks } }) => `
     joinSession {
       settings: ${JSON.stringify(settings)}
@@ -14,12 +14,15 @@ module.exports = {
         options: ${JSON.stringify(options)}
       `
       )}
-      feedbacks: ${feedbacks.map(
-        ({ content, votes }) => `
+      feedbacks: ${
+        feedbacks &&
+        feedbacks.map(
+          ({ content, votes }) => `
         content: ${content}
         votes: ${votes}
       `
-      )}
+        )
+      }
     }
   `,
 }

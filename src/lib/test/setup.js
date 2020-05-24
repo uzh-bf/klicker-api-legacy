@@ -1,7 +1,7 @@
 const { QuestionModel, QuestionInstanceModel, SessionModel, TagModel, UserModel, FileModel } = require('../../models')
 const AccountService = require('../../services/accounts')
 const QuestionService = require('../../services/questions')
-const { createContentState } = require('../../lib/draft')
+const { createContentState } = require('../draft')
 const { QUESTION_TYPES } = require('../../constants')
 
 /**
@@ -45,7 +45,7 @@ const setupTestEnv = async ({ email, password, shortname, isActive = true }) => 
 }
 
 // prepare a new session instance
-const prepareSessionFactory = SessionMgrService => async (userId, questions, started = false) => {
+const prepareSessionFactory = (SessionMgrService) => async (userId, questions, started = false, participants = []) => {
   let session
 
   if (!questions) {
@@ -68,12 +68,14 @@ const prepareSessionFactory = SessionMgrService => async (userId, questions, sta
     session = await SessionMgrService.createSession({
       name: 'testing session',
       questionBlocks: [{ questions: [{ question: question.id, version: 0 }] }],
+      participants,
       userId,
     })
   } else {
     session = await SessionMgrService.createSession({
       name: 'testing session',
       questionBlocks: [{ questions }],
+      participants,
       userId,
     })
   }

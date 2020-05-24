@@ -46,7 +46,7 @@ const generateJwtSettings = (user, scope = ['user']) => ({
  * Check whether an authentication object is valid
  * @param {Object} auth The authentication object
  */
-const isAuthenticated = auth => {
+const isAuthenticated = (auth) => {
   if (auth && auth.sub) {
     return true
   }
@@ -57,7 +57,7 @@ const isAuthenticated = auth => {
  * HOC to ensure the requester is authenticated
  * @param {Function} wrapped The resolver to be secured
  */
-const requireAuth = wrapped => (parentValue, args, context) => {
+const requireAuth = (wrapped) => (parentValue, args, context) => {
   if (!isAuthenticated(context.auth)) {
     throw new AuthenticationError('INVALID_LOGIN')
   }
@@ -87,7 +87,7 @@ const isValidJWT = (jwt, secret) => {
  * Extract a JWT from header or cookie
  * @param {Request} req The express request object
  */
-const getToken = req => {
+const getToken = (req) => {
   // try to parse an authorization cookie
   if (req.cookies && req.cookies.jwt && isValidJWT(req.cookies.jwt, APP_CFG.secret)) {
     return req.cookies.jwt
@@ -263,15 +263,12 @@ async function checkAccountStatus({ res, auth }) {
     return null
   }
 
-  console.log(auth)
-
   let user
   try {
     user = await UserModel.findOne({ email: auth.sub })
     if (!user) {
       user = await UserModel.findById(auth.sub)
     }
-    console.log(user)
   } catch (e) {
     console.log(e.message)
   }
@@ -282,12 +279,8 @@ async function checkAccountStatus({ res, auth }) {
     user = await signup(auth.sub, password, shortname, auth.org, '-', { isAAI: true, isActive: true })
   }
 
-  console.log(user)
-
   // generate a JWT for future authentication
   const jwt = generateScopedToken(user, 'user')
-
-  console.log(jwt)
 
   // set a cookie with the generated JWT
   if (res && res.cookie) {
@@ -363,7 +356,7 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
  * @param {String} email The email of the account that should be activated
  * @param {String} activationToken The activation token to be verified
  */
-const activateAccount = async activationToken => {
+const activateAccount = async (activationToken) => {
   // verify the token and extract the userId of the account
   const userId = verifyToken(activationToken, 'activate')
 
@@ -436,7 +429,7 @@ const login = async (res, email, password) => {
  * Perform logout for a logged in user
  * @param {Response} res The express response object
  */
-const logout = async res => {
+const logout = async (res) => {
   if (res && res.cookie) {
     res.cookie('jwt', null, {
       ...AUTH_COOKIE_SETTINGS,
@@ -530,7 +523,7 @@ const requestPassword = async (res, email) => {
  * Request account deletion
  * @param {ID} userId
  */
-const requestAccountDeletion = async userId => {
+const requestAccountDeletion = async (userId) => {
   // get the user from the database
   const user = await UserModel.findById(userId)
   if (!user) {
@@ -567,7 +560,7 @@ const requestAccountDeletion = async userId => {
  * Perform all steps needed to fully delete an account
  * @param {*} userId
  */
-const performAccountDeletion = async userId => {
+const performAccountDeletion = async (userId) => {
   // get the user from the database
   const user = await UserModel.findById(userId)
   if (!user) {
@@ -622,4 +615,5 @@ module.exports = {
   resolveAccountDeletion,
   activateAccount,
   generateScopedToken,
+  AUTH_COOKIE_SETTINGS,
 }

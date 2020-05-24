@@ -4,6 +4,8 @@ const _mapValues = require('lodash/mapValues')
 const _forOwn = require('lodash/forOwn')
 const dayjs = require('dayjs')
 const schedule = require('node-schedule')
+const passwordGenerator = require('generate-password')
+const { v4: uuidv4, v5: uuidv5 } = require('uuid')
 
 const { ObjectId } = mongoose.Types
 
@@ -17,6 +19,8 @@ const {
   SESSION_STATUS,
   QUESTION_BLOCK_STATUS,
   SESSION_ACTIONS,
+  SESSION_STORAGE_MODE,
+  SESSION_AUTHENTICATION_MODE,
   Errors,
 } = require('../constants')
 const { logDebug } = require('../lib/utils')
@@ -26,7 +30,7 @@ const responseCache = getRedis(3)
 
 function mapPropertyIds(elem) {
   if (Array.isArray(elem)) {
-    return elem.map(obj => ({ ...obj, id: obj._id, _id: undefined }))
+    return elem.map((obj) => ({ ...obj, id: obj._id, _id: undefined }))
   }
 
   const result = { ...elem }
@@ -46,7 +50,7 @@ async function publishRunningSessionUpdate({ sessionId }) {
   })
 
   const resultObj = mapPropertyIds(result.toObject())
-  resultObj.blocks = resultObj.blocks.map(block => ({
+  resultObj.blocks = resultObj.blocks.map((block) => ({
     ...mapPropertyIds(block),
     instances: mapPropertyIds(block.instances),
   }))
@@ -83,7 +87,7 @@ async function publishSessionUpdate({ sessionId, activeBlock }) {
     } else {
       resultObj.timeLimit = activeBlockData.timeLimit
       resultObj.expiresAt = activeBlockData.expiresAt
-      resultObj.activeInstances = activeBlockData.instances.map(instance => {
+      resultObj.activeInstances = activeBlockData.instances.map((instance) => {
         const { question } = instance
         const versionInfo = question.versions[instance.version]
         return {
@@ -95,7 +99,7 @@ async function publishSessionUpdate({ sessionId, activeBlock }) {
           content: versionInfo.content,
           description: versionInfo.description,
           options: versionInfo.options,
-          files: versionInfo.files.map(el => ({ ...el, id: el._id, _id: undefined })),
+          files: versionInfo.files.map((el) => ({ ...el, id: el._id, _id: undefined })),
         }
       })
     }
@@ -105,8 +109,8 @@ async function publishSessionUpdate({ sessionId, activeBlock }) {
   delete resultObj._id
 
   const properties = ['blocks', 'feedbacks', 'confusionTS']
-  properties.forEach(property => {
-    resultObj[property] = resultObj[property].map(el => ({ ...el, id: el._id, _id: undefined }))
+  properties.forEach((property) => {
+    resultObj[property] = resultObj[property].map((el) => ({ ...el, id: el._id, _id: undefined }))
   })
 
   // Publish Subscription Data to Subscribers
@@ -120,13 +124,11 @@ async function publishSessionUpdate({ sessionId, activeBlock }) {
  * If redis is in use, unlink the cached /join/:shortname pages
  * @param {*} shortname
  */
-const cleanCache = shortname => {
+const cleanCache = (shortname) => {
   const key = `/join/${shortname}`
 
   logDebug(() => console.log(`[redis] Cleaning up SSR cache for ${key}`))
 
-  // return redis.unlink([`${key}:de`, `${key}:en`])
-  // TODO: use unlink with redis 4.x
   return redisCache.del([`${key}:de`, `${key}:en`])
 }
 
@@ -135,7 +137,7 @@ const cleanCache = shortname => {
  * Then return the session as running
  * @param {*} sessionId
  */
-const getRunningSession = async sessionId => {
+const getRunningSession = async (sessionId) => {
   const session = await SessionModel.findById(sessionId)
 
   // if the session is not yet running, throw an error
@@ -163,8 +165,8 @@ const mapBlocks = async ({ sessionId, questionBlocks, userId }) => {
 
   const blocks = await Promise.all(
     questionBlocks
-      .filter(block => block.questions.length > 0)
-      .map(async block => ({
+      .filter((block) => block.questions.length > 0)
+      .map(async (block) => ({
         instances: await Promise.all(
           block.questions.map(async ({ question, version }) => {
             let questionVersion = version
@@ -173,7 +175,6 @@ const mapBlocks = async ({ sessionId, questionBlocks, userId }) => {
             if (questionVersion < 0) {
               const questionInfo = await QuestionModel.findById(question)
               questionVersion = questionInfo.versions.length - 1
-              console.log(questionInfo, questionVersion)
             }
 
             // create a new question instance model
@@ -212,7 +213,7 @@ const mapBlocks = async ({ sessionId, questionBlocks, userId }) => {
  * Parse the results hash object as extracted from redis into digestable results
  * @param {*} redisResults
  */
-const choicesToResults = redisResults => {
+const choicesToResults = (redisResults) => {
   if (!redisResults) {
     return {
       CHOICES: [],
@@ -258,21 +259,68 @@ const freeToResults = (redisResults, responseHashes) => {
 
 /**
  * Initialize the redis response cache as needed for session execution
+ * @param {QuestionInstance}
+ * @param {Session}
  */
-const initializeResponseCache = async ({ id, question, version, results }) => {
+const initializeResponseCache = async (
+  { id, question, version, results, blockedParticipants, responses, dropped },
+  { settings, participants, namespace }
+) => {
+  const instanceKey = `instance:${id}`
   const transaction = responseCache.multi()
+
+  // initialize auth and storage mode settings
+  const isAuthEnabled = settings.isParticipantAuthenticationEnabled || false
+  const storageMode = settings.storageMode || SESSION_STORAGE_MODE.SECRET
 
   // extract relevant information from the question entity
   const questionVersion = question.versions[version]
 
-  // set the instance status, opening the instance for responses
-  transaction.hmset(`instance:${id}:info`, 'status', 'OPEN', 'type', question.type)
-  transaction.hset(`instance:${id}:results`, 'participants', results ? results.totalParticipants : 0)
+  // set instance info and settings
+  transaction.hmset(
+    `${instanceKey}:info`,
+    'status',
+    'OPEN',
+    'type',
+    question.type,
+    'auth',
+    isAuthEnabled,
+    'mode',
+    storageMode,
+    'namespace',
+    namespace
+  )
+
+  // initialize the instance results
+  transaction.hset(`${instanceKey}:results`, 'participants', results ? results.totalParticipants : 0)
+
+  // if participant authentication is enabled, hydrate the participant list and the set of blocked participants
+  if (isAuthEnabled) {
+    transaction.sadd(`${instanceKey}:participantList`, ...participants.map((participant) => participant.id))
+
+    if (blockedParticipants && blockedParticipants.length > 0) {
+      transaction.sadd(`${instanceKey}:participants`, ...blockedParticipants)
+    }
+
+    if (responses && responses.length > 0) {
+      transaction.lpush(
+        `${instanceKey}:responses`,
+        ...responses.map((response) => JSON.stringify({ response: response.value, participant: response.participant }))
+      )
+    }
+
+    if (dropped && dropped.length > 0) {
+      transaction.lpush(
+        `${instanceKey}:dropped`,
+        ...dropped.map((response) => JSON.stringify({ response: response.value, participant: response.participant }))
+      )
+    }
+  }
 
   // include the min/max restrictions in the cache for FREE_RANGE questions
   if (question.type === QUESTION_TYPES.FREE_RANGE && questionVersion.options.FREE_RANGE.restrictions) {
     transaction.hmset(
-      `instance:${id}:info`,
+      `${instanceKey}:info`,
       'min',
       questionVersion.options.FREE_RANGE.restrictions.min,
       'max',
@@ -288,12 +336,12 @@ const initializeResponseCache = async ({ id, question, version, results }) => {
 
     // initialize all response counts to 0
     options.choices.forEach((_, index) => {
-      transaction.hset(`instance:${id}:results`, index, results ? results.CHOICES[index] : 0)
+      transaction.hset(`${instanceKey}:results`, index, results ? results.CHOICES[index] : 0)
     })
   } else if (results && QUESTION_GROUPS.FREE.includes(question.type)) {
     _forOwn(results.FREE, ({ count, value }, key) => {
-      transaction.hset(`instance:${id}:results`, key, count)
-      transaction.hset(`instance:${id}:responseHashes`, key, value)
+      transaction.hset(`${instanceKey}:results`, key, count)
+      transaction.hset(`${instanceKey}:responseHashes`, key, value)
     })
   }
 
@@ -304,17 +352,13 @@ const initializeResponseCache = async ({ id, question, version, results }) => {
  * Compute the question instance results based on the redis response cache
  */
 const computeInstanceResults = async ({ id, question }) => {
+  const instanceKey = `instance:${id}`
+
   // setup a transaction for result extraction from redis
   const redisResponse = await responseCache
     .multi()
-    .hgetall(`instance:${id}:results`)
-    .del(
-      `instance:${id}:info`,
-      `instance:${id}:results`,
-      `instance:${id}:responses`,
-      `instance:${id}:ip`,
-      `instance:${id}:fp`
-    )
+    .hgetall(`${instanceKey}:results`)
+    .del(`${instanceKey}:info`, `${instanceKey}:results`)
     .exec()
 
   if (!redisResponse) {
@@ -329,24 +373,89 @@ const computeInstanceResults = async ({ id, question }) => {
 
   if (QUESTION_GROUPS.FREE.includes(question.type)) {
     // extract the response hashes from redis
-    const responseHashes = (
-      await responseCache
-        .multi()
-        .hgetall(`instance:${id}:responseHashes`)
-        .del(`instance:${id}:responseHashes`)
-        .exec()
-    )[0][1]
+    const responseHashes = await responseCache
+      .multi()
+      .hgetall(`${instanceKey}:responseHashes`)
+      .del(`${instanceKey}:responseHashes`)
+      .exec()
 
-    return freeToResults(redisResults, responseHashes)
+    return freeToResults(redisResults, responseHashes[0][1])
   }
 
   return null
 }
 
+const getBlockedParticipants = async ({ id }) => {
+  const instanceKey = `instance:${id}`
+
+  const participants = await responseCache
+    .multi()
+    .smembers(`${instanceKey}:participants`)
+    .del(`${instanceKey}:participants`, `${instanceKey}:participantList`)
+    .exec()
+
+  return participants[0][1]
+}
+
+const parseResponses = (responseData) => {
+  if (typeof responseData === 'undefined') {
+    return []
+  }
+
+  return responseData.flatMap((response) => {
+    try {
+      const json = JSON.parse(response)
+      return [
+        {
+          participant: json.participant,
+          value: json.response,
+        },
+      ]
+    } catch (e) {
+      return []
+    }
+  })
+}
+
+const getFullResponseData = async ({ id }) => {
+  const instanceKey = `instance:${id}`
+
+  const allResponses = await responseCache
+    .multi()
+    .lrange(`${instanceKey}:responses`, 0, -1)
+    .lrange(`${instanceKey}:dropped`, 0, -1)
+    .del(`${instanceKey}:responses`, `${instanceKey}:dropped`)
+    .exec()
+
+  const responses = parseResponses(allResponses[0][1])
+  const dropped = parseResponses(allResponses[1][1])
+
+  return { responses, dropped }
+}
+
+function enhanceSessionParticipants({ authenticationMode, sessionNamespace, sessionId, participants }) {
+  return participants.map(({ username }) => ({
+    _id: uuidv5(username, sessionNamespace),
+    session: sessionId,
+    username,
+    password:
+      authenticationMode === SESSION_AUTHENTICATION_MODE.AAI
+        ? undefined
+        : passwordGenerator.generate({ length: 14, uppercase: true, symbols: false, numbers: true }),
+  }))
+}
+
 /**
  * Create a new session
  */
-const createSession = async ({ name, questionBlocks = [], userId }) => {
+const createSession = async ({
+  name,
+  questionBlocks = [],
+  participants = [],
+  authenticationMode,
+  storageMode,
+  userId,
+}) => {
   const sessionId = ObjectId()
   const { blocks, instances, promises } = await mapBlocks({
     sessionId,
@@ -354,19 +463,37 @@ const createSession = async ({ name, questionBlocks = [], userId }) => {
     userId,
   })
 
+  // initialize a new session namespace for hashing purposes
+  const sessionNamespace = uuidv4()
+
+  // if there are any participants specified, set the session to be authentication-based
+  const enhancedParticipants = enhanceSessionParticipants({
+    authenticationMode,
+    sessionNamespace,
+    sessionId,
+    participants,
+  })
+
   // create a new session model
   // pass in the list of blocks created above
   const newSession = new SessionModel({
     _id: sessionId,
+    namespace: sessionNamespace,
     name,
     blocks,
     user: userId,
+    participants: enhancedParticipants,
+    settings: {
+      isParticipantAuthenticationEnabled: enhancedParticipants.length > 0,
+      authenticationMode: authenticationMode || SESSION_AUTHENTICATION_MODE.NONE,
+      storageMode: storageMode || SESSION_STORAGE_MODE.SECRET,
+    },
   })
 
   // save everything at once
   await Promise.all([
     ...promises,
-    ...instances.map(instance => instance.save()),
+    ...instances.map((instance) => instance.save()),
     newSession.save(),
     UserModel.update(
       { _id: userId },
@@ -382,7 +509,7 @@ const createSession = async ({ name, questionBlocks = [], userId }) => {
 /**
  * Modify a session
  */
-const modifySession = async ({ id, name, questionBlocks, userId }) => {
+const modifySession = async ({ id, name, questionBlocks, participants, authenticationMode, storageMode, userId }) => {
   // get the specified session from the database
   const sessionWithInstances = await SessionModel.findOne({
     _id: id,
@@ -405,6 +532,11 @@ const modifySession = async ({ id, name, questionBlocks, userId }) => {
     throw new ForbiddenError(Errors.SESSION_ALREADY_STARTED)
   }
 
+  // if the session does not have a namespace yet, create one
+  if (typeof session.namespace === 'undefined') {
+    session.namespace = uuidv4()
+  }
+
   // if the name parameter is set, update the session name
   if (name) {
     session.name = name
@@ -416,16 +548,14 @@ const modifySession = async ({ id, name, questionBlocks, userId }) => {
     const oldInstances = sessionWithInstances.blocks.reduce((acc, block) => [...acc, ...block.instances], [])
 
     // remove the question instance ids from the corresponding question entities
-    const questionCleanup = oldInstances.map(instance =>
+    const questionCleanup = oldInstances.map((instance) =>
       QuestionModel.findByIdAndUpdate(instance.question, {
         $pull: { instances: instance.id },
       })
     )
 
     // completely remove the instance entities
-    const instanceCleanup = QuestionInstanceModel.deleteMany({
-      _id: { $in: oldInstances },
-    })
+    const instanceCleanup = QuestionInstanceModel.deleteMany({ _id: { $in: oldInstances } })
 
     // map the blocks
     const { blocks, instances, promises } = await mapBlocks({
@@ -438,7 +568,30 @@ const modifySession = async ({ id, name, questionBlocks, userId }) => {
     session.blocks = blocks
 
     // await all promises
-    await Promise.all([...promises, instances.map(instance => instance.save()), questionCleanup, instanceCleanup])
+    await Promise.all([...promises, instances.map((instance) => instance.save()), questionCleanup, instanceCleanup])
+  }
+
+  // if the participants parameter is set, update the participants list
+  if (typeof participants !== 'undefined' && participants.length > 0) {
+    const enhancedParticipants = enhanceSessionParticipants({
+      authenticationMode: authenticationMode || session.settings.authenticationMode,
+      sessionNamespace: session.namespace,
+      sessionId: id,
+      participants,
+    })
+    session.participants = enhancedParticipants
+    session.settings.isParticipantAuthenticationEnabled = true
+  } else {
+    session.participants = []
+    session.settings.isParticipantAuthenticationEnabled = false
+  }
+
+  // update the session authentication and storage mode
+  if (authenticationMode) {
+    session.settings.authenticationMode = authenticationMode
+  }
+  if (storageMode) {
+    session.settings.storageMode = storageMode
   }
 
   // save the updated session to the database
@@ -482,9 +635,11 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
       // if the session is paused, reinitialize the redis cache with persisted results
       if (session.status === SESSION_STATUS.PAUSED && session.activeInstances.length > 0) {
         await Promise.all(
-          session.activeInstances.map(async instanceId => {
+          session.activeInstances.map(async (instanceId) => {
             const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
-            await initializeResponseCache(instance)
+            await initializeResponseCache(instance, session)
+            instance.isOpen = true
+            await instance.save()
           })
         )
       }
@@ -516,11 +671,19 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
       // if the session has active instances, persist the results
       if (session.activeInstances.length > 0) {
         await Promise.all(
-          session.activeInstances.map(async instanceId => {
+          session.activeInstances.map(async (instanceId) => {
             const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
+
+            instance.isOpen = false
 
             // persist the results of the paused instances
             instance.results = await computeInstanceResults(instance)
+            instance.blockedParticipants = await getBlockedParticipants(instance)
+            if (session.settings.storageMode === SESSION_STORAGE_MODE.COMPLETE) {
+              const { responses, dropped } = await getFullResponseData(instance)
+              instance.responses = responses
+              instance.dropped = dropped
+            }
 
             return instance.save()
           })
@@ -574,12 +737,21 @@ const sessionAction = async ({ sessionId, userId }, actionType) => {
           session.blocks[i].execution += 1
           session.blocks[i].expiresAt = null
 
-          // reset any results that are already stored in the database
+          // reset any results that are already stored in the database and response cache
           promises.push(
-            session.blocks[i].instances.map(async instanceId => {
+            session.blocks[i].instances.map(async (instanceId) => {
+              // cleanup the response cache
+              const cacheKeys = await responseCache.keys(`instance:${instanceId}:*`)
+              if (cacheKeys.length > 0) {
+                await responseCache.del(...cacheKeys)
+              }
+
+              // reset all instance data
               const instance = await QuestionInstanceModel.findById(instanceId)
               instance.isOpen = false
+              instance.blockedParticipants = []
               instance.responses = []
+              instance.dropped = []
               instance.results = null
               return instance.save()
             })
@@ -664,6 +836,9 @@ const updateSettings = async ({ sessionId, userId, settings, shortname }) => {
   session.settings = {
     ...session.settings,
     ...settings,
+    // ensure that participant authentication cannot be changed here
+    isParticipantAuthenticationEnabled: session.settings.isParticipantAuthenticationEnabled,
+    storageMode: session.settings.storageMode,
   }
 
   // if the feedback channel functionality is set to be deactivated
@@ -701,7 +876,7 @@ async function deactivateBlockById({ userId, sessionId, blockId, incrementActive
   }
 
   // find the index of the block with the given id
-  const blockIndex = session.blocks.findIndex(block => block.id === blockId)
+  const blockIndex = session.blocks.findIndex((block) => block.id === blockId)
 
   // find the next block for the running session
   const oldBlock = session.blocks[blockIndex]
@@ -719,7 +894,7 @@ async function deactivateBlockById({ userId, sessionId, blockId, incrementActive
 
   // update the instances in the currently active block to be closed
   await Promise.all(
-    oldBlock.instances.map(async instanceId => {
+    oldBlock.instances.map(async (instanceId) => {
       const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
 
       // set the instances to be open
@@ -727,6 +902,12 @@ async function deactivateBlockById({ userId, sessionId, blockId, incrementActive
 
       // compute the instance results based on redis cache contents
       instance.results = await computeInstanceResults(instance)
+      instance.blockedParticipants = await getBlockedParticipants(instance)
+      if (session.settings.storageMode === SESSION_STORAGE_MODE.COMPLETE) {
+        const { responses, dropped } = await getFullResponseData(instance)
+        instance.responses = responses
+        instance.dropped = dropped
+      }
 
       return instance.save()
     })
@@ -762,7 +943,7 @@ async function activateBlockById({ userId, sessionId, blockId }) {
   }
 
   // find the index of the block with the given id
-  const blockIndex = session.blocks.findIndex(block => block.id === blockId)
+  const blockIndex = session.blocks.findIndex((block) => block.id === blockId)
 
   // find the next block for the running session
   const newBlock = session.blocks[blockIndex]
@@ -770,9 +951,9 @@ async function activateBlockById({ userId, sessionId, blockId }) {
   // if the newly activated block has been executed before, rehydrate the cache
   if (newBlock.status === QUESTION_BLOCK_STATUS.EXECUTED) {
     await Promise.all(
-      newBlock.instances.map(async instance => {
+      newBlock.instances.map(async (instance) => {
         const instanceWithDetails = await QuestionInstanceModel.findById(instance).populate('question')
-        return initializeResponseCache(instanceWithDetails)
+        return initializeResponseCache(instanceWithDetails, session)
       })
     )
   }
@@ -789,7 +970,7 @@ async function activateBlockById({ userId, sessionId, blockId }) {
 
   // update the instances in the new active block to be open
   await Promise.all(
-    newBlock.instances.map(async instanceId => {
+    newBlock.instances.map(async (instanceId) => {
       const instance = await QuestionInstanceModel.findById(instanceId).populate('question')
 
       // set the instances to be open
@@ -797,7 +978,7 @@ async function activateBlockById({ userId, sessionId, blockId }) {
 
       // if a response cache is available, hydrate it with the newly activated instances
       if (responseCache) {
-        await initializeResponseCache(instance)
+        await initializeResponseCache(instance, session)
       }
 
       return instance.save()
@@ -884,10 +1065,10 @@ const deleteSessions = async ({ userId, ids }) => {
   const sessions = await SessionModel.find({ _id: { $in: ids }, user: userId }).populate('blocks.instances')
 
   await Promise.all(
-    sessions.map(session => {
+    sessions.map((session) => {
       // compute the list of question instances used in this session
       const instances = session.blocks.reduce((acc, block) => [...acc, ...block.instances], [])
-      const instanceIds = instances.map(instance => instance.id)
+      const instanceIds = instances.map((instance) => instance.id)
 
       // delete the session and all related question instances
       // remove the session from the user model
@@ -898,7 +1079,7 @@ const deleteSessions = async ({ userId, ids }) => {
           user: userId,
         }),
         Promise.all(
-          instances.map(instance =>
+          instances.map((instance) =>
             QuestionModel.findByIdAndUpdate(instance.question, {
               $pull: { instances: instance.id },
             })
@@ -918,7 +1099,7 @@ async function modifyQuestionBlock({ sessionId, id, questionBlockSettings, userI
     throw new ForbiddenError('INVALID_QUESTION_BLOCK')
   }
 
-  const blockIndex = session.blocks.findIndex(block => block.id === id)
+  const blockIndex = session.blocks.findIndex((block) => block.id === id)
   if (blockIndex < 0) {
     return session
   }
@@ -945,4 +1126,5 @@ module.exports = {
   publishSessionUpdate,
   modifyQuestionBlock,
   activateBlockById,
+  computeInstanceResults,
 }

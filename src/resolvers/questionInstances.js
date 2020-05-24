@@ -13,11 +13,11 @@ const questionInstanceByIDQuery = (_, { id }, { loaders }) => ensureLoaders(load
 
 const questionInstancesByPVQuery = async (parentValue, args, { loaders }) => {
   const loader = ensureLoaders(loaders).questionInstances
-  const instances = await Promise.all(parentValue.instances.map(instance => loader.load(instance)))
-  return instances.filter(instance => !!instance)
+  const instances = await Promise.all(parentValue.instances.map((instance) => loader.load(instance)))
+  return instances.filter((instance) => !!instance)
 }
 
-const responsesByPVQuery = parentValue =>
+const responsesByPVQuery = (parentValue) =>
   parentValue.responses.map(({ id, value, createdAt }) => ({
     id,
     ...value,
@@ -69,12 +69,11 @@ const resultsByPVQuery = async ({ session, id, isOpen, results }) => {
 }
 
 /* ----- mutations ----- */
-const addResponseMutation = async (_, { fp, instanceId, response }, { ip }) => {
+const addResponseMutation = async (_, { instanceId, response }, { auth }) => {
   await SessionExecService.addResponse({
-    fp,
-    ip,
     instanceId,
     response,
+    auth,
   })
 
   return 'RESPONSE_ADDED'

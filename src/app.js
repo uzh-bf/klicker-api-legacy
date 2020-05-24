@@ -74,7 +74,7 @@ mongoose.connection
   .once('open', () => {
     console.log('[mongo] Connection to MongoDB established.')
   })
-  .on('error', error => {
+  .on('error', (error) => {
     throw new Error(`[mongo] Could not connect to MongoDB: ${error}`)
   })
 
@@ -145,7 +145,7 @@ if (isProd) {
       } else if (Array.isArray(req.body)) {
         // if the transaction is a batch of operations
         const operationsConcat = req.body
-          .map(o => o.operationName)
+          .map((o) => o.operationName)
           .sort()
           .join('/')
         apm.setTransactionName(operationsConcat)
@@ -162,13 +162,15 @@ if (isProd) {
 
   // add a rate limiting middleware
   if (SECURITY_CFG.rateLimit.enabled) {
+    const RedisStore = require('rate-limit-redis')
+
     const { windowMs, max } = SECURITY_CFG.rateLimit
-    // basic rate limiting configuration
+
     const limiterSettings = {
       windowMs,
       max,
-      keyGenerator: req => `${req.auth ? req.auth.sub : req.ip}`,
-      onLimitReached: req => {
+      keyGenerator: (req) => `${req.auth ? req.auth.sub : req.ip}`,
+      onLimitReached: (req) => {
         const error = `> Rate-Limited a Request from ${req.ip} ${req.auth.sub || 'anon'}!`
 
         console.error(error)
@@ -181,26 +183,14 @@ if (isProd) {
           Raven.captureException(error)
         }
       },
+      store: new RedisStore({
+        client: limitRedis,
+        expiry: Math.round(windowMs / 1000),
+        prefix: 'limiter:',
+      }),
     }
 
-    // if redis is available, use it to centrally store rate limiting dataconst
-    let limiter
-    if (limitRedis) {
-      const RedisStore = require('rate-limit-redis')
-      limiter = new RateLimit({
-        ...limiterSettings,
-        store: new RedisStore({
-          client: limitRedis,
-          expiry: Math.round(windowMs / 1000),
-          prefix: 'limiter:',
-        }),
-      })
-    } else {
-      // if redis is not available, setup basic rate limiting with in-memory store
-      limiter = new RateLimit(limiterSettings)
-    }
-
-    middleware.push(limiter)
+    middleware.push(new RateLimit(limiterSettings))
   }
 }
 
@@ -231,7 +221,7 @@ const apollo = new ApolloServer({
   engine: SERVICES_CFG.apolloEngine.enabled && {
     apiKey: SERVICES_CFG.apolloEngine.apiKey,
   },
-  formatError: e => {
+  formatError: (e) => {
     console.log(pe.render(e))
 
     if (isProd && Raven) {
@@ -272,7 +262,7 @@ apollo.applyMiddleware({
   onHealthCheck: async () => {
     // check connection to mongo
     if (!mongoose.connection.readyState) {
-      console.log('[klicker-react] MongoDB connection failure...')
+      console.error('[klicker-react] MongoDB connection failure...')
       throw new Error('MONGODB_CONNECTION_ERROR')
     }
 
@@ -282,7 +272,7 @@ apollo.applyMiddleware({
       (pageCache && pageCache.status !== 'ready') ||
       (responseCache && responseCache.status !== 'ready')
     ) {
-      console.log('[klicker-react] Redis connection failure...')
+      console.error('[klicker-react] Redis connection failure...')
       throw new Error('REDIS_CONNECTION_ERROR')
     }
   },

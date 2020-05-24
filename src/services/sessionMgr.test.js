@@ -7,7 +7,7 @@ const { QuestionInstanceModel, SessionModel, UserModel } = require('../models')
 const { initializeDb, prepareSessionFactory } = require('../lib/test/setup')
 const { sessionSerializer, questionInstanceSerializer } = require('../lib/test/serializers')
 const { getRedis } = require('../redis')
-const { SESSION_STATUS, QUESTION_TYPES } = require('../constants')
+const { SESSION_STATUS, QUESTION_TYPES, QUESTION_BLOCK_STATUS } = require('../constants')
 
 mongoose.Promise = Promise
 
@@ -22,6 +22,7 @@ const responseCache = getRedis(3)
 
 describe('SessionMgrService', () => {
   let sessionId
+  let sessionIdWithAuth
   let userId
   let questions
 
@@ -34,7 +35,7 @@ describe('SessionMgrService', () => {
       withQuestions: true,
     }))
   })
-  afterAll(async done => {
+  afterAll(async (done) => {
     userId = undefined
     await mongoose.disconnect(done)
   })
@@ -152,6 +153,8 @@ describe('SessionMgrService', () => {
   })
 
   describe('modifySession', () => {
+    // TODO: make use of the session factory
+
     it('allows modifying a session', async () => {
       const updatedSession = await SessionMgrService.modifySession({
         id: sessionId,
@@ -297,8 +300,10 @@ describe('SessionMgrService', () => {
       expect(cancelledSession.activeBlock).toEqual(-1)
       expect(cancelledSession.activeInstances.length).toEqual(0)
       for (let i = 0; i < cancelledSession.blocks.length; i += 1) {
-        expect(cancelledSession.blocks[i].status).toEqual('PLANNED')
+        expect(cancelledSession.blocks[i].status).toEqual(QUESTION_BLOCK_STATUS.PLANNED)
       }
+
+      // TODO: ensure that the redis cache has been reset to a pristine state
     })
 
     afterAll(async () => {
@@ -338,6 +343,9 @@ describe('SessionMgrService', () => {
 
       expect(endedSession.status).toEqual(SESSION_STATUS.COMPLETED)
       expect(endedSession).toMatchSnapshot()
+
+      // TODO: ensure that the session results have been aggregated and stored in the database
+      // TODO: ensure that the session has been pruned from the redis cache
     })
 
     it('returns on an already completed session', async () => {
@@ -573,7 +581,7 @@ describe('SessionMgrService', () => {
       const instanceIds = preparedSession.blocks.reduce((acc, block) => [...acc, ...block.instances], [])
 
       // ensure that all the instances are present
-      instanceIds.forEach(async questionInstance => {
+      instanceIds.forEach(async (questionInstance) => {
         const matchingInstances = await QuestionInstanceModel.count({
           _id: questionInstance,
         })
@@ -596,7 +604,7 @@ describe('SessionMgrService', () => {
       expect(matchingSessions).toEqual(0)
 
       // expect the instances to have been deleted
-      instanceIds.forEach(async questionInstance => {
+      instanceIds.forEach(async (questionInstance) => {
         const matchingInstances = await QuestionInstanceModel.count({
           _id: questionInstance,
         })
@@ -605,6 +613,50 @@ describe('SessionMgrService', () => {
 
       const userAfter = await UserModel.findById(userId)
       expect(userAfter.sessions.length).toEqual(userBefore.sessions.length - 1)
+    })
+  })
+
+  describe('createSession (auth)', () => {
+    it('allows creating a valid session with participant authentication', async () => {
+      const newSession = await SessionMgrService.createSession({
+        name: 'with authentication',
+        participants: [{ username: 'testparticipant' }, { username: 'participant2' }],
+        questionBlocks: [
+          {
+            questions: [
+              { question: questions[QUESTION_TYPES.SC].id, version: 0 },
+              { question: questions[QUESTION_TYPES.MC].id, version: 0 },
+            ],
+          },
+          {
+            questions: [
+              { question: questions[QUESTION_TYPES.FREE].id, version: 0 },
+              { question: questions[QUESTION_TYPES.FREE_RANGE].id, version: 0 },
+            ],
+          },
+        ],
+        userId,
+      })
+
+      expect(newSession.participants).toHaveLength(2)
+      expect(newSession).toMatchSnapshot()
+
+      sessionIdWithAuth = newSession.id
+    })
+  })
+
+  describe('modifySession (auth)', () => {
+    // TODO: make use of the session factory
+
+    it('allows changing the participants of a session', async () => {
+      const updatedSession = await SessionMgrService.modifySession({
+        id: sessionIdWithAuth,
+        participants: [{ username: 'newparticipant' }],
+        userId,
+      })
+
+      expect(updatedSession.participants).toHaveLength(1)
+      expect(updatedSession).toMatchSnapshot()
     })
   })
 })

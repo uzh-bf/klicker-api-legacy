@@ -8,12 +8,10 @@ const { ensureLoaders } = require('../lib/loaders')
 /* ----- queries ----- */
 const allSessionsQuery = async (parentValue, args, { auth, loaders }) => {
   // get all the sessions for the given user
-  const results = await SessionModel.find({ user: auth.sub }).sort({
-    createdAt: -1,
-  })
+  const results = await SessionModel.find({ user: auth.sub }).sort({ createdAt: -1 })
 
   // prime the dataloader cache
-  results.forEach(session => ensureLoaders(loaders).sessions.prime(session.id, session))
+  results.forEach((session) => ensureLoaders(loaders).sessions.prime(session.id, session))
 
   return results
 }
@@ -37,7 +35,7 @@ const sessionByPVQuery = (parentValue, args, { loaders }) => {
 }
 const sessionsByPVQuery = (parentValue, args, { loaders }) => {
   const loader = ensureLoaders(loaders).sessions
-  return Promise.all(parentValue.sessions.map(session => loader.load(session)))
+  return Promise.all(parentValue.sessions.map((session) => loader.load(session)))
 }
 
 const runningSessionQuery = async (parentValue, args, { auth }) => {
@@ -45,7 +43,8 @@ const runningSessionQuery = async (parentValue, args, { auth }) => {
   return user.runningSession
 }
 
-const joinSessionQuery = async (parentValue, { shortname }) => SessionExecService.joinSession({ shortname })
+const joinSessionQuery = async (parentValue, { shortname }, { auth }) =>
+  SessionExecService.joinSession({ shortname, auth })
 
 // calculate the session runtime
 const runtimeByPVQuery = ({ startedAt }) => {
@@ -63,67 +62,55 @@ const runtimeByPVQuery = ({ startedAt }) => {
 }
 
 /* ----- mutations ----- */
-const createSessionMutation = (parentValue, { session: { name, blocks } }, { auth }) =>
+const createSessionMutation = (
+  parentValue,
+  { session: { name, blocks, participants, authenticationMode, storageMode } },
+  { auth }
+) =>
   SessionMgrService.createSession({
     name,
     questionBlocks: blocks,
+    authenticationMode,
+    participants,
+    storageMode,
     userId: auth.sub,
   })
 
-const modifySessionMutation = (parentValue, { id, session: { name, blocks } }, { auth }) =>
+const modifySessionMutation = (
+  parentValue,
+  { id, session: { name, blocks, participants, authenticationMode, storageMode } },
+  { auth }
+) =>
   SessionMgrService.modifySession({
     id,
     name,
+    participants,
+    authenticationMode,
+    storageMode,
     questionBlocks: blocks,
     userId: auth.sub,
   })
 
-const startSessionMutation = (parentValue, { id }, { auth }) =>
-  SessionMgrService.startSession({
-    id,
-    userId: auth.sub,
-  })
+const startSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.startSession({ id, userId: auth.sub })
 
 const activateNextBlockMutation = (parentValue, args, { auth }) =>
-  SessionMgrService.activateNextBlock({
-    userId: auth.sub,
-  })
+  SessionMgrService.activateNextBlock({ userId: auth.sub })
 
 const activateBlockByIdMutation = (parentValue, { blockId, sessionId }, { auth }) =>
   SessionMgrService.activateBlockById({ userId: auth.sub, sessionId, blockId })
 
-const pauseSessionMutation = (parentValue, { id }, { auth }) =>
-  SessionMgrService.pauseSession({
-    id,
-    userId: auth.sub,
-  })
+const pauseSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.pauseSession({ id, userId: auth.sub })
 
 const cancelSessionMutation = (parentValue, { id }, { auth }) =>
-  SessionMgrService.cancelSession({
-    id,
-    userId: auth.sub,
-  })
+  SessionMgrService.cancelSession({ id, userId: auth.sub })
 
 const resetQuestionBlockMutation = (parentValue, { sessionId, blockId }, { auth }) =>
-  SessionExecService.resetQuestionBlock({
-    sessionId,
-    blockId,
-    userId: auth.sub,
-  })
+  SessionExecService.resetQuestionBlock({ sessionId, blockId, userId: auth.sub })
 
-const endSessionMutation = (parentValue, { id }, { auth }) =>
-  SessionMgrService.endSession({
-    id,
-    userId: auth.sub,
-  })
+const endSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.endSession({ id, userId: auth.sub })
 
-const addFeedbackMutation = async (parentValue, { fp, sessionId, content }, { ip }) => {
-  await SessionExecService.addFeedback({
-    fp,
-    ip,
-    sessionId,
-    content,
-  })
+const addFeedbackMutation = async (parentValue, { sessionId, content }) => {
+  await SessionExecService.addFeedback({ sessionId, content })
 
   return 'FEEDBACK_ADDED'
 }
@@ -131,31 +118,23 @@ const addFeedbackMutation = async (parentValue, { fp, sessionId, content }, { ip
 const deleteFeedbackMutation = (parentValue, { sessionId, feedbackId }, { auth }) =>
   SessionExecService.deleteFeedback({ sessionId, feedbackId, userId: auth.sub })
 
-const addConfusionTSMutation = async (parentValue, { fp, sessionId, difficulty, speed }, { ip }) => {
-  await SessionExecService.addConfusionTS({
-    fp,
-    ip,
-    sessionId,
-    difficulty,
-    speed,
-  })
+const addConfusionTSMutation = async (parentValue, { sessionId, difficulty, speed }) => {
+  await SessionExecService.addConfusionTS({ sessionId, difficulty, speed })
 
   return 'CONFUSION_ADDED'
 }
 
 const updateSessionSettingsMutation = (parentValue, { sessionId, settings }, { auth }) =>
-  SessionMgrService.updateSettings({
-    sessionId,
-    userId: auth.sub,
-    settings,
-    shortname: auth.shortname,
-  })
+  SessionMgrService.updateSettings({ sessionId, userId: auth.sub, settings, shortname: auth.shortname })
 
 const deleteSessionsMutation = (parentValue, { ids }, { auth }) =>
   SessionMgrService.deleteSessions({ userId: auth.sub, ids })
 
 const modifyQuestionBlockMutation = (parentValue, { sessionId, id, questionBlockSettings }, { auth }) =>
   SessionMgrService.modifyQuestionBlock({ id, sessionId, userId: auth.sub, questionBlockSettings })
+
+const loginParticipantMutation = (parentValue, { sessionId, username, password }, { res }) =>
+  SessionExecService.loginParticipant({ sessionId, username, password, res })
 
 module.exports = {
   // queries
@@ -183,4 +162,5 @@ module.exports = {
   deleteSessions: deleteSessionsMutation,
   resetQuestionBlock: resetQuestionBlockMutation,
   modifyQuestionBlock: modifyQuestionBlockMutation,
+  loginParticipant: loginParticipantMutation,
 }

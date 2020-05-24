@@ -8,7 +8,8 @@ require('dotenv').config()
 
 const mongoose = require('mongoose')
 const { isEmail, normalizeEmail } = require('validator')
-const { UserModel } = require('../models')
+
+const { UserModel } = require('../../../src/models')
 
 mongoose.Promise = Promise
 
@@ -26,8 +27,8 @@ mongoose.connection
     // go through all users
     // update their email with a normalized version
     users
-      .filter(user => isEmail(user.email))
-      .forEach(async user => {
+      .filter((user) => isEmail(user.email))
+      .forEach(async (user) => {
         const { id, email } = user
         const normalizedEmail = normalizeEmail(email)
 
@@ -37,6 +38,6 @@ mongoose.connection
         }
       })
   })
-  .on('error', error => {
+  .on('error', (error) => {
     console.warn('> Warning: ', error)
   })

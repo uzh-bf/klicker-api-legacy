@@ -44,6 +44,7 @@ const {
   deleteSessions,
   resetQuestionBlock,
   modifyQuestionBlock,
+  loginParticipant,
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
@@ -114,6 +115,7 @@ const typeDefs = [
     deleteSessions(ids: [ID!]!): String!
     endSession(id: ID!): Session!
     login(email: String!, password: String!): ID!
+    loginParticipant(sessionId: ID!, username: String, password: String!): ID!
     logout: String!
     modifyQuestionBlock(sessionId: ID!, id: ID!, questionBlockSettings: Session_QuestionBlockModifyInput!): Session!
     modifyQuestion(id: ID!, question: QuestionModifyInput!): Question!
@@ -179,6 +181,7 @@ const resolvers = {
     deleteSessions: requireAuth(deleteSessions),
     endSession: requireAuth(endSession),
     login,
+    loginParticipant,
     logout,
     modifyQuestion: requireAuth(modifyQuestion),
     modifySession: requireAuth(modifySession),
@@ -241,7 +244,7 @@ const resolvers = {
     question: questionByPV,
     responses: responsesByPV,
     results: resultsByPV,
-    session: pv => String(pv.session), // HACK: fix broken ID coercion of graphql 14.0.0
+    session: (pv) => String(pv.session), // HACK: fix broken ID coercion of graphql 14.0.0
   },
   QuestionInstance_Public: {
     question: questionByPV,
