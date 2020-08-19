@@ -401,6 +401,9 @@ const joinSession = async ({ shortname, auth }) => {
     }
   }
 
+  // increment the user counter of the session by 1
+  await SessionModel.findByIdAndUpdate(user.runningSession.id, { $inc: { userCount: 1 } })
+
   return {
     id,
     settings,

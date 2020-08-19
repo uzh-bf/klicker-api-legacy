@@ -49,7 +49,7 @@ const Session = new mongoose.Schema(
     activeStep: { type: Number, default: 0 },
     activeInstances: [{ type: ObjectId, ref: 'QuestionInstance' }],
     participants: [{ type: SessionParticipant }],
-
+    userCount: { type: Number, default: 0 },
     startedAt: { type: Date },
     finishedAt: { type: Date },
   },

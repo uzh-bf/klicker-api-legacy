@@ -30,6 +30,7 @@ module.exports = `
     timeLimit: Int
     expiresAt: DateTime
     execution: Int
+    userCount: Int
 
     settings: Session_Settings!
 
@@ -58,6 +59,7 @@ module.exports = `
     activeStep: Int!
     execution: Int
     runtime: String
+    userCount: Int!
 
     status: Session_Status!
     settings: Session_Settings!
@@ -148,7 +150,6 @@ module.exports = `
     id: ID!
     content: String!
     votes: Int!
-
     createdAt: DateTime!
   }
 
@@ -156,7 +157,7 @@ module.exports = `
     id: ID!
     activeStep: Int!
     activeBlock: Int!
-
+    userCount: Int!
     blocks: [SessionUpdate_Block!]!
   }
 

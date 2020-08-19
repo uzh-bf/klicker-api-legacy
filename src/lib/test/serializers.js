@@ -101,6 +101,7 @@ const sessionSerializer = {
     ActiveBlock: ${val.activeBlock}
     ActiveStep: ${val.activeStep}
     ActiveInstances: ${val.activeInstances.length}
+    UserCount: ${val.userCount}
 
     Blocks: [${val.blocks.map(
       (block) => `{
