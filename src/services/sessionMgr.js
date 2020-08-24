@@ -1124,6 +1124,7 @@ module.exports = {
   freeToResults,
   cleanCache,
   publishSessionUpdate,
+  publishRunningSessionUpdate,
   modifyQuestionBlock,
   activateBlockById,
   computeInstanceResults,

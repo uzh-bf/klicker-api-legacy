@@ -9,7 +9,7 @@ const CFG = require('../klicker.conf.js')
 const { QuestionInstanceModel, UserModel, FileModel, SessionModel } = require('../models')
 const { QUESTION_GROUPS, QUESTION_TYPES, SESSION_STATUS, SESSION_STORAGE_MODE } = require('../constants')
 const { getRedis } = require('../redis')
-const { getRunningSession, cleanCache, publishSessionUpdate } = require('./sessionMgr')
+const { getRunningSession, cleanCache, publishSessionUpdate, publishRunningSessionUpdate } = require('./sessionMgr')
 const { pubsub, CONFUSION_ADDED, FEEDBACK_ADDED } = require('../resolvers/subscriptions')
 const { AUTH_COOKIE_SETTINGS } = require('./accounts')
 
@@ -371,7 +371,8 @@ const joinSession = async ({ shortname, auth }) => {
   }
 
   // populate the running session with active instance and question details
-  const runningSession = await SessionModel.findById(user.runningSession.id).populate({
+  const sessionId = user.runningSession.id
+  const runningSession = await SessionModel.findById(sessionId).populate({
     path: `blocks.${user.runningSession.activeBlock}.instances`,
     populate: {
       path: 'question',
@@ -402,7 +403,11 @@ const joinSession = async ({ shortname, auth }) => {
   }
 
   // increment the user counter of the session by 1
-  await SessionModel.findByIdAndUpdate(user.runningSession.id, { $inc: { userCount: 1 } })
+  runningSession.userCount += 1
+  await runningSession.save()
+  publishRunningSessionUpdate({ sessionId })
+
+  // await SessionModel.findByIdAndUpdate(user.runningSession.id, { $inc: { userCount: 1 } })
 
   return {
     id,
