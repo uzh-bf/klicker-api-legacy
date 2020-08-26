@@ -3168,7 +3168,7 @@ describe('Integration', () => {
   })
 
   describe('Session Execution (authenticated, complete)', () => {
-    const instanceIds = {}npm run
+    const instanceIds = {}
 
     it('LECTURER: can start a session', async () => {
       const data = ensureNoErrors(
