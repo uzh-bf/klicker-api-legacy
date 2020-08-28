@@ -18,6 +18,9 @@ const helmet = require('helmet')
 const morgan = require('morgan')
 const RateLimit = require('express-rate-limit')
 
+// authentication middleware
+const permissions = require('./services/authentication')
+
 // import the configuration
 const CFG = require('./klicker.conf.js')
 
@@ -254,6 +257,8 @@ const apollo = new ApolloServer({
   },
 })
 
+// apply the authentication to the schema
+
 // apply the apollo middleware to express
 apollo.applyMiddleware({
   app,
@@ -276,6 +281,7 @@ apollo.applyMiddleware({
       throw new Error('REDIS_CONNECTION_ERROR')
     }
   },
+  permissions,
 })
 
 module.exports = { app, apollo }
