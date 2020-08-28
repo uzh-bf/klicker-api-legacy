@@ -37,32 +37,11 @@ const AUTH_COOKIE_SETTINGS = {
  */
 const generateJwtSettings = (user, scope = ['user']) => ({
   // expiresIn: 86400,
+  role: user.role,
   sub: user.id,
   scope,
   shortname: user.shortname,
 })
-
-/**
- * Check whether an authentication object is valid
- * @param {Object} auth The authentication object
- */
-const isAuthenticated = (auth) => {
-  if (auth && auth.sub) {
-    return true
-  }
-  return false
-}
-
-/**
- * HOC to ensure the requester is authenticated
- * @param {Function} wrapped The resolver to be secured
- */
-const requireAuth = (wrapped) => (parentValue, args, context) => {
-  if (!isAuthenticated(context.auth)) {
-    throw new AuthenticationError('INVALID_LOGIN')
-  }
-  return wrapped(parentValue, args, context)
-}
 
 /**
  * Check whether a JWT is valid
@@ -602,8 +581,6 @@ module.exports = {
   checkAvailability,
   checkAccountStatus,
   updateAccountData,
-  isAuthenticated,
-  requireAuth,
   isValidJWT,
   getToken,
   signup,

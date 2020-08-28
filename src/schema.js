@@ -1,8 +1,7 @@
 const { GraphQLDate, GraphQLTime, GraphQLDateTime } = require('graphql-iso-date')
 
-// authentication middleware
-const { requireAuth } = require('./services/accounts')
 const { requestPresignedURL } = require('./resolvers/files')
+
 const {
   allQuestions,
   createQuestion,
@@ -161,7 +160,7 @@ const resolvers = {
     checkAvailability,
     joinSession,
     question,
-    runningSession: requireAuth(runningSession),
+    runningSession,
     session,
     sessionPublic: session,
     user: authUser,

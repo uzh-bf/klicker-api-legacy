@@ -23,6 +23,7 @@ module.exports = `
     institution: String
     useCase: String
     hmac: String!
+    role: String!
 
     runningSession: Session
 
