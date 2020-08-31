@@ -1,6 +1,6 @@
 const JWT = require('jsonwebtoken')
 const { AuthenticationError, ForbiddenError } = require('apollo-server-express')
-const { rule, shield, allow } = require('graphql-shield')
+const { rule, shield, allow, and } = require('graphql-shield')
 const CFG = require('../klicker.conf.js')
 const { Errors } = require('../constants')
 
@@ -33,17 +33,20 @@ const isAuthenticated = rule({ cache: 'contextual' })(async (parentValue, args, 
   return new AuthenticationError(Errors.UNAUTHORIZED)
 })
 
-// checks whether provided token allows a given action
-const isInScope = (tokenType, wantedScope) => {
-  rule(`name-${(wantedScope, tokenType)}`, { cache: 'strict' })(async (parentValue, args) => {
-    return verifyToken(args.tokenType, wantedScope)
-  })
-}
+// checks whether provided token allows account deletion
+const isAccountDeletionPermitted = rule({ cache: 'strict' })(async (parentValue, args, context) => {
+  return verifyToken(args.deletionToken, 'delete', context.auth.sub)
+})
 
-/*  // Checks whether user is an admin
+const isAccountActivationPermitted = rule({ cache: 'strict' })(async (parentValue, args) => {
+  return verifyToken(args.activationToken, 'activate')
+})
+
+/*
+// Checks whether user is an admin
 const isAdmin = rule({ cache: 'contextual' })(
   async (parentValue, args, context) => {
-    return context.auth.scope.includes('admin')
+    return context.auth.role === 'admin'
   }
 )
 */
@@ -64,7 +67,7 @@ const permissions = shield({
   },
 
   Mutation: {
-    activateAccount: isInScope('activationToken', 'activate'),
+    activateAccount: isAccountActivationPermitted,
     archiveQuestions: isAuthenticated,
     addFeedback: allow,
     deleteFeedback: isAuthenticated,
@@ -87,7 +90,7 @@ const permissions = shield({
     pauseSession: isAuthenticated,
     cancelSession: isAuthenticated,
     requestAccountDeletion: isAuthenticated,
-    resolveAccountDeletion: isAuthenticated,
+    resolveAccountDeletion: and(isAuthenticated, isAccountDeletionPermitted),
     requestPassword: allow,
     requestPresignedURL: isAuthenticated,
     startSession: isAuthenticated,

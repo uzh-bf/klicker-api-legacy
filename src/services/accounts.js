@@ -3,7 +3,7 @@ const JWT = require('jsonwebtoken')
 const _get = require('lodash/get')
 const passwordGenerator = require('generate-password')
 const { isLength, isEmail, normalizeEmail } = require('validator')
-const { AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-express')
+const { AuthenticationError, UserInputError } = require('apollo-server-express')
 
 const CFG = require('../klicker.conf.js')
 const validators = require('../lib/validators')
@@ -103,31 +103,6 @@ const generateScopedToken = (user, scope, expiresIn = '1w') =>
   JWT.sign(generateJwtSettings(user, [scope]), APP_CFG.secret, {
     expiresIn,
   })
-
-/**
- * Verify an arbitrary JWT for validity and correct scoping
- * @param {*} token The JWT to be evaluated
- * @param {*} wantedScope The scope that the JWT should have to pass
- * @param {*} userId The userId that the JWT should be related to
- */
-const verifyToken = (token, wantedScope, userId) => {
-  // validate the token
-  try {
-    JWT.verify(token, APP_CFG.secret)
-  } catch (e) {
-    throw new ForbiddenError(Errors.INVALID_TOKEN)
-  }
-
-  // decode the valid token
-  const { sub, scope } = JWT.decode(token)
-
-  // ensure that the wanted scope is available
-  if ((wantedScope && !scope.includes(wantedScope)) || (userId && sub !== userId)) {
-    throw new ForbiddenError(Errors.INVALID_TOKEN)
-  }
-
-  return sub
-}
 
 /**
  * Check the availability of fields with uniqueness constraints
@@ -336,11 +311,11 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
  * @param {String} activationToken The activation token to be verified
  */
 const activateAccount = async (activationToken) => {
-  // verify the token and extract the userId of the account
-  const userId = verifyToken(activationToken, 'activate')
+  // extract the userId of the account
+  const { sub } = JWT.decode(activationToken)
 
   // activate the user account
-  await UserModel.findByIdAndUpdate(userId, {
+  await UserModel.findByIdAndUpdate(sub, {
     isActive: true,
   })
 
@@ -565,14 +540,10 @@ const performAccountDeletion = async (userId) => {
  * Resolve account deletion requests
  * Validate the deletion token previosuly sent to the stored email
  * @param {ID} userId
- * @param {String} deletionToken
  */
-const resolveAccountDeletion = async (userId, deletionToken) => {
-  // verify the deletion token and extract the user id
-  const userToDelete = verifyToken(deletionToken, 'delete', userId)
-
+const resolveAccountDeletion = async (userId) => {
   // perform the actual account deletion procedures
-  await performAccountDeletion(userToDelete)
+  await performAccountDeletion(userId)
 
   return 'ACCOUNT_DELETED'
 }
