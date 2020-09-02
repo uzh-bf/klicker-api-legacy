@@ -48,8 +48,11 @@ const {
 } = require('./resolvers/sessions')
 const { allTags, tags } = require('./resolvers/tags')
 const {
+  allUsers,
   createUser,
+  deleteUser,
   modifyUser,
+  modifyUserAsAdmin,
   login,
   logout,
   user,
@@ -87,6 +90,7 @@ const typeDefs = [
     allQuestions: [Question]!
     allSessions: [Session]!
     allTags: [Tag]!
+    allUsers: [User]!
     checkAccountStatus: ID
     checkAvailability(email: String, shortname: String): User_Availability!
     joinSession(shortname: String!): Session_Public
@@ -113,6 +117,7 @@ const typeDefs = [
     deleteQuestions(ids: [ID!]!): String!
     deleteResponse(instanceId: ID!, response: String!): String!
     deleteSessions(ids: [ID!]!): String!
+    deleteUser(id: ID!): String!
     endSession(id: ID!): Session!
     login(email: String!, password: String!): ID!
     loginParticipant(sessionId: ID!, username: String, password: String!): ID!
@@ -121,6 +126,7 @@ const typeDefs = [
     modifyQuestion(id: ID!, question: QuestionModifyInput!): Question!
     modifySession(id: ID!, session: SessionModifyInput!): Session!
     modifyUser(user: User_Modify!): User!
+    modifyUserAsAdmin(id: ID!, user: User_ModifyAsAdmin!): User!
     pauseSession(id: ID!): Session!
     cancelSession(id: ID!): Session!
     resetSession(id: ID!): Session!
@@ -156,6 +162,7 @@ const resolvers = {
     allQuestions,
     allSessions,
     allTags,
+    allUsers,
     checkAccountStatus,
     checkAvailability,
     joinSession,
@@ -179,6 +186,7 @@ const resolvers = {
     deleteQuestions,
     deleteResponse,
     deleteSessions,
+    deleteUser,
     endSession,
     login,
     loginParticipant,
@@ -186,6 +194,7 @@ const resolvers = {
     modifyQuestion,
     modifySession,
     modifyUser,
+    modifyUserAsAdmin,
     pauseSession,
     cancelSession,
     requestAccountDeletion,

@@ -255,7 +255,7 @@ async function checkAccountStatus({ res, auth }) {
  * @param {String} institution
  * @param {String} useCase
  */
-const updateAccountData = async ({ userId, email, shortname, institution, useCase }) => {
+const updateAccountData = async ({ userId, email, shortname, institution, useCase, role }) => {
   let user
   try {
     user = await UserModel.findById(userId)
@@ -297,6 +297,10 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
     if (useCase) {
       validators.useCase.check(useCase)
       user.useCase = useCase
+    }
+    if (role) {
+      validators.role.check(role)
+      user.role = role
     }
   } catch (e) {
     throw new UserInputError(Errors.INVALID_INPUT)
