@@ -29,7 +29,7 @@ const modifyUserMutation = (parentValue, { user: { email, shortname, institution
   AccountService.updateAccountData({ userId: auth.sub, email, shortname, institution, useCase })
 
 const modifyUserAsAdminMutation = (parentValue, { id, user: { email, shortname, institution, role } }) => {
-  AccountService.updateAccountData({ userId: id, email, shortname, institution, role })
+  return AccountService.updateAccountData({ userId: id, email, shortname, institution, role })
 }
 
 const loginMutation = (parentValue, { email, password }, { res }) => AccountService.login(res, email, password)

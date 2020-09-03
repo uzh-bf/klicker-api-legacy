@@ -113,7 +113,8 @@ const permissions = shield(
       sessionUpdated: allow,
       runningSessionUpdated: allow,
     },
-  } /* options={allowExternalErrors: true} */
+  },
+  { allowExternalErrors: true }
 )
 
 module.exports = {

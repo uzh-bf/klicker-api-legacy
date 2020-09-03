@@ -298,6 +298,7 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
       validators.useCase.check(useCase)
       user.useCase = useCase
     }
+
     if (role) {
       validators.role.check(role)
       user.role = role
