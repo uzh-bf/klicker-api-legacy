@@ -276,7 +276,7 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
       }
 
       // TODO enable after migration
-      // user.email = email
+      user.email = email
     }
 
     if (shortname) {
