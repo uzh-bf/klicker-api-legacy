@@ -38,7 +38,6 @@ const {
   updateSessionSettings,
   activateNextBlock,
   activateBlockById,
-  runtimeByPV,
   session,
   modifySession,
   deleteSessions,
@@ -280,7 +279,6 @@ const resolvers = {
   },
   Session: {
     user,
-    runtime: runtimeByPV,
   },
   Session_QuestionBlock: {
     instances: questionInstancesByPV,
