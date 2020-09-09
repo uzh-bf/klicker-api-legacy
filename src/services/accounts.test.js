@@ -159,22 +159,6 @@ describe('AccountService', () => {
     })
 
     describe('resolveAccountDeletion', () => {
-      /* not used anymore, deletionToken should now be tested in the tests for the shield
-
-      it('throws when passed an invalid deletion token', async () => {
-        await expect(AccountService.resolveAccountDeletion(userId, 'invalidToken')).rejects.toThrow( 
-          new ForbiddenError(Errors.INVALID_TOKEN)
-        )
-      })
-      
-
-      it('throws when users in deletion and auth token do not match', async () => {
-        await expect(AccountService.resolveAccountDeletion('someOtherUserId', deletionToken)).rejects.toThrow(
-          new ForbiddenError(Errors.INVALID_TOKEN)
-        )
-      })
-      */
-
       it('correctly performs account deletion', async () => {
         await AccountService.resolveAccountDeletion(userId)
       })

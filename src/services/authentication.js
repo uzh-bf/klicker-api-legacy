@@ -119,4 +119,5 @@ const permissions = shield(
 
 module.exports = {
   permissions,
+  verifyToken,
 }
