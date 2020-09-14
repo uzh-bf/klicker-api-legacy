@@ -9,7 +9,7 @@ const CFG = require('../klicker.conf.js')
 const validators = require('../lib/validators')
 const { QuestionInstanceModel, TagModel, FileModel, SessionModel, QuestionModel, UserModel } = require('../models')
 const { sendEmailNotification, sendSlackNotification, compileEmailTemplate } = require('./notifications')
-const { Errors } = require('../constants')
+const { Errors, ROLES } = require('../constants')
 
 const APP_CFG = CFG.get('app')
 
@@ -139,7 +139,7 @@ const checkAvailability = async ({ email, shortname }) => {
  * @param {Boolean} isAAI Whether the user registrations is performed via AAI
  * @param {Boolean} isActive Whether the user is initially active
  */
-const signup = async (email, password, shortname, institution, useCase, { isAAI, isActive } = {}) => {
+const signup = async (email, password, shortname, institution, useCase, { isAAI, isActive } = {}, role=ROLES.USER ) => {
   if (!isEmail(email)) {
     throw new UserInputError(Errors.INVALID_EMAIL)
   }
@@ -174,6 +174,7 @@ const signup = async (email, password, shortname, institution, useCase, { isAAI,
     useCase,
     isAAI,
     isActive,
+    role,
   }).save()
 
   if (newUser) {

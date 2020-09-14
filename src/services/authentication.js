@@ -89,6 +89,7 @@ const permissions = shield(
       logout: allow,
       modifyQuestion: isAuthenticated,
       modifySession: isAuthenticated,
+      modifyUserAsAdmin: and(isAuthenticated, isAdmin),
       modifyUser: isAuthenticated,
       pauseSession: isAuthenticated,
       cancelSession: isAuthenticated,

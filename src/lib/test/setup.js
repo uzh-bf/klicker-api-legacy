@@ -2,7 +2,7 @@ const { QuestionModel, QuestionInstanceModel, SessionModel, TagModel, UserModel,
 const AccountService = require('../../services/accounts')
 const QuestionService = require('../../services/questions')
 const { createContentState } = require('../draft')
-const { QUESTION_TYPES } = require('../../constants')
+const { QUESTION_TYPES, ROLES } = require('../../constants')
 
 /**
  * Cleanup all data belonging to a user
@@ -31,7 +31,7 @@ const cleanupUser = async ({ email, userId }) => {
   }
 }
 
-const setupTestEnv = async ({ email, password, shortname, isActive = true }) => {
+const setupTestEnv = async ({ email, password, shortname, isActive = true, role = ROLES.USER }) => {
   // find the id of the user to reset
   const user = await UserModel.findOne({ email })
 
@@ -41,7 +41,7 @@ const setupTestEnv = async ({ email, password, shortname, isActive = true }) => 
   }
 
   // sign up a fresh user
-  return AccountService.signup(email, password, shortname, 'IBF Test', 'Testing', { isActive })
+  return AccountService.signup(email, password, shortname, 'IBF Test', 'Testing', { isActive }, role)
 }
 
 // prepare a new session instance
@@ -97,6 +97,7 @@ const initializeDb = async ({
   withLogin = false,
   withQuestions = false,
   isActive = true,
+  withAdmin = false,
 }) => {
   if (mongoose.connection.readyState === 0) {
     await mongoose.connect(`mongodb://${process.env.MONGO_URL_TEST}`, {
@@ -108,6 +109,9 @@ const initializeDb = async ({
 
   const createdUser = await setupTestEnv({ email, password: 'somePassword', shortname, isActive })
 
+  if (withAdmin){
+    const createdAdmin = await setupTestEnv({ email: "admin@bf.uzh.ch", password: 'somePassword', shortname: 'admin', role: ROLES.ADMIN })
+  }
   if (withLogin) {
     const result = { userId: await AccountService.login(null, email, 'somePassword') }
 

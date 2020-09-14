@@ -64,7 +64,7 @@ const REDIS_KEY_TYPES = {
   responses: REDIS_TYPES.LIST,
   results: REDIS_TYPES.HASH,
 }
-const ensureCacheConsistency = async (questionBlock, { expectedKeys, unexpectedKeys } = {}) => {
+const ensureCacheConsistency = async (questionBlock, { expectedKeys, unexpectedKeys } = {}) =>  {
   const instanceResults = await Promise.all(
     questionBlock.instances.map(async ({ id }) => {
       const instanceKey = `instance:${id}`
@@ -132,6 +132,7 @@ const ensureCacheConsistency = async (questionBlock, { expectedKeys, unexpectedK
 
 describe('Integration', () => {
   let authCookie
+  let adminAuthCookie
   let authCookieParticipant
   let sessionId
   let sessionIdWithAuth
@@ -149,6 +150,7 @@ describe('Integration', () => {
       email: 'testintegration@bf.uzh.ch',
       shortname: 'integr',
       isActive: false,
+      withAdmin: true,
     }))
   })
 
@@ -172,6 +174,24 @@ describe('Integration', () => {
 
     // save the authorization cookie
     authCookie = response.header['set-cookie']
+    expect(authCookie.length).toEqual(1)
+  }
+
+  const loginAsAdmin = async (password) => {
+    // send a login request
+    const response = await sendQuery({
+      query: Mutations.LoginMutation,
+      variables: {
+        email: 'admin@bf.uzh.ch',
+        password,
+      },
+    })
+
+    const data = ensureNoErrors(response)
+    expect(data).toBeTruthy()
+
+    // save the authorization cookie
+    adminAuthCookie = response.header['set-cookie']
     expect(authCookie.length).toEqual(1)
   }
 
@@ -205,6 +225,12 @@ describe('Integration', () => {
   describe('Login', () => {
     it('works with valid credentials', async () => {
       await login(initialPassword)
+    })
+  })
+
+  describe('Login into admin account', () => {
+    it('works with valid credentials', async () => {
+      await loginAsAdmin(initialPassword)
     })
   })
 
@@ -307,6 +333,25 @@ describe('Integration', () => {
         modifyUser: {
           institution: 'integrator',
           useCase: 'integration',
+        },
+      })
+    })
+
+    it('can be updated by an admin', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ModifyUserAsAdminMutation,
+            variables: { id: initialUserId, institution: 'adminIntegrator'}
+          }, 
+          adminAuthCookie,
+        )
+      )
+
+      expect(data).toMatchObject({
+        modifyUserAsAdmin: {
+          id: initialUserId,
+          institution: 'adminIntegrator',
         },
       })
     })
