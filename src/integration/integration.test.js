@@ -64,7 +64,7 @@ const REDIS_KEY_TYPES = {
   responses: REDIS_TYPES.LIST,
   results: REDIS_TYPES.HASH,
 }
-const ensureCacheConsistency = async (questionBlock, { expectedKeys, unexpectedKeys } = {}) =>  {
+const ensureCacheConsistency = async (questionBlock, { expectedKeys, unexpectedKeys } = {}) => {
   const instanceResults = await Promise.all(
     questionBlock.instances.map(async ({ id }) => {
       const instanceKey = `instance:${id}`
@@ -230,12 +230,6 @@ describe('Integration', () => {
     })
   })
 
-  describe('Login into admin account', () => {
-    it('works with valid credentials', async () => {
-      await loginAsAdmin(initialPassword)
-    })
-  })
-
   describe('Passwords', () => {
     it('can be updated', async () => {
       ensureNoErrors(
@@ -338,43 +332,6 @@ describe('Integration', () => {
         },
       })
     })
-
-    it('can be updated for another user by an admin', async () => {
-      const data = ensureNoErrors(
-        await sendQuery(
-          {
-            query: Mutations.ModifyUserAsAdminMutation,
-            variables: { 
-              id: initialDummyId, 
-              shortname: 'dummy123',
-              institution: 'University of Dummy',
-              role: ROLES.ADMIN,
-            }
-          }, 
-          adminAuthCookie,
-        )
-      )
-
-      expect(data).toMatchObject({
-        modifyUserAsAdmin: {
-          id: initialDummyId,  
-          shortname: 'dummy123',
-          institution: 'University of Dummy',
-          role: ROLES.ADMIN,
-        },
-      })
-    })
-  })
-
-  it('cannot be updated for another user by a user', async () => {
-    const { body } = await sendQuery(
-      {
-        query: Mutations.ModifyUserAsAdminMutation,
-        variables: { id: initialDummyId, email: 'aboutToFail@bf.uzh.ch'}
-      }, 
-      authCookie,
-    )
-    expect(body.errors[0].message).toEqual(Errors.UNAUTHORIZED)
   })
 
   describe('Question Creation', () => {
@@ -4305,6 +4262,96 @@ describe('Integration', () => {
     })
   })
 
+  describe('User Management (only possible as an admin)', () => {
+    it('login works with valid credentials', async () => {
+      await loginAsAdmin(initialPassword)
+    })
+
+    it('can update another user as admin', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.ModifyUserAsAdminMutation,
+            variables: {
+              id: initialDummyId,
+              shortname: 'dummy123',
+              institution: 'University of Dummy',
+              role: ROLES.ADMIN,
+            },
+          },
+          adminAuthCookie
+        )
+      )
+      expect(data).toMatchObject({
+        modifyUserAsAdmin: {
+          id: initialDummyId,
+          shortname: 'dummy123',
+          institution: 'University of Dummy',
+          role: ROLES.ADMIN,
+        },
+      })
+    })
+
+    it('can get a list of all users as admin', async () => {
+      const data = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Queries.UserListQuery,
+          },
+          adminAuthCookie
+        )
+      )
+      expect(data).toHaveProperty('users')
+    })
+
+    it('cannot get a list of all users as regular user', async () => {
+      const { body } = await sendQuery(
+        {
+          query: Queries.UserListQuery,
+        },
+        authCookie
+      )
+      expect(body.errors[0].message).toEqual(Errors.UNAUTHORIZED)
+    })
+
+    it('cannot update another user as regular user', async () => {
+      const { body } = await sendQuery(
+        {
+          query: Mutations.ModifyUserAsAdminMutation,
+          variables: { id: initialDummyId, email: 'aboutToFail@bf.uzh.ch' },
+        },
+        authCookie
+      )
+      expect(body.errors[0].message).toEqual(Errors.UNAUTHORIZED)
+    })
+
+    it('cannot delete another user as a regular user', async () => {
+      const { body } = await sendQuery(
+        {
+          query: Mutations.DeleteUserMutation,
+          variables: { id: initialDummyId },
+        },
+        authCookie
+      )
+      expect(body.errors[0].message).toEqual(Errors.UNAUTHORIZED)
+    })
+
+    it('can delete a user as admin', async () => {
+      const { deleteUser } = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.DeleteUserMutation,
+            variables: {
+              id: initialDummyId,
+            },
+          },
+          adminAuthCookie
+        )
+      )
+      expect(deleteUser).toEqual('ACCOUNT_DELETED')
+    })
+  })
+
   describe('Logout', () => {
     it('works', async () => {
       const response = await sendQuery(
@@ -4342,36 +4389,6 @@ describe('Integration', () => {
     beforeAll(async () => {
       await login(passwordAfterChange)
     })
-
-    it('cannot delete another user as a user', async () => {
-      const { body } = await sendQuery(
-        {
-          query: Mutations.DeleteUserMutation,
-          variables: { id: initialDummyId }
-        }, 
-        authCookie,
-      )
-      expect(body.errors[0].message).toEqual(Errors.UNAUTHORIZED)
-    })
-
-    it('can delete a user as an admin', async () => {
-      const { deleteUser } = ensureNoErrors(
-        await sendQuery(
-          {
-            query: Mutations.DeleteUserMutation,
-            variables: { 
-              id: initialDummyId, 
-            }
-          }, 
-          adminAuthCookie,
-        )
-      )
-
-      expect(deleteUser).toEqual('ACCOUNT_DELETED')
-
-    })
-
-    
 
     it('can request a deletion token email', async () => {
       const { requestAccountDeletion } = ensureNoErrors(
