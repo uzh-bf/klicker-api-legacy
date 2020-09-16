@@ -2796,51 +2796,6 @@ exports[`Integration Session Management (authenticated) enables the creation of 
   
 `;
 
-exports[`Integration Session Management (authentication, aai) enables the creation of a new session) 1`] = `
-
-    createSession / modifySession {
-      confusionTS: 
-      feedbacks: 
-      blocks: [
-        status: PLANNED
-        instances: 
-          title: Test SC #2
-          type: SC
-        ,
-          title: Test MC #2
-          type: MC
-        
-      ,
-        status: PLANNED
-        instances: 
-          title: Test FREE #2
-          type: FREE
-        
-      ,
-        status: PLANNED
-        instances: 
-          title: Test FREE_RANGE #2
-          type: FREE_RANGE
-        ,
-          title: Test partly restricted FREE_RANGE
-          type: FREE_RANGE
-        ,
-          title: Test unrestricted FREE_RANGE
-          type: FREE_RANGE
-        
-      ]
-      participants: [
-          username: integration-1,
-      ,
-          username: tester-1,
-      ,
-          username: aai-1,
-      ]
-      settings: {"isParticipantAuthenticationEnabled":true,"isConfusionBarometerActive":false,"isFeedbackChannelActive":false,"isFeedbackChannelPublic":false,"authenticationMode":"AAI","storageMode":"SECRET"}
-    }
-  
-`;
-
 exports[`Integration Session Management (authentication, aai) enables the creation of a new session) 3`] = `
 
     createSession / modifySession {
