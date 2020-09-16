@@ -10,7 +10,7 @@ const { UserModel } = require('../models')
 const { app } = require('../app')
 const { initializeDb } = require('../lib/test/setup')
 const { createContentState } = require('../lib/draft')
-const { Errors, QUESTION_TYPES, SESSION_STORAGE_MODE, SESSION_AUTHENTICATION_MODE } = require('../constants')
+const { Errors, QUESTION_TYPES, SESSION_STORAGE_MODE, SESSION_AUTHENTICATION_MODE, ROLES } = require('../constants')
 const { getRedis } = require('../redis')
 
 process.env.NODE_ENV = 'test'
@@ -138,6 +138,7 @@ describe('Integration', () => {
   let sessionIdWithAuth
   // let sessionIdCompleteWithAuth
   let initialUserId
+  let initialDummyId
   let initialShortname
   let blocks
   let blockIds
@@ -145,7 +146,7 @@ describe('Integration', () => {
   const questions = {}
 
   beforeAll(async () => {
-    ;({ userId: initialUserId, shortname: initialShortname } = await initializeDb({
+    ;({ userId: initialUserId, dummyId: initialDummyId, shortname: initialShortname } = await initializeDb({
       mongoose,
       email: 'testintegration@bf.uzh.ch',
       shortname: 'integr',
@@ -156,6 +157,7 @@ describe('Integration', () => {
 
   afterAll(async (done) => {
     authCookie = null
+    adminAuthCookie = null
     await mongoose.disconnect(done)
   })
 
@@ -337,12 +339,17 @@ describe('Integration', () => {
       })
     })
 
-    it('can be updated by an admin', async () => {
+    it('can be updated for another user by an admin', async () => {
       const data = ensureNoErrors(
         await sendQuery(
           {
             query: Mutations.ModifyUserAsAdminMutation,
-            variables: { id: initialUserId, institution: 'adminIntegrator'}
+            variables: { 
+              id: initialDummyId, 
+              shortname: 'dummy123',
+              institution: 'University of Dummy',
+              role: ROLES.ADMIN,
+            }
           }, 
           adminAuthCookie,
         )
@@ -350,11 +357,24 @@ describe('Integration', () => {
 
       expect(data).toMatchObject({
         modifyUserAsAdmin: {
-          id: initialUserId,
-          institution: 'adminIntegrator',
+          id: initialDummyId,  
+          shortname: 'dummy123',
+          institution: 'University of Dummy',
+          role: ROLES.ADMIN,
         },
       })
     })
+  })
+
+  it('cannot be updated for another user by a user', async () => {
+    const { body } = await sendQuery(
+      {
+        query: Mutations.ModifyUserAsAdminMutation,
+        variables: { id: initialDummyId, email: 'aboutToFail@bf.uzh.ch'}
+      }, 
+      authCookie,
+    )
+    expect(body.errors[0].message).toEqual(Errors.UNAUTHORIZED)
   })
 
   describe('Question Creation', () => {
@@ -4322,6 +4342,36 @@ describe('Integration', () => {
     beforeAll(async () => {
       await login(passwordAfterChange)
     })
+
+    it('cannot delete another user as a user', async () => {
+      const { body } = await sendQuery(
+        {
+          query: Mutations.DeleteUserMutation,
+          variables: { id: initialDummyId }
+        }, 
+        authCookie,
+      )
+      expect(body.errors[0].message).toEqual(Errors.UNAUTHORIZED)
+    })
+
+    it('can delete a user as an admin', async () => {
+      const { deleteUser } = ensureNoErrors(
+        await sendQuery(
+          {
+            query: Mutations.DeleteUserMutation,
+            variables: { 
+              id: initialDummyId, 
+            }
+          }, 
+          adminAuthCookie,
+        )
+      )
+
+      expect(deleteUser).toEqual('ACCOUNT_DELETED')
+
+    })
+
+    
 
     it('can request a deletion token email', async () => {
       const { requestAccountDeletion } = ensureNoErrors(
