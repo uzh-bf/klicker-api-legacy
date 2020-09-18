@@ -110,10 +110,11 @@ const initializeDb = async ({
   const createdUser = await setupTestEnv({ email, password: 'somePassword', shortname, isActive })
   let createdDummy
 
-  if (withAdmin){
-    const createdAdmin = await setupTestEnv({ email: "admin@bf.uzh.ch", password: 'somePassword', shortname: 'admin', role: ROLES.ADMIN })
+  if (withAdmin) {
+    // create an admin
+    await setupTestEnv({ email: 'admin@bf.uzh.ch', password: 'somePassword', shortname: 'admin', role: ROLES.ADMIN })
     // create another user which is modified and later deleted by the admin in the intregration test
-    createdDummy = await setupTestEnv({ email: "dummy@bf.uzh.ch", password: 'somePassword', shortname: 'dummy' })
+    createdDummy = await setupTestEnv({ email: 'dummy@bf.uzh.ch', password: 'somePassword', shortname: 'dummy' })
   }
   if (withLogin) {
     const result = { userId: await AccountService.login(null, email, 'somePassword') }
@@ -205,7 +206,7 @@ const initializeDb = async ({
 
   const dummyId = createdDummy ? createdDummy.id : undefined
 
-  return { userId: createdUser.id, dummyId: dummyId, email, shortname }
+  return { userId: createdUser.id, dummyId, email, shortname }
 }
 
 module.exports = {
