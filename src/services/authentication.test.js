@@ -16,8 +16,6 @@ describe('AuthenticationService', () => {
 
   const activationToken = generateScopedToken(dummyUser, 'activate')
 
-  const userToken = generateScopedToken(dummyUser)
-
   describe('TokenVerification', () => {
     it('error is returned when passed an invalid deletion token', () => {
       expect(AuthenticationService.verifyToken('invalidToken', 'delete', dummyUser.id)).toEqual(

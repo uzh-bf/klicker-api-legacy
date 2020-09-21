@@ -139,7 +139,15 @@ const checkAvailability = async ({ email, shortname }) => {
  * @param {Boolean} isAAI Whether the user registrations is performed via AAI
  * @param {Boolean} isActive Whether the user is initially active
  */
-const signup = async (email, password, shortname, institution, useCase, { isAAI, isActive } = {}, role=ROLES.USER ) => {
+const signup = async (
+  email,
+  password,
+  shortname,
+  institution,
+  useCase,
+  role = ROLES.USER,
+  { isAAI, isActive } = {}
+) => {
   if (!isEmail(email)) {
     throw new UserInputError(Errors.INVALID_EMAIL)
   }
