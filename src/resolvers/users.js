@@ -28,8 +28,9 @@ const deleteUserMutation = (parentValue, { id }) => {
 const modifyUserMutation = (parentValue, { user: { email, shortname, institution, useCase } }, { auth }) =>
   AccountService.updateAccountData({ userId: auth.sub, email, shortname, institution, useCase })
 
+// caller param can be removed when users are also able to edit their email
 const modifyUserAsAdminMutation = (parentValue, { id, user: { email, shortname, institution, role } }) => {
-  return AccountService.updateAccountData({ userId: id, email, shortname, institution, role })
+  return AccountService.updateAccountData({ userId: id, email, shortname, institution, role, caller: 'ADMIN' })
 }
 
 const loginMutation = (parentValue, { email, password }, { res }) => AccountService.login(res, email, password)

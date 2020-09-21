@@ -41,7 +41,7 @@ const setupTestEnv = async ({ email, password, shortname, isActive = true, role 
   }
 
   // sign up a fresh user
-  return AccountService.signup(email, password, shortname, 'IBF Test', 'Testing', { isActive }, role)
+  return AccountService.signup(email, password, shortname, 'IBF Test', 'Testing', role, { isActive })
 }
 
 // prepare a new session instance

@@ -264,7 +264,7 @@ async function checkAccountStatus({ res, auth }) {
  * @param {String} institution
  * @param {String} useCase
  */
-const updateAccountData = async ({ userId, email, shortname, institution, useCase, role }) => {
+const updateAccountData = async ({ userId, email, shortname, institution, useCase, role, caller = ROLES.USER }) => {
   let user
   try {
     user = await UserModel.findById(userId)
@@ -284,8 +284,10 @@ const updateAccountData = async ({ userId, email, shortname, institution, useCas
         throw new UserInputError(Errors.EMAIL_NOT_AVAILABLE)
       }
 
-      // TODO enable after migration
-      user.email = email
+      // caller param can be removed after migration (when users can also edit their email)
+      if (caller) {
+        user.email = email
+      }
     }
 
     if (shortname) {
