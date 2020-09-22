@@ -1,6 +1,6 @@
 {
   "name": "klicker-api",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "main": "src/server.js",
   "homepage": "https://www.klicker.uzh.ch",
   "repository": "https://github.com/uzh-bf/klicker-api.git",
@@ -29,7 +29,7 @@
     "cors": "2.8.5",
     "cross-env": "7.0.2",
     "dataloader": "2.0.0",
-    "dayjs": "1.8.34",
+    "dayjs": "1.8.36",
     "dotenv": "8.2.0",
     "draft-js": "0.11.5",
     "elastic-apm-node": "3.5.0",
@@ -69,14 +69,14 @@
     "validator": "13.0.0"
   },
   "devDependencies": {
-    "eslint": "7.8.0",
+    "eslint": "7.9.0",
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-import": "2.22.0",
     "eslint-plugin-prettier": "3.1.4",
-    "husky": "4.2.5",
+    "husky": "4.3.0",
     "jest": "26.4.2",
-    "lint-staged": "10.2.13",
+    "lint-staged": "10.4.0",
     "nodemon": "2.0.4",
     "prettier": "2.0.5",
     "supertest": "4.0.2"
