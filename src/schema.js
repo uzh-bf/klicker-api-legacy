@@ -25,6 +25,7 @@ const {
   addFeedback,
   deleteFeedback,
   addConfusionTS,
+  allRunningSessions,
   allSessions,
   createSession,
   pauseSession,
@@ -87,6 +88,7 @@ const typeDefs = [
   type Query {
     activeInstances: [QuestionInstance]!
     allQuestions: [Question]!
+    allRunningSessions: [Session]!
     allSessions: [Session]!
     allTags: [Tag]!
     allUsers: [User]!
@@ -159,6 +161,7 @@ const resolvers = {
   // map queries and mutations
   Query: {
     allQuestions,
+    allRunningSessions,
     allSessions,
     allTags,
     allUsers,

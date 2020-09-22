@@ -2,8 +2,17 @@ const SessionMgrService = require('../services/sessionMgr')
 const SessionExecService = require('../services/sessionExec')
 const { SessionModel, UserModel } = require('../models')
 const { ensureLoaders } = require('../lib/loaders')
+const { SESSION_STATUS } = require('../constants')
 
 /* ----- queries ----- */
+const allRunningSessionsQuery = async (parentValue, args, { loaders }) => {
+  // get all currently running Sessions
+  const results = await SessionModel.find({ status: SESSION_STATUS.RUNNING }).populate('user')
+  // prime the dataloader cache
+  results.forEach((session) => ensureLoaders(loaders).sessions.prime(session.id, session))
+
+  return results
+}
 const allSessionsQuery = async (parentValue, args, { auth, loaders }) => {
   // get all the sessions for the given user
   const results = await SessionModel.find({ user: auth.sub }).sort({ createdAt: -1 })
@@ -121,6 +130,7 @@ const loginParticipantMutation = (parentValue, { sessionId, username, password }
 
 module.exports = {
   // queries
+  allRunningSessions: allRunningSessionsQuery,
   allSessions: allSessionsQuery,
   runningSession: runningSessionQuery,
   session: sessionQuery,
