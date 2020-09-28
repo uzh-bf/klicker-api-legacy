@@ -27,6 +27,7 @@ const {
   addConfusionTS,
   allRunningSessions,
   allSessions,
+  abortSession,
   createSession,
   pauseSession,
   cancelSession,
@@ -103,6 +104,7 @@ const typeDefs = [
   }
 
   type Mutation {
+    abortSession(id: ID!): Session
     activateAccount(activationToken: String!): String!
     activateNextBlock: Session!
     activateBlockById(sessionId: ID!, blockId: ID!): Session!
@@ -175,6 +177,7 @@ const resolvers = {
     user: authUser,
   },
   Mutation: {
+    abortSession,
     activateAccount,
     archiveQuestions,
     addFeedback,

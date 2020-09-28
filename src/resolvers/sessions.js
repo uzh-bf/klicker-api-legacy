@@ -54,6 +54,7 @@ const joinSessionQuery = async (parentValue, { shortname }, { auth }) =>
   SessionExecService.joinSession({ shortname, auth })
 
 /* ----- mutations ----- */
+
 const createSessionMutation = (
   parentValue,
   { session: { name, blocks, participants, authenticationMode, storageMode } },
@@ -99,6 +100,8 @@ const cancelSessionMutation = (parentValue, { id }, { auth }) =>
 const resetQuestionBlockMutation = (parentValue, { sessionId, blockId }, { auth }) =>
   SessionExecService.resetQuestionBlock({ sessionId, blockId, userId: auth.sub })
 
+const abortSessionMutation = (parentValue, { id }) => SessionMgrService.abortSession({ id })
+
 const endSessionMutation = (parentValue, { id }, { auth }) => SessionMgrService.endSession({ id, userId: auth.sub })
 
 const addFeedbackMutation = async (parentValue, { sessionId, content }) => {
@@ -138,6 +141,7 @@ module.exports = {
   sessionsByPV: sessionsByPVQuery,
 
   // mutations
+  abortSession: abortSessionMutation,
   createSession: createSessionMutation,
   modifySession: modifySessionMutation,
   endSession: endSessionMutation,

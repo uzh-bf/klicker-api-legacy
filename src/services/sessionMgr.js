@@ -1094,6 +1094,25 @@ const deleteSessions = async ({ userId, ids }) => {
   return 'DELETION_SUCCESSFUL'
 }
 
+/**
+ * Abort a running Session of a user by walking through until the end
+ */
+const abortSession = async ({ id }) => {
+  const session = await SessionModel.findById(id)
+  const { user } = session
+  let sessionCurrentBlock = session.activeBlock
+  let sessionNextBlock = activateNextBlock({ userId: user.id }).activeBlock
+  while (sessionCurrentBlock !== sessionNextBlock) {
+    sessionCurrentBlock = sessionNextBlock
+    sessionNextBlock = activateNextBlock({ userId: user.id }).activeBlock
+  }
+  session.status = SESSION_STATUS.COMPLETED
+  session.finishedAt = Date.now()
+  await session.save()
+
+  return session
+}
+
 async function modifyQuestionBlock({ sessionId, id, questionBlockSettings, userId }) {
   const session = await SessionModel.findOne({ _id: sessionId, user: userId })
   if (!session) {
@@ -1127,5 +1146,6 @@ module.exports = {
   publishSessionUpdate,
   modifyQuestionBlock,
   activateBlockById,
+  abortSession,
   computeInstanceResults,
 }
