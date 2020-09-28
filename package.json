@@ -79,7 +79,7 @@
     "lint-staged": "10.4.0",
     "nodemon": "2.0.4",
     "prettier": "2.0.5",
-    "supertest": "4.0.2"
+    "supertest": "5.0.0"
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon -w \"src/**/*.js\" -w .env -w package.json src/server.js",
