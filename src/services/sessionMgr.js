@@ -1098,25 +1098,29 @@ const deleteSessions = async ({ userId, ids }) => {
  * Abort a running Session of a user by walking through until the end
  */
 const abortSession = async ({ id }) => {
+
   const session = await SessionModel.findById(id).populate('user')
   const { user } = session
 
+  // if session is already completed return the session
+  if (session.status === SESSION_STATUS.COMPLETED){
+    return session
+  }
+  
   let currentSession = session
   let nextStepSession = await activateNextBlock({ userId: user.id })
   let currentStep = currentSession.activeStep
   let nextStep = nextStepSession.activeStep
 
+  // go to the next step until you are at the last step
   while (currentStep !== nextStep) {
-    try {
-      currentSession = nextStepSession
-      nextStepSession = activateNextBlock({ userId: user.id })
-      currentStep = currentSession.activeStep
-      nextStep = nextStepSession.activeStep
-    } catch (error) {
-      break
-    }
+    currentSession = nextStepSession
+    nextStepSession = activateNextBlock({ userId: user.id })
+    currentStep = currentSession.activeStep
+    nextStep = nextStepSession.activeStep
   }
 
+  // end the session
   sessionAction({ sessionId: id, userId: user.id }, SESSION_ACTIONS.STOP)
   const endedSession = await SessionModel.findById(id)
   return endedSession

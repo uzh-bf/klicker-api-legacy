@@ -616,6 +616,28 @@ describe('SessionMgrService', () => {
     })
   })
 
+  describe('abortSession', () => {
+    let preparedSession
+    beforeAll(async () => {
+      preparedSession = await prepareSession(userId)
+      const userBefore = await UserModel.findOneAndUpdate({_id: userId}, {runningSession: preparedSession})
+    })
+
+    it('successfully abort a running session of a user', async () => {
+      // perform the session abort
+      const abortedSession = await SessionMgrService.abortSession({ id: preparedSession.id })
+
+      expect(abortedSession.status).toEqual(SESSION_STATUS.COMPLETED)
+      expect(abortedSession).toMatchSnapshot()
+
+      const userAfter = await UserModel.findById(userId)
+      // make sure User's running session was aborted
+      expect(userAfter.runningSession.length).toEqual(0)
+    })
+
+
+  })
+
   describe('createSession (auth)', () => {
     it('allows creating a valid session with participant authentication', async () => {
       const newSession = await SessionMgrService.createSession({
