@@ -1098,19 +1098,28 @@ const deleteSessions = async ({ userId, ids }) => {
  * Abort a running Session of a user by walking through until the end
  */
 const abortSession = async ({ id }) => {
-  const session = await SessionModel.findById(id)
+  const session = await SessionModel.findById(id).populate('user')
   const { user } = session
-  let sessionCurrentBlock = session.activeBlock
-  let sessionNextBlock = activateNextBlock({ userId: user.id }).activeBlock
-  while (sessionCurrentBlock !== sessionNextBlock) {
-    sessionCurrentBlock = sessionNextBlock
-    sessionNextBlock = activateNextBlock({ userId: user.id }).activeBlock
-  }
-  session.status = SESSION_STATUS.COMPLETED
-  session.finishedAt = Date.now()
-  await session.save()
 
-  return session
+  let currentSession = session
+  let nextStepSession = await activateNextBlock({ userId: user.id })
+  let currentStep = currentSession.activeStep
+  let nextStep = nextStepSession.activeStep
+
+  while (currentStep !== nextStep) {
+    try {
+      currentSession = nextStepSession
+      nextStepSession = activateNextBlock({ userId: user.id })
+      currentStep = currentSession.activeStep
+      nextStep = nextStepSession.activeStep
+    } catch (error) {
+      break
+    }
+  }
+
+  sessionAction({ sessionId: id, userId: user.id }, SESSION_ACTIONS.STOP)
+  const endedSession = await SessionModel.findById(id)
+  return endedSession
 }
 
 async function modifyQuestionBlock({ sessionId, id, questionBlockSettings, userId }) {
