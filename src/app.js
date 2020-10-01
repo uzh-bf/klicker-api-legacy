@@ -116,6 +116,7 @@ let middleware = [
   bodyParser.json(),
   // setup JWT authentication
   expressJWT({
+    algorithms: ['HS256'],
     credentialsRequired: false,
     requestProperty: 'auth',
     secret: APP_CFG.secret,
