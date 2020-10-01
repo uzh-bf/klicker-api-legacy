@@ -44,6 +44,7 @@ const CreateSessionSerializer = require('./CreateSessionSerializer')
 const StartAndEndSessionSerializer = require('./StartAndEndSessionSerializer')
 const UpdateSessionSettingsSerializer = require('./UpdateSessionSettingsSerializer')
 const ModifyQuestionBlockSerializer = require('./ModifyQuestionBlockSerializer')
+const AddFeedbackSerializer = require('./AddFeedbackSerializer')
 
 module.exports = {
   RegistrationMutation,
@@ -90,5 +91,6 @@ module.exports = {
     StartAndEndSessionSerializer,
     UpdateSessionSettingsSerializer,
     ModifyQuestionBlockSerializer,
+    AddFeedbackSerializer,
   ],
 }
