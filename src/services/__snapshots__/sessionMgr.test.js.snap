@@ -1,5 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`SessionMgrService abortSession successfully abort a running session of a user 1`] = `
+
+    Name: testing session
+    Status: COMPLETED
+
+    ActiveBlock: 0
+    ActiveStep: 2
+    ActiveInstances: 0
+
+    Blocks: [{
+      Show solutions: false
+      Status: EXECUTED
+      Time limit: -1
+      Number of instances: 1
+    }]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Participants: []
+
+    Settings: {
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+      ParticipantAuthentication: false
+    }
+`;
+
 exports[`SessionMgrService activateBlockById allows activating the first question block by id 1`] = `
 
     SESSION
@@ -441,36 +471,6 @@ exports[`SessionMgrService endSession returns on an already completed session 1`
     }
 `;
 
-exports[`SessionMgrService abortSession successfully abort a running session of a user 1`] = `
-
-    Name: testing session
-    Status: COMPLETED
-
-    ActiveBlock: 0
-    ActiveStep: 2
-    ActiveInstances: 0
-
-    Blocks: [{
-      Show solutions: false
-      Status: EXECUTED
-      Time limit: -1
-      Number of instances: 1
-    }]
-
-    ConfusionTS: []
-
-    Feedbacks: []
-
-    Participants: []
-
-    Settings: {
-      ConfusionActive: false
-      FeedbacksActive: false
-      FeedbacksPublic: false
-      ParticipantAuthentication: false
-    }
-`;
-
 exports[`SessionMgrService freeToResults correctly aggregates FREE/FREE_RANGE question results 1`] = `
 Object {
   "FREE": Object {
@@ -492,6 +492,45 @@ Object {
 `;
 
 exports[`SessionMgrService modifySession (auth) allows changing the participants of a session 1`] = `
+
+    SESSION
+
+    Name: with authentication
+    Status: CREATED
+
+    ActiveBlock: -1
+    ActiveStep: 0
+    ActiveInstances: 0
+
+    Blocks: [{
+      Show solutions: false
+      Status: PLANNED
+      Time limit: -1
+      Number of instances: 2
+    },{
+      Show solutions: false
+      Status: PLANNED
+      Time limit: -1
+      Number of instances: 2
+    }]
+
+    ConfusionTS: []
+
+    Feedbacks: []
+
+    Participants: [{
+      Username: newparticipant
+    }]
+
+    Settings: {
+      ConfusionActive: false
+      FeedbacksActive: false
+      FeedbacksPublic: false
+      ParticipantAuthentication: true
+    }
+`;
+
+exports[`SessionMgrService modifySession (auth) allows changing the participants of a session 2`] = `
 
     SESSION
 

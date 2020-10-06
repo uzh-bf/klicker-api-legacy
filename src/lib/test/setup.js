@@ -48,7 +48,7 @@ const setupTestEnv = async ({ email, password, shortname, isActive = true, role 
 const prepareSessionFactory = (SessionMgrService) => async (userId, questions, started = false, participants = []) => {
   let session
 
-  if (!questions) {
+  if (!questions || questions === 'ommited') {
     const question = await QuestionService.createQuestion({
       content: createContentState('test question'),
       options: {

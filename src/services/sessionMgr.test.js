@@ -619,8 +619,7 @@ describe('SessionMgrService', () => {
   describe('abortSession', () => {
     let preparedSession
     beforeAll(async () => {
-      preparedSession = await prepareSession(userId)
-      const userBefore = await UserModel.findOneAndUpdate({_id: userId}, {runningSession: preparedSession})
+      preparedSession = await prepareSession(userId, 'ommited', true)
     })
 
     it('successfully abort a running session of a user', async () => {
@@ -634,8 +633,6 @@ describe('SessionMgrService', () => {
       // make sure User's running session was aborted
       expect(userAfter.runningSession.length).toEqual(0)
     })
-
-
   })
 
   describe('createSession (auth)', () => {
