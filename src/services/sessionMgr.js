@@ -1027,15 +1027,17 @@ const activateNextBlock = async ({ userId }) => {
     throw new ForbiddenError('NO_RUNNING_SESSION')
   }
 
+  let updatedSession
+
   // if all the blocks have already been activated, simply return the session
   if (runningSession.activeBlock === runningSession.blocks.length) {
-    return user.runningSession
+    console.log('i actually went out because of this')
+    return runningSession
   }
 
   const prevBlockIndex = runningSession.activeBlock
   const nextBlockIndex = runningSession.activeBlock + 1
 
-  let updatedSession
   if (runningSession.activeInstances.length === 0) {
     // find the next block for the running session
     const nextBlock = runningSession.blocks[nextBlockIndex]
@@ -1106,22 +1108,29 @@ const abortSession = async ({ id }) => {
     return session
   }
 
-  let currentSession = session
-  let nextStepSession = await activateNextBlock({ userId: user.id })
-  let currentStep = currentSession.activeStep
-  let nextStep = nextStepSession.activeStep
+  let isAtTheEnd = false
+
+  try {
+    await activateNextBlock({ userId: user.id })
+  } catch (error) {
+    isAtTheEnd = true
+  }
 
   // go to the next step until you are at the last step
-  while (currentStep !== nextStep) {
-    currentSession = nextStepSession
-    nextStepSession = activateNextBlock({ userId: user.id })
-    currentStep = currentSession.activeStep
-    nextStep = nextStepSession.activeStep
+  while (!isAtTheEnd) {
+    try {
+      /* eslint-disable no-await-in-loop */
+      await activateNextBlock({ userId: user.id })
+    } catch (error) {
+      isAtTheEnd = true
+    }
   }
 
   // end the session
+  console.log('i tried to end the session')
   await sessionAction({ sessionId: id, userId: user.id }, SESSION_ACTIONS.STOP)
   const endedSession = await SessionModel.findById(id)
+  console.log('i ended the session')
   return endedSession
 }
 

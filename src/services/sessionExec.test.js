@@ -40,7 +40,7 @@ describe('SessionExecService', () => {
     let preparedSession
 
     beforeAll(async () => {
-      preparedSession = await prepareSession(userId)
+      preparedSession = await prepareSession({ userId })
     })
 
     it('prevents adding feedbacks if a session is not yet running', () => {
@@ -106,7 +106,7 @@ describe('SessionExecService', () => {
     let preparedSession
 
     beforeAll(async () => {
-      preparedSession = await prepareSession(userId)
+      preparedSession = await prepareSession({ userId })
     })
 
     it('prevents adding timesteps if a session is not yet running', () => {
@@ -173,16 +173,16 @@ describe('SessionExecService', () => {
 
     beforeEach(async () => {
       // prepare a session with a SC question
-      preparedSession = await prepareSession(
+      preparedSession = await prepareSession({
         userId,
-        [
+        questions: [
           { question: questions[QUESTION_TYPES.SC].id, version: 0 },
           { question: questions[QUESTION_TYPES.MC].id, version: 0 },
           { question: questions[QUESTION_TYPES.FREE].id, version: 0 },
           { question: questions[QUESTION_TYPES.FREE_RANGE].id, version: 0 },
         ],
-        true
-      )
+        started: true,
+      })
     })
 
     afterEach(async () => {
@@ -437,17 +437,21 @@ describe('SessionExecService', () => {
 
     beforeEach(async () => {
       // prepare a session with a SC question
-      preparedSession = await prepareSession(
+      preparedSession = await prepareSession({
         userId,
-        [
+        questions: [
           { question: questions[QUESTION_TYPES.SC].id, version: 0 },
           { question: questions[QUESTION_TYPES.MC].id, version: 0 },
           { question: questions[QUESTION_TYPES.FREE].id, version: 0 },
           { question: questions[QUESTION_TYPES.FREE_RANGE].id, version: 0 },
         ],
-        true,
-        [{ username: 'testparticipant1' }, { username: 'participant2' }, { username: 'aaiparticipant', isAAI: true }]
-      )
+        started: true,
+        participants: [
+          { username: 'testparticipant1' },
+          { username: 'participant2' },
+          { username: 'aaiparticipant', isAAI: true },
+        ],
+      })
     })
 
     afterEach(async () => {

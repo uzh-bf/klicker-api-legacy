@@ -2,6 +2,8 @@
 
 exports[`SessionMgrService abortSession successfully abort a running session of a user 1`] = `
 
+    SESSION
+
     Name: testing session
     Status: COMPLETED
 
@@ -492,45 +494,6 @@ Object {
 `;
 
 exports[`SessionMgrService modifySession (auth) allows changing the participants of a session 1`] = `
-
-    SESSION
-
-    Name: with authentication
-    Status: CREATED
-
-    ActiveBlock: -1
-    ActiveStep: 0
-    ActiveInstances: 0
-
-    Blocks: [{
-      Show solutions: false
-      Status: PLANNED
-      Time limit: -1
-      Number of instances: 2
-    },{
-      Show solutions: false
-      Status: PLANNED
-      Time limit: -1
-      Number of instances: 2
-    }]
-
-    ConfusionTS: []
-
-    Feedbacks: []
-
-    Participants: [{
-      Username: newparticipant
-    }]
-
-    Settings: {
-      ConfusionActive: false
-      FeedbacksActive: false
-      FeedbacksPublic: false
-      ParticipantAuthentication: true
-    }
-`;
-
-exports[`SessionMgrService modifySession (auth) allows changing the participants of a session 2`] = `
 
     SESSION
 
