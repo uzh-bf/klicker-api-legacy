@@ -1127,10 +1127,9 @@ const abortSession = async ({ id }) => {
   }
 
   // end the session
-  console.log('i tried to end the session')
   await sessionAction({ sessionId: id, userId: user.id }, SESSION_ACTIONS.STOP)
   const endedSession = await SessionModel.findById(id)
-  console.log('i ended the session')
+
   return endedSession
 }
 
