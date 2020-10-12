@@ -1031,7 +1031,6 @@ const activateNextBlock = async ({ userId }) => {
 
   // if all the blocks have already been activated, simply return the session
   if (runningSession.activeBlock === runningSession.blocks.length) {
-    console.log('i actually went out because of this')
     return runningSession
   }
 
