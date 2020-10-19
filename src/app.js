@@ -3,12 +3,13 @@
 const isProd = process.env.NODE_ENV === 'production'
 
 // base packages
+const path = require('path')
 const mongoose = require('mongoose')
 const express = require('express')
 const PrettyError = require('pretty-error')
 const { ApolloServer } = require('apollo-server-express')
 const { applyMiddleware } = require('graphql-middleware')
-const { makeExecutableSchema } = require('graphql-tools')
+const { makeExecutableSchema } = require('@graphql-tools/schema')
 
 // express middlewares
 const bodyParser = require('body-parser')
@@ -91,6 +92,9 @@ const responseCache = getRedis(3)
 // initialize an express server
 const app = express()
 
+// serve public files
+app.use(express.static(path.join(__dirname, 'public')))
+
 // if the server is behind a proxy, set the APP_PROXY env to true
 // this will make express trust the X-* proxy headers and set corresponding req.ip
 if (APP_CFG.trustProxy) {
@@ -116,6 +120,7 @@ let middleware = [
   bodyParser.json(),
   // setup JWT authentication
   expressJWT({
+    algorithms: ['HS256'],
     credentialsRequired: false,
     requestProperty: 'auth',
     secret: APP_CFG.secret,

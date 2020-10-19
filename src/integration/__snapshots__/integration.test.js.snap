@@ -2305,7 +2305,10 @@ Object {
 
 exports[`Integration Session Execution PARTICIPANT: can add feedbacks 1`] = `
 Object {
-  "addFeedback": "FEEDBACK_ADDED",
+  "addFeedback": Object {
+    "content": "my test feedback",
+    "votes": 0,
+  },
 }
 `;
 
