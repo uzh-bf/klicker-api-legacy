@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Integration Admin Area (only possible as an admin) can abort a session as an admin 1`] = `
+Object {
+  "abortSession": Object {
+    "id": "5f8d988341698a4d90138456",
+    "status": "COMPLETED",
+  },
+}
+`;
+
 exports[`Integration Logout works 1`] = `
 Object {
   "logout": "LOGGED_OUT",
