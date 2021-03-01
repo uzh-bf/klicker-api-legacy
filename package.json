@@ -48,7 +48,7 @@
     "graphql-subscriptions": "1.1.0",
     "handlebars": "4.7.7",
     "helmet": "4.1.1",
-    "ioredis": "4.17.3",
+    "ioredis": "4.23.0",
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.21",
     "md5": "2.3.0",
