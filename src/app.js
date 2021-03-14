@@ -3,6 +3,7 @@
 const isProd = process.env.NODE_ENV === 'production'
 
 // base packages
+const path = require('path')
 const mongoose = require('mongoose')
 const express = require('express')
 const PrettyError = require('pretty-error')
@@ -90,6 +91,9 @@ const responseCache = getRedis(3)
 
 // initialize an express server
 const app = express()
+
+// serve public files
+app.use(express.static(path.join(__dirname, 'public')))
 
 // if the server is behind a proxy, set the APP_PROXY env to true
 // this will make express trust the X-* proxy headers and set corresponding req.ip
