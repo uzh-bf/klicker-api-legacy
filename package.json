@@ -72,6 +72,7 @@
     "validator": "13.1.17"
   },
   "devDependencies": {
+    "@uzh-bf/code-style-react-js": "0.0.13",
     "eslint": "7.21.0",
     "eslint-config-airbnb-base": "14.2.1",
     "eslint-config-prettier": "6.15.0",
@@ -81,16 +82,20 @@
     "jest": "26.6.3",
     "lint-staged": "10.5.4",
     "nodemon": "2.0.7",
+    "npm-run-all": "4.1.5",
     "prettier": "2.2.1",
     "supertest": "5.0.0"
   },
   "scripts": {
+    "check": "npm-run-all --parallel format:ci lint",
+    "check:fix": "npm-run-all format lint:fix",
     "dev": "cross-env NODE_ENV=development nodemon -w \"src/**/*.js\" -w .env -w package.json src/server.js",
     "dev:inspect": "cross-env NODE_ENV=development nodemon -w \"src/**/*.js\" -w .env -w package.json --inspect src/server.js",
     "dev:ndb": "cross-env NODE_ENV=development ndb node src/server.js",
-    "format": "prettier --write \"src/**/*.js\" \"src/**/*.graphql\" \"src/**/*.json\"",
-    "format:ci": "prettier --list-different \"src/**/*.js\" \"src/**/*.graphql\" \"src/**/*.json\"",
-    "lint": "eslint \"src/**/*.js\"",
+    "format": "prettier --write \"src/**/*.(js|ts|graphql|json)\" \"*.(js|ts)\"",
+    "format:ci": "prettier --list-different \"src/**/*.(js|ts|graphql|json)\" \"*.(js|ts)\"",
+    "lint": "eslint --ext .js,.ts src/",
+    "lint:fix": "eslint --fix --ext .js,.ts src/",
     "start": "cross-env NODE_ENV=production node src/server.js",
     "start:inspect": "cross-env NODE_ENV=production node --inspect src/server.js",
     "test": "jest",
