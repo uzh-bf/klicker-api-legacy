@@ -21,7 +21,7 @@
   "dependencies": {
     "@graphql-tools/schema": "6.2.4",
     "apollo-server-express": "2.18.2",
-    "aws-sdk": "2.765.0",
+    "aws-sdk": "2.931.0",
     "bcryptjs": "2.4.3",
     "body-parser": "1.19.0",
     "caller": "1.0.1",
